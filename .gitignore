@@ -1,0 +1,25 @@
+# Ignore all environment files
+*.env
+*.env.*
+.env
+.env.*
+
+# Ignore VS Code settings
+.vscode/
+**/.vscode/
+
+# Ignore common system files
+.DS_Store
+Thumbs.db
+
+# Ignore Node.js and Python artifacts (optional but useful)
+node_modules/
+__pycache__/
+*.pyc
+
+# Ignore logs and temp files
+*.log
+logs/
+temp/
+tmp/
+
