@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -7,4 +6,42 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String      @id @default(uuid())
+  firstName    String
+  lastName     String
+  email        String      @unique
+  hash         String
+  role         Role
+  resurant     Resturants? @relation(fields: [resturantsId], references: [id])
+  resturantsId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Resturants {
+  id            String  @id @default(uuid())
+  name          String
+  streetAddress String
+  city          String
+  state         String
+  zip           String
+  country       String
+  phone         String
+  email         String  @unique
+  faceBookUrl   String?
+  tikTokUrl     String?
+  instagramUrl  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  users     User[]
+}
+
+enum Role {
+  USER
+  ADMIN
 }
