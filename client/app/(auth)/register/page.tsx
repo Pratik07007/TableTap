@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useState } from "react";
 import { z } from "zod";
+import toast from "react-hot-toast";
 
 const registerSchema = z.object({
     fName: z.string().min(1, "First name is required"),
@@ -26,8 +27,8 @@ export default function Page() {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [errors, setErrors] = useState<Partial<Record<keyof RegisterFormData, string>>>({});
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault(); // Stop the page reload
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
 
         const formData = new FormData(e.currentTarget);
         const rawData = {
@@ -53,13 +54,37 @@ export default function Page() {
         setErrors({});
         const { fName, lName, email, password } = parsed.data;
         const role = role_url === "ADMIN" ? "ADMIN" : "USER";
-        
+
+        try {
+            const response = await fetch(`${process.env.Backend_URL}/api/auth/register`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    fName,
+                    lName,
+                    email,
+                    password,
+                    role,
+                }),
+            });
+            const data = await response.json();
+            if (response.ok) {
+                toast.success("Registration successful!");
+            } else {
+                toast.error(data.message || "Registration failed");
+            }
+        } catch (err) {
+            toast.error("Network error");
+        }
+
     };
 
     return (
         <div className="min-h-screen flex">
             {/* Left half: image */}
-            <div className="hidden md:flex md:w-1/2  from-indigo-500 to-purple-600 items-center justify-center relative">
+            <div className="hidden md:flex md:w-1/2 from-indigo-500 to-purple-600 items-center justify-center relative">
                 <Image
                     src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop"
                     alt="Restaurant interior"
@@ -94,7 +119,7 @@ export default function Page() {
                                 type="text"
                                 placeholder="Last Name"
                                 required
-                                className="w-full px-4 py-2 border text-black border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500  placeholder:text-gray-400"
+                                className="w-full px-4 py-2 border text-black border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400"
                             />
                             {errors.lName && <p className="text-red-500 text-sm mt-1">{errors.lName}</p>}
                         </div>
@@ -104,7 +129,7 @@ export default function Page() {
                                 type="email"
                                 placeholder="Email"
                                 required
-                                className="w-full px-4 py-2 border text-black border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500  placeholder:text-gray-400"
+                                className="w-full px-4 py-2 border text-black border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400"
                             />
                             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                         </div>
@@ -114,7 +139,7 @@ export default function Page() {
                                 type={showPassword ? "text" : "password"}
                                 placeholder="Password"
                                 required
-                                className="w-full px-4 py-2  text-black border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500  placeholder:text-gray-400"
+                                className="w-full px-4 py-2 text-black border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400"
                             />
                             <button
                                 type="button"
