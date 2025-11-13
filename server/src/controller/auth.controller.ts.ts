@@ -15,9 +15,9 @@ export const registerUserController = async (req: Request, res: Response) => {
     role,
   });
   if (!response.success) {
-    return res.status(400).json({ response });
+    return res.status(400).json({ ...response });
   }
-  res.status(201).json({ response });
+  res.status(201).json({ ...response });
 };
 
 export const verifyEmailController = async (req: Request, res: Response) => {
@@ -29,16 +29,16 @@ export const verifyEmailController = async (req: Request, res: Response) => {
   }
   const response = await verifyEmailService(token);
   if (!response.success) {
-    return res.status(400).json({ response });
+    return res.status(400).json({ ...response });
   }
-  res.status(200).json({ response });
+  res.status(200).json({ ...response });
 };
 
 export const loginController = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const response = await loginService(email, password);
   if (!response.success) {
-    return res.status(400).json({ response });
+    return res.status(400).json({ ...response });
   }
   res.cookie("token", response.token, {
     sameSite: "strict",

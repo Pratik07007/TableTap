@@ -25,6 +25,7 @@ export type TRegisterUser = {
 export const registerUserService = async (userData: TRegisterUser) => {
   try {
     const { fName, lName, email, password, role } = userData;
+    console.log(fName, lName, email, password, role);
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const userAlreadyExists = await prisma.user.findUnique({

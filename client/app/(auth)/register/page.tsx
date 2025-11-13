@@ -26,6 +26,7 @@ export default function Page() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [errors, setErrors] = useState<Partial<Record<keyof RegisterFormData, string>>>({});
+    const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -52,33 +53,28 @@ export default function Page() {
         }
 
         setErrors({});
-        const { fName, lName, email, password } = parsed.data;
-        const role = role_url === "ADMIN" ? "ADMIN" : "USER";
+        setLoading(true);
 
         try {
-            const response = await fetch(`${process.env.Backend_URL}/api/auth/register`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                    fName,
-                    lName,
-                    email,
-                    password,
-                    role,
-                }),
+                body: JSON.stringify({ ...parsed.data, role: role_url }),
             });
             const data = await response.json();
-            if (response.ok) {
-                toast.success("Registration successful!");
+            if (!data.success) {
+                toast.error(data.message);
             } else {
-                toast.error(data.message || "Registration failed");
+                toast.success(data.message);
             }
         } catch (err) {
+            console.log("Error in register/page.tsx", err);
             toast.error("Network error");
+        } finally {
+            setLoading(false);
         }
-
     };
 
     return (
@@ -109,7 +105,8 @@ export default function Page() {
                                 type="text"
                                 placeholder="First Name"
                                 required
-                                className="w-full px-4 py-2 border text-black border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400"
+                                disabled={loading}
+                                className="w-full px-4 py-2 border text-black border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
                             />
                             {errors.fName && <p className="text-red-500 text-sm mt-1">{errors.fName}</p>}
                         </div>
@@ -119,7 +116,8 @@ export default function Page() {
                                 type="text"
                                 placeholder="Last Name"
                                 required
-                                className="w-full px-4 py-2 border text-black border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400"
+                                disabled={loading}
+                                className="w-full px-4 py-2 border text-black border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
                             />
                             {errors.lName && <p className="text-red-500 text-sm mt-1">{errors.lName}</p>}
                         </div>
@@ -129,7 +127,8 @@ export default function Page() {
                                 type="email"
                                 placeholder="Email"
                                 required
-                                className="w-full px-4 py-2 border text-black border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400"
+                                disabled={loading}
+                                className="w-full px-4 py-2 border text-black border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
                             />
                             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                         </div>
@@ -139,12 +138,14 @@ export default function Page() {
                                 type={showPassword ? "text" : "password"}
                                 placeholder="Password"
                                 required
-                                className="w-full px-4 py-2 text-black border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400"
+                                disabled={loading}
+                                className="w-full px-4 py-2 text-black border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600"
+                                disabled={loading}
+                                className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600 disabled:opacity-50"
                             >
                                 {showPassword ? (
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -165,12 +166,14 @@ export default function Page() {
                                 type={showConfirmPassword ? "text" : "password"}
                                 placeholder="Confirm Password"
                                 required
-                                className="w-full px-4 py-2 pr-10 border text-black placeholder:text-gray-400 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                disabled={loading}
+                                className="w-full px-4 py-2 pr-10 border text-black placeholder:text-gray-400 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600"
+                                disabled={loading}
+                                className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600 disabled:opacity-50"
                             >
                                 {showConfirmPassword ? (
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -187,9 +190,13 @@ export default function Page() {
                         </div>
                         <button
                             type="submit"
-                            className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition"
+                            disabled={loading}
+                            className={`w-full py-2 rounded transition ${loading
+                                ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                                : "bg-indigo-600 text-white hover:bg-indigo-700"
+                            }`}
                         >
-                            Register
+                            {loading ? "Registering..." : "Register"}
                         </button>
                     </form>
                 </div>
