@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
+
+import { useRouter } from "next/navigation";
 
 export default function Page() {
   const router = useRouter();
@@ -13,26 +14,24 @@ export default function Page() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
+        body: JSON.stringify({ email }),
       });
       const data = await res.json();
-      if (data?.success) {
+      if (data.success) {
         toast.success(data.message);
         setTimeout(() => {
-          router.push("/");
+          router.push("/login");
         }, 2000);
       } else {
-        toast.error(data.message || "Login failed");
+        toast.error(data.message || "Failed to send reset link");
       }
     } catch (err) {
-      toast.error("Network error",);
+      toast.error("Network error");
     } finally {
       setLoading(false);
     }
@@ -53,7 +52,8 @@ export default function Page() {
 
       <div className="w-full md:w-1/2 flex items-center justify-center bg-gray-50">
         <div className="w-full max-w-md px-8">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-6">Welcome back</h2>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-6">Forgot your password?</h2>
+          <p className="text-gray-600 mb-6">Enter your email to receive a reset link.</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
@@ -64,25 +64,13 @@ export default function Page() {
               disabled={loading}
               className="w-full px-4 py-2 border text-black border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
             />
-            <input
-              name="password"
-              type="password"
-              placeholder="Password"
-              required
-              disabled={loading}
-              className="w-full px-4 py-2 border text-black border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
-            />
-
             <button
               type="submit"
               disabled={loading}
               className={`w-full py-2 rounded transition ${loading ? "bg-gray-400 text-gray-200 cursor-not-allowed" : "bg-indigo-600 text-white hover:bg-indigo-700"}`}
             >
-              {loading ? "Signing in..." : "Sign in"}
+              {loading ? "Sending..." : "Send reset link"}
             </button>
-            <div className="text-sm text-gray-600 text-center">
-              <a href="/forgot-password" className="text-indigo-600 hover:underline">Forgot your password?</a>
-            </div>
           </form>
         </div>
       </div>

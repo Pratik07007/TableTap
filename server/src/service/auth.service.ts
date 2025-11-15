@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
-import prisma from "../prisma/client.js";
-import { sendRegistrationerificationEmail } from "../libs/registrationEmail.js";
+import prisma from "../prisma/client";
+import { sendRegistrationerificationEmail } from "../libs/registrationEmail";
+import { sendPasswordResetEmail } from "../libs/passwordResetEmail";
 import jwt from "jsonwebtoken";
 
 export type TRegisterUser = {
@@ -11,21 +12,11 @@ export type TRegisterUser = {
   role: "ADMIN" | "USER";
 };
 
-/**
- * registerUserService
- * -------------------
- * Accepts user registration data (first name, last name, email, password, role).
- * 1. Hashes the provided password.
- * 2. Checks if a user with the given email already exists.
- * 3. Creates the new user record in the database.
- * 4. Sends a registration verification email to the user.
- * 5. On email failure, rolls back the user creation.
- */
 
 export const registerUserService = async (userData: TRegisterUser) => {
   try {
     const { fName, lName, email, password, role } = userData;
-    console.log(fName, lName, email, password, role);
+    // console.log(fName, lName, email, password, role);
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const userAlreadyExists = await prisma.user.findUnique({
@@ -35,8 +26,8 @@ export const registerUserService = async (userData: TRegisterUser) => {
     });
     if (userAlreadyExists) {
       return {
-        message: "User already exists",
         success: false,
+        message: "User already exists",
       };
     }
     const user = await prisma.user.create({
@@ -45,7 +36,7 @@ export const registerUserService = async (userData: TRegisterUser) => {
         lastName: lName,
         email,
         hash: hashedPassword,
-        role,
+        role: role === "ADMIN" ? "ADMIN" : "USER",
       },
     });
     try {
@@ -78,18 +69,17 @@ export const registerUserService = async (userData: TRegisterUser) => {
   }
 };
 
-/**
- * verifyEmailService
- * ------------------
- * Accepts a verification token.
- * 1. Finds the user with the corresponding token.
- * 2. If found, marks the user as verified and clears the token.
- * 3. Returns success/failure status and accompanying messages.
- */
+
 export const verifyEmailService = async (token: string) => {
   try {
     const verify = jwt.verify(token, process.env.JWT_SECRET as string);
-    const { email } = verify as { email: string };
+    const { email, type } = verify as { email: string; type: string };
+    if (type != "verify") {
+      return {
+        success: false,
+        message: "Invalid or expired token",
+      };
+    }
     console.log(email);
     try {
       const user = await prisma.user.findUnique({
@@ -162,4 +152,65 @@ export const loginService = async (email: string, password: string) => {
     success: true,
     token,
   };
+};
+
+export const forgotPasswordService = async (email: string) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (user) {
+      await sendPasswordResetEmail(email);
+    }
+    return {
+      message: "If the email exists, a reset link has been sent",
+      success: true,
+    };
+  } catch (error) {
+    return {
+      message: "Failed to initiate password reset",
+      success: false,
+      error,
+    };
+  }
+};
+
+export const resetPasswordService = async (
+  token: string,
+  newPassword: string
+) => {
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      email: string;
+      type?: string;
+    };
+    if (payload.type && payload.type !== "reset") {
+      return {
+        message: "Invalid token type",
+        success: false,
+      };
+    }
+    const user = await prisma.user.findUnique({
+      where: { email: payload.email },
+    });
+    if (!user) {
+      return {
+        message: "Invalid or expired token",
+        success: false,
+      };
+    }
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { email: user.email },
+      data: { hash: hashed },
+    });
+    return {
+      message: "Password reset successfully",
+      success: true,
+    };
+  } catch (error) {
+    return {
+      message: "Invalid or expired token",
+      success: false,
+      error,
+    };
+  }
 };

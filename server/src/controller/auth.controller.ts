@@ -3,6 +3,8 @@ import {
   loginService,
   registerUserService,
   verifyEmailService,
+  forgotPasswordService,
+  resetPasswordService,
 } from "../service/auth.service";
 
 export const registerUserController = async (req: Request, res: Response) => {
@@ -40,8 +42,24 @@ export const loginController = async (req: Request, res: Response) => {
   if (!response.success) {
     return res.status(400).json({ ...response });
   }
-  res.cookie("token", response.token, {
-    sameSite: "strict",
-  });
-  res.status(200).json({ response });
+  res.cookie("token", response.token);
+  res.status(200).json({ ...response });
+};
+
+export const forgotPasswordController = async (req: Request, res: Response) => {
+  const { email } = req.body;
+  const response = await forgotPasswordService(email);
+  if (!response.success) {
+    return res.status(400).json({ ...response });
+  }
+  res.status(200).json({ ...response });
+};
+
+export const resetPasswordController = async (req: Request, res: Response) => {
+  const { token, password } = req.body;
+  const response = await resetPasswordService(token, password);
+  if (!response.success) {
+    return res.status(400).json({ ...response });
+  }
+  res.status(200).json({ ...response });
 };

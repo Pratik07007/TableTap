@@ -5,6 +5,10 @@ import Image from "next/image";
 import { useState } from "react";
 import { z } from "zod";
 import toast from "react-hot-toast";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+
 
 const registerSchema = z.object({
     fName: z.string().min(1, "First name is required"),
@@ -12,20 +16,20 @@ const registerSchema = z.object({
     email: z.string().email("Invalid email address"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string().min(1, "Please confirm your password"),
+    role: z.enum(["ADMIN", "USER"]),
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
 });
 
-type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function Page() {
+    const router = useRouter();
     const searchParams = useSearchParams();
     const role_url = searchParams.get("role");
 
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [errors, setErrors] = useState<Partial<Record<keyof RegisterFormData, string>>>({});
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -38,21 +42,17 @@ export default function Page() {
             email: formData.get("email") as string,
             password: formData.get("password") as string,
             confirmPassword: formData.get("confirmPassword") as string,
+            role: role_url
         };
 
         const parsed = registerSchema.safeParse(rawData);
         if (!parsed.success) {
-            const fieldErrors: Partial<Record<keyof RegisterFormData, string>> = {};
             parsed.error.issues.forEach((err) => {
-                if (err.path[0]) {
-                    fieldErrors[err.path[0] as keyof RegisterFormData] = err.message;
-                }
+                toast.error(err.message);
             });
-            setErrors(fieldErrors);
             return;
         }
 
-        setErrors({});
         setLoading(true);
 
         try {
@@ -68,6 +68,9 @@ export default function Page() {
                 toast.error(data.message);
             } else {
                 toast.success(data.message);
+                setTimeout(() => {
+                    router.push("/login");
+                }, 2000);
             }
         } catch (err) {
             console.log("Error in register/page.tsx", err);
@@ -76,7 +79,25 @@ export default function Page() {
             setLoading(false);
         }
     };
-
+    if (role_url !== "ADMIN" && role_url !== "USER") {
+        return (
+            <div className="min-h-screen flex">
+                <div className="w-full md:w-1/2 flex items-center justify-center bg-gray-50">
+                    <div className="w-full max-w-md px-8">
+                        <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+                            Invalid Role
+                        </h2>
+                        <p className="text-red-500 mb-4">
+                            The link is broken. Please retry again later
+                        </p>
+                        <Link href="/" className="inline-block text-indigo-600 font-medium">
+                            Go to Home
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
     return (
         <div className="min-h-screen flex">
             {/* Left half: image */}
@@ -108,7 +129,6 @@ export default function Page() {
                                 disabled={loading}
                                 className="w-full px-4 py-2 border text-black border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
                             />
-                            {errors.fName && <p className="text-red-500 text-sm mt-1">{errors.fName}</p>}
                         </div>
                         <div>
                             <input
@@ -119,7 +139,6 @@ export default function Page() {
                                 disabled={loading}
                                 className="w-full px-4 py-2 border text-black border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
                             />
-                            {errors.lName && <p className="text-red-500 text-sm mt-1">{errors.lName}</p>}
                         </div>
                         <div>
                             <input
@@ -130,7 +149,6 @@ export default function Page() {
                                 disabled={loading}
                                 className="w-full px-4 py-2 border text-black border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
                             />
-                            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                         </div>
                         <div className="relative">
                             <input
@@ -158,7 +176,6 @@ export default function Page() {
                                     </svg>
                                 )}
                             </button>
-                            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
                         </div>
                         <div className="relative">
                             <input
@@ -186,7 +203,6 @@ export default function Page() {
                                     </svg>
                                 )}
                             </button>
-                            {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
                         </div>
                         <button
                             type="submit"
@@ -194,7 +210,7 @@ export default function Page() {
                             className={`w-full py-2 rounded transition ${loading
                                 ? "bg-gray-400 text-gray-200 cursor-not-allowed"
                                 : "bg-indigo-600 text-white hover:bg-indigo-700"
-                            }`}
+                                }`}
                         >
                             {loading ? "Registering..." : "Register"}
                         </button>
