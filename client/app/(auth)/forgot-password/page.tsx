@@ -5,6 +5,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 export default function Page() {
   const router = useRouter();
@@ -16,12 +17,8 @@ export default function Page() {
     const email = formData.get("email") as string;
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/forgot-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/forgot-password`, { email });
+      const data = await response.data;
       if (data.success) {
         toast.success(data.message);
         setTimeout(() => {

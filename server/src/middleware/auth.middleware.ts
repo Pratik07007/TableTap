@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import z, { success } from "zod";
+import z from "zod";
 import { loginSchema, registerSchema } from "../types/zod";
 
 export const registerMiddleware = (
