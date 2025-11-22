@@ -40,6 +40,8 @@ model Resturants {
     userId String @unique
     owner  User   @relation("UserOwnsRestaurant", fields: [userId], references: [id])
 
+    menuItems MenuItem[]
+
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }
@@ -47,4 +49,42 @@ model Resturants {
 enum Role {
     USER
     ADMIN
+}
+
+enum MenuCategory {
+    HOT_DRINK
+    COLD_DRINK
+    ALCOHOLIC_DRINK
+    VEGAN_FOOD
+    CHINESE
+    NEPALI
+    THAI
+    CONTINENTAL
+}
+
+enum QuantityType {
+    SERVING
+    HALF_SERVING
+    FULL_SERVING
+    HALF_PLATE
+    FULL_PLATE
+}
+
+model MenuItem {
+    id           String       @id @default(uuid())
+    name         String
+    description  String?
+    price        Float
+    category     MenuCategory
+    quantityType QuantityType
+    imageUrl     String?
+    isAvailable  Boolean      @default(true)
+
+    restaurantId String?
+    restaurant   Resturants? @relation(fields: [restaurantId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([restaurantId])
 }

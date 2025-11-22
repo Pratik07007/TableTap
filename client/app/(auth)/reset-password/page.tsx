@@ -32,13 +32,20 @@ function ResetPasswordForm() {
       });
       const data = await res.json();
       if (data.success) {
-
         toast.success(data.message);
         setTimeout(() => {
           router.push("/login");
         }, 2000);
       } else {
-        toast.error(data.message || "Reset failed");
+        const raw: unknown = data.message as unknown;
+        let msg: unknown = raw;
+        if (Array.isArray(raw)) {
+          msg = (raw[0] as { message?: string })?.message ?? raw[0];
+        } else if (typeof raw === "object" && raw && "errors" in (raw as Record<string, unknown>)) {
+          const errs = (raw as { errors?: { message?: string }[] }).errors;
+          msg = errs && errs[0]?.message;
+        }
+        toast.error(typeof msg === "string" ? msg : "Reset failed");
       }
     } catch (err) {
       toast.error("Network error");

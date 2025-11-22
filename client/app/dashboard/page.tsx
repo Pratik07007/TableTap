@@ -256,6 +256,9 @@ function DashBoard() {
                             <Link href={restaurant ? "/update-restaurant" : "/register-restaurant"} className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700 transition-colors flex items-center gap-2">
                                 {restaurant ? 'Update Restaurant Information' : 'Manage Restaurant'} <ArrowRight size={16} />
                             </Link>
+                            <Link href="/menu" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-2">
+                                Manage Menu <ArrowRight size={16} />
+                            </Link>
                         </div>
                     </div>
                 </div>

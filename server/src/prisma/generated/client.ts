@@ -52,3 +52,8 @@ export type User = Prisma.UserModel
  * 
  */
 export type Resturants = Prisma.ResturantsModel
+/**
+ * Model MenuItem
+ * 
+ */
+export type MenuItem = Prisma.MenuItemModel

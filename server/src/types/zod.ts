@@ -58,14 +58,33 @@ export const resturantSchema = z.object({
     .or(z.literal("")),
 });
 
-export const resturantPatchSchema = resturantSchema
+export const menuItemSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional().or(z.literal("")),
+  price: z.number().min(0, "Price must be positive"),
+  category: z.enum([
+    "hot drink",
+    "cold drink",
+    "alcoholic drink",
+    "vegan food",
+    "chinese",
+    "nepali",
+    "thai",
+    "continental",
+  ]),
+  quantityType: z.enum([
+    "serving",
+    "half serving",
+    "full serving",
+    "half plate",
+    "full plate",
+  ]),
+  imageUrl: z.string().url("Invalid image URL").optional().or(z.literal("")),
+  isAvailable: z.boolean().optional(),
+});
+
+export const menuItemUpdateSchema = menuItemSchema
   .partial()
-  .superRefine((data, ctx) => {
-    const keys = Object.keys(data);
-    if (keys.length === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "At least one field must be provided",
-      });
-    }
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "At least one field must be provided",
   });

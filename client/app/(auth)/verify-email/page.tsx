@@ -28,7 +28,15 @@ function VerifyContent() {
                     toast.success('Email verified successfully');
                 } else {
                     setStatus('error');
-                    toast.error(data.message || 'Email verification failed');
+                    const raw: unknown = data.message as unknown;
+                    let msg: unknown = raw;
+                    if (Array.isArray(raw)) {
+                        msg = (raw[0] as { message?: string })?.message ?? raw[0];
+                    } else if (typeof raw === 'object' && raw && 'errors' in (raw as Record<string, unknown>)) {
+                        const errs = (raw as { errors?: { message?: string }[] }).errors;
+                        msg = errs && errs[0]?.message;
+                    }
+                    toast.error(typeof msg === 'string' ? msg : 'Email verification failed');
                 }
             } catch (error) {
                 setStatus('error');
