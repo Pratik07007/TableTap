@@ -1,8 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import Image from "next/image";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { z } from "zod";
 import toast from "react-hot-toast";
 import Link from "next/link";
@@ -21,7 +20,7 @@ const registerSchema = z.object({
     path: ["confirmPassword"],
 });
 
-export default function Page() {
+function RegisterContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const role_url = searchParams.get("role");
@@ -102,6 +101,7 @@ export default function Page() {
     }
 
     return (
+        <Suspense fallback={<div />}> 
         <div className="min-h-screen flex bg-white">
             {/* Left half: image & Branding */}
             <div className="hidden md:flex md:w-1/2 bg-linear-to-br from-orange-600 to-amber-200 items-center justify-center relative overflow-hidden">
@@ -245,5 +245,14 @@ export default function Page() {
                 </div>
             </div>
         </div>
+        </Suspense>
+    );
+}
+
+export default function Page() {
+    return (
+        <Suspense fallback={<div />}> 
+            <RegisterContent />
+        </Suspense>
     );
 }

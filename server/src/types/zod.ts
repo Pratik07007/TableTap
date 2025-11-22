@@ -57,3 +57,15 @@ export const resturantSchema = z.object({
     .optional()
     .or(z.literal("")),
 });
+
+export const resturantPatchSchema = resturantSchema
+  .partial()
+  .superRefine((data, ctx) => {
+    const keys = Object.keys(data);
+    if (keys.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "At least one field must be provided",
+      });
+    }
+  });

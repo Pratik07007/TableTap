@@ -77,7 +77,6 @@ export const UserScalarFieldEnum = {
   hash: 'hash',
   role: 'role',
   isEmailVerified: 'isEmailVerified',
-  resturantsId: 'resturantsId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -98,6 +97,7 @@ export const ResturantsScalarFieldEnum = {
   faceBookUrl: 'faceBookUrl',
   tikTokUrl: 'tikTokUrl',
   instagramUrl: 'instagramUrl',
+  userId: 'userId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

@@ -1,4 +1,5 @@
 'use client';
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -6,7 +7,7 @@ import toast from 'react-hot-toast';
 import { LayoutDashboard, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
-function Page() {
+function VerifyContent() {
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
     const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'loading'>(token ? 'loading' : 'idle');
@@ -112,4 +113,19 @@ function Page() {
     );
 }
 
-export default Page;
+export default function Page() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-white">
+                <div className="flex flex-col items-center">
+                    <div className="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mb-6">
+                        <Loader2 size={32} className="animate-spin" />
+                    </div>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Loading...</h1>
+                </div>
+            </div>
+        }>
+            <VerifyContent />
+        </Suspense>
+    );
+}

@@ -235,13 +235,26 @@ function DashBoard() {
                                         <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Restaurant Email</p>
                                         <p className="text-lg font-medium text-gray-900">{restaurant.email}</p>
                                     </div>
+                                    <div>
+                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Instagram URL</p>
+                                        <p className="text-lg font-medium text-gray-900">{restaurant.instagramUrl}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Facebook URL</p>
+                                        <p className="text-lg font-medium text-gray-900">{restaurant.faceBookUrl}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">TikTok URL</p>
+                                        <p className="text-lg font-medium text-gray-900">{restaurant.tikTokUrl}</p>
+                                    </div>
+
                                 </div>
                             )}
                         </div>
 
                         <div className="mt-10 pt-6 border-t border-gray-100 flex gap-4">
-                            <Link href="/register-restaurant" className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700 transition-colors flex items-center gap-2">
-                                Manage Restaurant <ArrowRight size={16} />
+                            <Link href={restaurant ? "/update-restaurant" : "/register-restaurant"} className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700 transition-colors flex items-center gap-2">
+                                {restaurant ? 'Update Restaurant Information' : 'Manage Restaurant'} <ArrowRight size={16} />
                             </Link>
                         </div>
                     </div>

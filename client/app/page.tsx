@@ -45,7 +45,7 @@ const validateSession = async () => {
 
 // --- Components ---
 
-export const Navbar = ({
+const Navbar = ({
   isLoggedIn,
   onLogout
 }: {

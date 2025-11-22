@@ -6,9 +6,8 @@ import {
   verifyEmailService,
   forgotPasswordService,
   resetPasswordService,
-  verifyTokenService,
-  createResturantService,
 } from "../service/auth.service";
+import { createResturantService } from "../service/resturant.service";
 
 export const registerUserController = async (req: Request, res: Response) => {
   const { fName, lName, email, password, role } = req.body;
@@ -123,11 +122,15 @@ export const validateSessionController = async (
   }
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
+    const payload = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      id: string;
+    };
     const { default: prisma } = await import("../prisma/client");
     const user = await prisma.user.findUnique({ where: { id: payload.id } });
     if (!user) {
-      return res.status(401).json({ success: false, message: "Invalid or expired session" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid or expired session" });
     }
     return res.status(200).json({
       success: true,
@@ -158,13 +161,50 @@ export const authDocsController = async (_req: Request, res: Response) => {
   res.status(200).json({
     success: true,
     endpoints: [
-      { method: "POST", path: "/api/auth/register", body: ["fName", "lName", "email", "password", "confirmPassword", "role"], auth: false },
-      { method: "POST", path: "/api/auth/login", body: ["email", "password"], auth: false },
-      { method: "GET", path: "/api/auth/validate-session", auth: true, returns: ["email", "role", "name"] },
+      {
+        method: "POST",
+        path: "/api/auth/register",
+        body: [
+          "fName",
+          "lName",
+          "email",
+          "password",
+          "confirmPassword",
+          "role",
+        ],
+        auth: false,
+      },
+      {
+        method: "POST",
+        path: "/api/auth/login",
+        body: ["email", "password"],
+        auth: false,
+      },
+      {
+        method: "GET",
+        path: "/api/auth/validate-session",
+        auth: true,
+        returns: ["email", "role", "name"],
+      },
       { method: "POST", path: "/api/auth/logout", auth: true },
-      { method: "POST", path: "/api/auth/verify-email", body: ["token"], auth: false },
-      { method: "POST", path: "/api/auth/forgot-password", body: ["email"], auth: false },
-      { method: "POST", path: "/api/auth/reset-password", body: ["token", "password", "confirmPassword"], auth: false },
+      {
+        method: "POST",
+        path: "/api/auth/verify-email",
+        body: ["token"],
+        auth: false,
+      },
+      {
+        method: "POST",
+        path: "/api/auth/forgot-password",
+        body: ["email"],
+        auth: false,
+      },
+      {
+        method: "POST",
+        path: "/api/auth/reset-password",
+        body: ["token", "password", "confirmPassword"],
+        auth: false,
+      },
       { method: "POST", path: "/api/auth/register-restaurant", auth: true },
     ],
   });

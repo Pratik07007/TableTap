@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { resturantSchema } from "../types/zod";
+import { resturantSchema, resturantPatchSchema } from "../types/zod";
 import { checkSessionAndGetUserId } from "../utils/checkSession";
 
 export const createResturantInputValidiationMiddleware = (
@@ -77,6 +77,25 @@ export const updateResturantInputValidationMiddleware = (
     tikTokUrl,
     instagramUrl,
   });
+  if (!result.success) {
+    const errors = result.error.issues.map((issue) => ({
+      field: issue.path.join('.'),
+      message: issue.message,
+    }));
+    return res.status(400).json({
+      message: errors,
+      success: false,
+    });
+  }
+  next();
+};
+
+export const patchResturantInputValidationMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const result = resturantPatchSchema.safeParse(req.body ?? {});
   if (!result.success) {
     const errors = result.error.issues.map((issue) => ({
       field: issue.path.join('.'),

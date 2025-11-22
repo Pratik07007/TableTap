@@ -216,65 +216,7 @@ export const resetPasswordService = async (
   }
 };
 
-export const createResturantService = async (
-  userId: string,
-  name: string,
-  address: string,
-  city: string,
-  state: string,
-  country: string,
-  zipCode: string,
-  phoneNumber: string,
-  email: string,
-  faceBookUrl: string,
-  tikTokUrl: string,
-  instagramUrl: string
-) => {
-  try {
-    const ifUserAlreadyHasResturant = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        resurant: true,
-      },
-    });
-    if (ifUserAlreadyHasResturant?.resurant) {
-      return {
-        message: "User already has a resturant",
-        success: false,
-      };
-    }
-    const resturant = await prisma.resturants.create({
-      data: {
-        name,
-        streetAddress: address,
-        city,
-        state,
-        zip: zipCode,
-        country,
-        phone: phoneNumber,
-        email,
-        faceBookUrl,
-        tikTokUrl,
-        instagramUrl,
-      },
-    });
-    await prisma.user.update({
-      where: { id: userId },
-      data: { resturantsId: resturant.id },
-    });
-    return {
-      message: "Resturant created successfully",
-      success: true,
-      data: { resturant },
-    };
-  } catch (error) {
-    return {
-      message: "Resturant creation failed",
-      success: false,
-      error,
-    };
-  }
-};
+
 
 export const verifyTokenService = async (token: string) => {
   try {
