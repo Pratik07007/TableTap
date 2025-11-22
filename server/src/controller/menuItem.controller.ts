@@ -42,11 +42,17 @@ export const createMenuItem = async (
   try {
     const session = checkSessionAndGetUserId(req);
     if (!session.success) {
-      return res.status(401).json({ success: false, message: "Not authenticated" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Not authenticated" });
     }
-    const restaurant = await prisma.resturants.findUnique({ where: { userId: session.userId as string } });
+    const restaurant = await prisma.resturants.findUnique({
+      where: { userId: session.userId as string },
+    });
     if (!restaurant) {
-      return res.status(400).json({ success: false, message: "No restaurant found for user" });
+      return res
+        .status(400)
+        .json({ success: false, message: "No restaurant found for user" });
     }
     const body = req.body || {};
     const category = categoryMap[String(body.category || "").toLowerCase()];
@@ -86,11 +92,15 @@ export const getMenuItems = async (
     if (!session.success) {
       return res.status(200).json({ success: true, data: [] });
     }
-    const restaurant = await prisma.resturants.findUnique({ where: { userId: session.userId as string } });
+    const restaurant = await prisma.resturants.findUnique({
+      where: { userId: session.userId as string },
+    });
     if (!restaurant) {
       return res.status(200).json({ success: true, data: [] });
     }
-    const items = await prisma.menuItem.findMany({ where: { restaurantId: restaurant.id } });
+    const items = await prisma.menuItem.findMany({
+      where: { restaurantId: restaurant.id },
+    });
     res.status(200).json({ success: true, data: items });
   } catch (err) {
     next(err);
@@ -105,11 +115,17 @@ export const updateMenuItem = async (
   try {
     const session = checkSessionAndGetUserId(req);
     if (!session.success) {
-      return res.status(401).json({ success: false, message: "Not authenticated" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Not authenticated" });
     }
-    const restaurant = await prisma.resturants.findUnique({ where: { userId: session.userId as string } });
+    const restaurant = await prisma.resturants.findUnique({
+      where: { userId: session.userId as string },
+    });
     if (!restaurant) {
-      return res.status(400).json({ success: false, message: "No restaurant found for user" });
+      return res
+        .status(400)
+        .json({ success: false, message: "No restaurant found for user" });
     }
     const { id } = req.params;
     const body = req.body || {};
@@ -140,7 +156,9 @@ export const updateMenuItem = async (
       data.isAvailable = !!body.isAvailable;
     const existing = await prisma.menuItem.findUnique({ where: { id } });
     if (!existing) {
-      return res.status(404).json({ success: false, message: "Menu item not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Menu item not found" });
     }
     if (existing.restaurantId !== restaurant.id) {
       return res.status(403).json({ success: false, message: "Forbidden" });
@@ -165,21 +183,32 @@ export const deleteMenuItem = async (
   try {
     const session = checkSessionAndGetUserId(req);
     if (!session.success) {
-      return res.status(401).json({ success: false, message: "Not authenticated" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Not authenticated" });
     }
-    const restaurant = await prisma.resturants.findUnique({ where: { userId: session.userId as string } });
+    const restaurant = await prisma.resturants.findUnique({
+      where: { userId: session.userId as string },
+    });
     if (!restaurant) {
-      return res.status(400).json({ success: false, message: "No restaurant found for user" });
+      return res
+        .status(400)
+        .json({ success: false, message: "No restaurant found for user" });
     }
     const { id } = req.params;
     const existing = await prisma.menuItem.findUnique({ where: { id } });
     if (!existing) {
-      return res.status(404).json({ success: false, message: "Menu item not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Menu item not found" });
     }
     if (existing.restaurantId !== restaurant.id) {
       return res.status(403).json({ success: false, message: "Forbidden" });
     }
-    const updated = await prisma.menuItem.update({ where: { id }, data: { isAvailable: false } });
+    const updated = await prisma.menuItem.update({
+      where: { id },
+      data: { isAvailable: false },
+    });
     res.status(200).json({ success: true, data: updated });
   } catch (err: any) {
     if (err?.code === "P2025") {
@@ -199,21 +228,32 @@ export const makeMenuItemAvailable = async (
   try {
     const session = checkSessionAndGetUserId(req);
     if (!session.success) {
-      return res.status(401).json({ success: false, message: "Not authenticated" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Not authenticated" });
     }
-    const restaurant = await prisma.resturants.findUnique({ where: { userId: session.userId as string } });
+    const restaurant = await prisma.resturants.findUnique({
+      where: { userId: session.userId as string },
+    });
     if (!restaurant) {
-      return res.status(400).json({ success: false, message: "No restaurant found for user" });
+      return res
+        .status(400)
+        .json({ success: false, message: "No restaurant found for user" });
     }
     const { id } = req.params;
     const existing = await prisma.menuItem.findUnique({ where: { id } });
     if (!existing) {
-      return res.status(404).json({ success: false, message: "Menu item not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Menu item not found" });
     }
     if (existing.restaurantId !== restaurant.id) {
       return res.status(403).json({ success: false, message: "Forbidden" });
     }
-    const updated = await prisma.menuItem.update({ where: { id }, data: { isAvailable: true } });
+    const updated = await prisma.menuItem.update({
+      where: { id },
+      data: { isAvailable: true },
+    });
     res.status(200).json({ success: true, data: updated });
   } catch (err: any) {
     if (err?.code === "P2025") {
