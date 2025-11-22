@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -18,25 +19,33 @@ import {
   Clock,
   FileSignature
 } from 'lucide-react';
+
 // --- Types ---
 type AuthState = boolean;
 interface FAQItem {
   question: string;
   answer: string;
 }
-// --- Helper Functions for Cookies ---
-const getCookie = (name: string) => {
-  if (typeof document === 'undefined') return null;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift();
-  return null;
+
+const validateSession = async () => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/validate-session`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return data.success === true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
 };
-const deleteCookie = (name: string) => {
-  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-};
+
 // --- Components ---
-const Navbar = ({
+
+export const Navbar = ({
   isLoggedIn,
   onLogout
 }: {
@@ -46,16 +55,21 @@ const Navbar = ({
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
+
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
+
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
   const navLinks = [
     { name: 'System Features', href: '#features' },
     { name: 'QR Solution', href: '#benefits' },
     { name: 'FAQ', href: '#faq' },
   ];
+
   return (
     <nav className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/95 backdrop-blur-md shadow-sm py-3' : 'bg-white/50 backdrop-blur-sm py-5'
       }`}>
@@ -70,6 +84,7 @@ const Navbar = ({
             Table<span className="text-orange-600">Tap</span>
           </span>
         </div>
+
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
           {navLinks.map((link) => (
@@ -82,6 +97,7 @@ const Navbar = ({
             </a>
           ))}
         </div>
+
         {/* Auth Section */}
         <div className="hidden md:flex items-center gap-4">
           {isLoggedIn ? (
@@ -91,6 +107,12 @@ const Navbar = ({
                 className="flex items-center gap-2 px-5 py-2 rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 transition-all text-sm font-semibold"
               >
                 <LogOut size={16} /> Logout
+              </button>
+              <button
+                onClick={() => router.push('/dashboard')}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white transition-all shadow-lg shadow-orange-600/20 text-sm font-semibold"
+              >
+                Get Started <ArrowRight size={16} />
               </button>
             </div>
           ) : (
@@ -110,6 +132,7 @@ const Navbar = ({
             </div>
           )}
         </div>
+
         {/* Mobile Menu Toggle */}
         <button
           className="md:hidden text-gray-700 p-2"
@@ -118,6 +141,7 @@ const Navbar = ({
           {mobileMenuOpen ? <X /> : <Menu />}
         </button>
       </div>
+
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-white border-t shadow-xl p-6 flex flex-col space-y-4 animate-in slide-in-from-top-5">
@@ -188,8 +212,8 @@ const Hero = ({ isLoggedIn }: { isLoggedIn: AuthState }) => {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             {isLoggedIn ? (
-              <button className="w-full sm:w-auto px-8 py-4 rounded-full bg-orange-600 text-white font-bold hover:bg-orange-700 transition-all flex items-center justify-center gap-2 shadow-xl shadow-orange-600/20">
-                <LayoutDashboard size={20} /> Go to Admin Dashboard
+              <button onClick={() => router.push('/dashboard')} className="w-full sm:w-auto px-8 py-4 rounded-full bg-orange-600 text-white font-bold hover:bg-orange-700 transition-all flex items-center justify-center gap-2 shadow-xl shadow-orange-600/20">
+                <LayoutDashboard size={20} /> Go to Dashboard
               </button>
             ) : (
               <>
@@ -199,7 +223,6 @@ const Hero = ({ isLoggedIn }: { isLoggedIn: AuthState }) => {
                 >
                   Get Started <ArrowRight size={18} />
                 </button>
-
               </>
             )}
           </div>
@@ -231,10 +254,6 @@ const Features = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-20">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Complete Control Over Your Venue</h2>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto font-light">
-
-
-          </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
@@ -264,13 +283,11 @@ const DualViewSection = () => {
     <section id="benefits" className="py-24 bg-white border-t border-gray-100 scroll-mt-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-20 items-center">
-
           {/* Visual: The Solution in Action */}
           <div className="relative">
             <div className="absolute inset-0  from-orange-100 to-transparent rounded-3xl transform rotate-3"></div>
             <div className="relative bg-white p-8 rounded-3xl shadow-2xl border border-gray-100">
               <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
-                {/* <span className="font-bold text-gray-900">Table #05</span> */}
                 <span className="text-xs font-bold text-green-700 bg-green-50 px-2 py-1 rounded-md tracking-wide">LIVE ORDER</span>
               </div>
               <div className="space-y-4">
@@ -322,7 +339,6 @@ const DualViewSection = () => {
               ))}
             </div>
           </div>
-
         </div>
       </div>
     </section>
@@ -397,7 +413,6 @@ const FAQSection = () => {
   );
 };
 
-// --- Minimal Modern Footer ---
 const Footer = () => (
   <footer className="bg-white border-t border-gray-100 pt-16 pb-8">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -463,22 +478,22 @@ const Footer = () => (
 // --- Main Page Component ---
 
 export default function LandingPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const token = getCookie('token');
-    if (token) {
-      setIsLoggedIn(true);
-    }
+    const bootstrap = async () => {
+      const ok = await validateSession();
+      setIsLoggedIn(ok);
+    };
+    bootstrap();
   }, []);
 
-  const handleLogout = () => {
-    // 1. Clear the cookie
-    deleteCookie('token');
-    // 2. Update state
+  const handleLogout = async () => {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, { method: 'POST', credentials: 'include' });
+    } catch { }
     setIsLoggedIn(false);
-    // 3. Refresh or Redirect
     router.refresh();
   };
 

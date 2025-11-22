@@ -4,7 +4,8 @@ import jwt from "jsonwebtoken";
 export const sendRegistrationerificationEmail = async (email: string) => {
   const token = jwt.sign(
     { email, type: "verify" },
-    process.env.JWT_SECRET as string
+    process.env.JWT_SECRET as string,
+    { expiresIn: "24h" }
   );
   const info = await transporter.sendMail({
     from: `"TableTap" <${process.env.EMAIL_USER}>`,

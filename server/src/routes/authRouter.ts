@@ -11,6 +11,10 @@ import {
   verifyEmailController,
   forgotPasswordController,
   resetPasswordController,
+  validateSessionController,
+  logoutController,
+  registerRestaurantController,
+  authDocsController,
 } from "../controller/auth.controller";
 const authRouter = Router();
 
@@ -31,5 +35,10 @@ authRouter.post(
   resetPasswordMiddleware,
   resetPasswordController
 );
+
+authRouter.get("/validate-session", validateSessionController);
+authRouter.post("/logout", logoutController);
+authRouter.post("/register-restaurant", registerRestaurantController);
+authRouter.get("/docs", authDocsController);
 
 export default authRouter;

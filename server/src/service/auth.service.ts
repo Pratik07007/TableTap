@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import prisma from "../prisma/client";
 import { sendRegistrationerificationEmail } from "../libs/registrationEmail";
 import { sendPasswordResetEmail } from "../libs/passwordResetEmail";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 export type TRegisterUser = {
   fName: string;
@@ -11,7 +11,6 @@ export type TRegisterUser = {
   password: string;
   role: "ADMIN" | "USER";
 };
-
 
 export const registerUserService = async (userData: TRegisterUser) => {
   try {
@@ -68,7 +67,6 @@ export const registerUserService = async (userData: TRegisterUser) => {
     };
   }
 };
-
 
 export const verifyEmailService = async (token: string) => {
   try {
@@ -144,8 +142,11 @@ export const loginService = async (email: string, password: string) => {
     };
   }
   const token = jwt.sign(
-    { email: user.email },
-    process.env.JWT_SECRET as string
+    {
+      id: user.id,
+    },
+    process.env.JWT_SECRET as string,
+    { expiresIn: "24h" }
   );
   return {
     message: "Login successful",
@@ -205,6 +206,99 @@ export const resetPasswordService = async (
     return {
       message: "Password reset successfully",
       success: true,
+    };
+  } catch (error) {
+    return {
+      message: "Invalid or expired token",
+      success: false,
+      error,
+    };
+  }
+};
+
+export const createResturantService = async (
+  userId: string,
+  name: string,
+  address: string,
+  city: string,
+  state: string,
+  country: string,
+  zipCode: string,
+  phoneNumber: string,
+  email: string,
+  faceBookUrl: string,
+  tikTokUrl: string,
+  instagramUrl: string
+) => {
+  try {
+    const ifUserAlreadyHasResturant = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        resurant: true,
+      },
+    });
+    if (ifUserAlreadyHasResturant?.resurant) {
+      return {
+        message: "User already has a resturant",
+        success: false,
+      };
+    }
+    const resturant = await prisma.resturants.create({
+      data: {
+        name,
+        streetAddress: address,
+        city,
+        state,
+        zip: zipCode,
+        country,
+        phone: phoneNumber,
+        email,
+        faceBookUrl,
+        tikTokUrl,
+        instagramUrl,
+      },
+    });
+    await prisma.user.update({
+      where: { id: userId },
+      data: { resturantsId: resturant.id },
+    });
+    return {
+      message: "Resturant created successfully",
+      success: true,
+      data: { resturant },
+    };
+  } catch (error) {
+    return {
+      message: "Resturant creation failed",
+      success: false,
+      error,
+    };
+  }
+};
+
+export const verifyTokenService = async (token: string) => {
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      email: string;
+      role: string;
+      name: string;
+    };
+    const user = await prisma.user.findUnique({
+      where: { email: payload.email },
+      include: {
+        resurant: true,
+      },
+    });
+    if (!user) {
+      return {
+        message: "Invalid or expired token",
+        success: false,
+      };
+    }
+    return {
+      message: "Token verified successfully",
+      success: true,
+      data: { user },
     };
   } catch (error) {
     return {

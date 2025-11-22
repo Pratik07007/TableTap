@@ -17,14 +17,14 @@ model User {
     role      Role
 
     isEmailVerified Boolean     @default(false)
-    resurant        Resturants? @relation(fields: [resturantsId], references: [id])
-    resturantsId    String?
+    restaurant      Restaurant? @relation(fields: [restaurantId], references: [id])
+    restaurantId    String?     @unique
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }
 
-model Resturants {
+model Restaurant {
     id            String  @id @default(uuid())
     name          String
     streetAddress String
@@ -40,7 +40,7 @@ model Resturants {
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-    users     User[]
+    user      User?
 }
 
 enum Role {
