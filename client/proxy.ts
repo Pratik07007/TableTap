@@ -5,13 +5,32 @@ export async function proxy(request: NextRequest) {
   const token = cookieStore.get("token")?.value;
   const { pathname } = request.nextUrl;
 
-  if (token && (pathname === "/login" || pathname === "/register")) {
+  if (
+    (token &&
+      (pathname === "/login" ||
+        pathname === "/register" ||
+        pathname === "/verify-email" ||
+        pathname === "/reset-password")) ||
+    pathname === "/forgot-password"
+  ) {
     return NextResponse.redirect(new URL("/", request.url));
+  }
+  if (pathname === "/dashboard") {
+    if (!token) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/login", "/register"],
+  matcher: [
+    "/login",
+    "/register",
+    "/verify-email",
+    "/reset-password",
+    "/forgot-password",
+    "/dashboard",
+  ],
 };

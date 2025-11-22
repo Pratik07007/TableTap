@@ -50,7 +50,8 @@ export const AnyNull = runtime.objectEnumValues.instances.AnyNull
 
 export const ModelName = {
   User: 'User',
-  Resturants: 'Resturants'
+  Resturants: 'Resturants',
+  MenuItem: 'MenuItem'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -77,7 +78,6 @@ export const UserScalarFieldEnum = {
   hash: 'hash',
   role: 'role',
   isEmailVerified: 'isEmailVerified',
-  resturantsId: 'resturantsId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -98,11 +98,29 @@ export const ResturantsScalarFieldEnum = {
   faceBookUrl: 'faceBookUrl',
   tikTokUrl: 'tikTokUrl',
   instagramUrl: 'instagramUrl',
+  userId: 'userId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type ResturantsScalarFieldEnum = (typeof ResturantsScalarFieldEnum)[keyof typeof ResturantsScalarFieldEnum]
+
+
+export const MenuItemScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  price: 'price',
+  category: 'category',
+  quantityType: 'quantityType',
+  imageUrl: 'imageUrl',
+  isAvailable: 'isAvailable',
+  restaurantId: 'restaurantId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MenuItemScalarFieldEnum = (typeof MenuItemScalarFieldEnum)[keyof typeof MenuItemScalarFieldEnum]
 
 
 export const SortOrder = {

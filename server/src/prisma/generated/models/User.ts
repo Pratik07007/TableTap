@@ -32,7 +32,6 @@ export type UserMinAggregateOutputType = {
   hash: string | null
   role: $Enums.Role | null
   isEmailVerified: boolean | null
-  resturantsId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -45,7 +44,6 @@ export type UserMaxAggregateOutputType = {
   hash: string | null
   role: $Enums.Role | null
   isEmailVerified: boolean | null
-  resturantsId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -58,7 +56,6 @@ export type UserCountAggregateOutputType = {
   hash: number
   role: number
   isEmailVerified: number
-  resturantsId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -73,7 +70,6 @@ export type UserMinAggregateInputType = {
   hash?: true
   role?: true
   isEmailVerified?: true
-  resturantsId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -86,7 +82,6 @@ export type UserMaxAggregateInputType = {
   hash?: true
   role?: true
   isEmailVerified?: true
-  resturantsId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -99,7 +94,6 @@ export type UserCountAggregateInputType = {
   hash?: true
   role?: true
   isEmailVerified?: true
-  resturantsId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -185,7 +179,6 @@ export type UserGroupByOutputType = {
   hash: string
   role: $Enums.Role
   isEmailVerified: boolean
-  resturantsId: string | null
   createdAt: Date
   updatedAt: Date
   _count: UserCountAggregateOutputType | null
@@ -219,7 +212,6 @@ export type UserWhereInput = {
   hash?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   isEmailVerified?: Prisma.BoolFilter<"User"> | boolean
-  resturantsId?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   resurant?: Prisma.XOR<Prisma.ResturantsNullableScalarRelationFilter, Prisma.ResturantsWhereInput> | null
@@ -233,7 +225,6 @@ export type UserOrderByWithRelationInput = {
   hash?: Prisma.SortOrder
   role?: Prisma.SortOrder
   isEmailVerified?: Prisma.SortOrder
-  resturantsId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   resurant?: Prisma.ResturantsOrderByWithRelationInput
@@ -250,7 +241,6 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   hash?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   isEmailVerified?: Prisma.BoolFilter<"User"> | boolean
-  resturantsId?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   resurant?: Prisma.XOR<Prisma.ResturantsNullableScalarRelationFilter, Prisma.ResturantsWhereInput> | null
@@ -264,7 +254,6 @@ export type UserOrderByWithAggregationInput = {
   hash?: Prisma.SortOrder
   role?: Prisma.SortOrder
   isEmailVerified?: Prisma.SortOrder
-  resturantsId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
@@ -283,7 +272,6 @@ export type UserScalarWhereWithAggregatesInput = {
   hash?: Prisma.StringWithAggregatesFilter<"User"> | string
   role?: Prisma.EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
   isEmailVerified?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
-  resturantsId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
@@ -298,7 +286,7 @@ export type UserCreateInput = {
   isEmailVerified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
-  resurant?: Prisma.ResturantsCreateNestedOneWithoutUsersInput
+  resurant?: Prisma.ResturantsCreateNestedOneWithoutOwnerInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -309,9 +297,9 @@ export type UserUncheckedCreateInput = {
   hash: string
   role: $Enums.Role
   isEmailVerified?: boolean
-  resturantsId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  resurant?: Prisma.ResturantsUncheckedCreateNestedOneWithoutOwnerInput
 }
 
 export type UserUpdateInput = {
@@ -324,7 +312,7 @@ export type UserUpdateInput = {
   isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  resurant?: Prisma.ResturantsUpdateOneWithoutUsersNestedInput
+  resurant?: Prisma.ResturantsUpdateOneWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -335,9 +323,9 @@ export type UserUncheckedUpdateInput = {
   hash?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  resturantsId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  resurant?: Prisma.ResturantsUncheckedUpdateOneWithoutOwnerNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -348,7 +336,6 @@ export type UserCreateManyInput = {
   hash: string
   role: $Enums.Role
   isEmailVerified?: boolean
-  resturantsId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -373,7 +360,6 @@ export type UserUncheckedUpdateManyInput = {
   hash?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  resturantsId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -386,7 +372,6 @@ export type UserCountOrderByAggregateInput = {
   hash?: Prisma.SortOrder
   role?: Prisma.SortOrder
   isEmailVerified?: Prisma.SortOrder
-  resturantsId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -399,7 +384,6 @@ export type UserMaxOrderByAggregateInput = {
   hash?: Prisma.SortOrder
   role?: Prisma.SortOrder
   isEmailVerified?: Prisma.SortOrder
-  resturantsId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -412,19 +396,13 @@ export type UserMinOrderByAggregateInput = {
   hash?: Prisma.SortOrder
   role?: Prisma.SortOrder
   isEmailVerified?: Prisma.SortOrder
-  resturantsId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
-export type UserListRelationFilter = {
-  every?: Prisma.UserWhereInput
-  some?: Prisma.UserWhereInput
-  none?: Prisma.UserWhereInput
-}
-
-export type UserOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
+export type UserScalarRelationFilter = {
+  is?: Prisma.UserWhereInput
+  isNot?: Prisma.UserWhereInput
 }
 
 export type StringFieldUpdateOperationsInput = {
@@ -443,50 +421,18 @@ export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
+export type UserCreateNestedOneWithoutResurantInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutResurantInput, Prisma.UserUncheckedCreateWithoutResurantInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutResurantInput
+  connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserCreateNestedManyWithoutResurantInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutResurantInput, Prisma.UserUncheckedCreateWithoutResurantInput> | Prisma.UserCreateWithoutResurantInput[] | Prisma.UserUncheckedCreateWithoutResurantInput[]
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutResurantInput | Prisma.UserCreateOrConnectWithoutResurantInput[]
-  createMany?: Prisma.UserCreateManyResurantInputEnvelope
-  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
-}
-
-export type UserUncheckedCreateNestedManyWithoutResurantInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutResurantInput, Prisma.UserUncheckedCreateWithoutResurantInput> | Prisma.UserCreateWithoutResurantInput[] | Prisma.UserUncheckedCreateWithoutResurantInput[]
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutResurantInput | Prisma.UserCreateOrConnectWithoutResurantInput[]
-  createMany?: Prisma.UserCreateManyResurantInputEnvelope
-  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
-}
-
-export type UserUpdateManyWithoutResurantNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutResurantInput, Prisma.UserUncheckedCreateWithoutResurantInput> | Prisma.UserCreateWithoutResurantInput[] | Prisma.UserUncheckedCreateWithoutResurantInput[]
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutResurantInput | Prisma.UserCreateOrConnectWithoutResurantInput[]
-  upsert?: Prisma.UserUpsertWithWhereUniqueWithoutResurantInput | Prisma.UserUpsertWithWhereUniqueWithoutResurantInput[]
-  createMany?: Prisma.UserCreateManyResurantInputEnvelope
-  set?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
-  disconnect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
-  delete?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
-  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
-  update?: Prisma.UserUpdateWithWhereUniqueWithoutResurantInput | Prisma.UserUpdateWithWhereUniqueWithoutResurantInput[]
-  updateMany?: Prisma.UserUpdateManyWithWhereWithoutResurantInput | Prisma.UserUpdateManyWithWhereWithoutResurantInput[]
-  deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
-}
-
-export type UserUncheckedUpdateManyWithoutResurantNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutResurantInput, Prisma.UserUncheckedCreateWithoutResurantInput> | Prisma.UserCreateWithoutResurantInput[] | Prisma.UserUncheckedCreateWithoutResurantInput[]
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutResurantInput | Prisma.UserCreateOrConnectWithoutResurantInput[]
-  upsert?: Prisma.UserUpsertWithWhereUniqueWithoutResurantInput | Prisma.UserUpsertWithWhereUniqueWithoutResurantInput[]
-  createMany?: Prisma.UserCreateManyResurantInputEnvelope
-  set?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
-  disconnect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
-  delete?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
-  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
-  update?: Prisma.UserUpdateWithWhereUniqueWithoutResurantInput | Prisma.UserUpdateWithWhereUniqueWithoutResurantInput[]
-  updateMany?: Prisma.UserUpdateManyWithWhereWithoutResurantInput | Prisma.UserUpdateManyWithWhereWithoutResurantInput[]
-  deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+export type UserUpdateOneRequiredWithoutResurantNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutResurantInput, Prisma.UserUncheckedCreateWithoutResurantInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutResurantInput
+  upsert?: Prisma.UserUpsertWithoutResurantInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutResurantInput, Prisma.UserUpdateWithoutResurantInput>, Prisma.UserUncheckedUpdateWithoutResurantInput>
 }
 
 export type UserCreateWithoutResurantInput = {
@@ -518,53 +464,15 @@ export type UserCreateOrConnectWithoutResurantInput = {
   create: Prisma.XOR<Prisma.UserCreateWithoutResurantInput, Prisma.UserUncheckedCreateWithoutResurantInput>
 }
 
-export type UserCreateManyResurantInputEnvelope = {
-  data: Prisma.UserCreateManyResurantInput | Prisma.UserCreateManyResurantInput[]
-  skipDuplicates?: boolean
-}
-
-export type UserUpsertWithWhereUniqueWithoutResurantInput = {
-  where: Prisma.UserWhereUniqueInput
+export type UserUpsertWithoutResurantInput = {
   update: Prisma.XOR<Prisma.UserUpdateWithoutResurantInput, Prisma.UserUncheckedUpdateWithoutResurantInput>
   create: Prisma.XOR<Prisma.UserCreateWithoutResurantInput, Prisma.UserUncheckedCreateWithoutResurantInput>
+  where?: Prisma.UserWhereInput
 }
 
-export type UserUpdateWithWhereUniqueWithoutResurantInput = {
-  where: Prisma.UserWhereUniqueInput
+export type UserUpdateToOneWithWhereWithoutResurantInput = {
+  where?: Prisma.UserWhereInput
   data: Prisma.XOR<Prisma.UserUpdateWithoutResurantInput, Prisma.UserUncheckedUpdateWithoutResurantInput>
-}
-
-export type UserUpdateManyWithWhereWithoutResurantInput = {
-  where: Prisma.UserScalarWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateManyMutationInput, Prisma.UserUncheckedUpdateManyWithoutResurantInput>
-}
-
-export type UserScalarWhereInput = {
-  AND?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
-  OR?: Prisma.UserScalarWhereInput[]
-  NOT?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
-  id?: Prisma.StringFilter<"User"> | string
-  firstName?: Prisma.StringFilter<"User"> | string
-  lastName?: Prisma.StringFilter<"User"> | string
-  email?: Prisma.StringFilter<"User"> | string
-  hash?: Prisma.StringFilter<"User"> | string
-  role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
-  isEmailVerified?: Prisma.BoolFilter<"User"> | boolean
-  resturantsId?: Prisma.StringNullableFilter<"User"> | string | null
-  createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
-}
-
-export type UserCreateManyResurantInput = {
-  id?: string
-  firstName: string
-  lastName: string
-  email: string
-  hash: string
-  role: $Enums.Role
-  isEmailVerified?: boolean
-  createdAt?: Date | string
-  updatedAt?: Date | string
 }
 
 export type UserUpdateWithoutResurantInput = {
@@ -591,18 +499,6 @@ export type UserUncheckedUpdateWithoutResurantInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type UserUncheckedUpdateManyWithoutResurantInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  firstName?: Prisma.StringFieldUpdateOperationsInput | string
-  lastName?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  hash?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
-  isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
 
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -613,7 +509,6 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   hash?: boolean
   role?: boolean
   isEmailVerified?: boolean
-  resturantsId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   resurant?: boolean | Prisma.User$resurantArgs<ExtArgs>
@@ -627,10 +522,8 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   hash?: boolean
   role?: boolean
   isEmailVerified?: boolean
-  resturantsId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  resurant?: boolean | Prisma.User$resurantArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -641,10 +534,8 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   hash?: boolean
   role?: boolean
   isEmailVerified?: boolean
-  resturantsId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  resurant?: boolean | Prisma.User$resurantArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
@@ -655,21 +546,16 @@ export type UserSelectScalar = {
   hash?: boolean
   role?: boolean
   isEmailVerified?: boolean
-  resturantsId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstName" | "lastName" | "email" | "hash" | "role" | "isEmailVerified" | "resturantsId" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstName" | "lastName" | "email" | "hash" | "role" | "isEmailVerified" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   resurant?: boolean | Prisma.User$resurantArgs<ExtArgs>
 }
-export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  resurant?: boolean | Prisma.User$resurantArgs<ExtArgs>
-}
-export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  resurant?: boolean | Prisma.User$resurantArgs<ExtArgs>
-}
+export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
@@ -684,7 +570,6 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     hash: string
     role: $Enums.Role
     isEmailVerified: boolean
-    resturantsId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["user"]>
@@ -1118,7 +1003,6 @@ export interface UserFieldRefs {
   readonly hash: Prisma.FieldRef<"User", 'String'>
   readonly role: Prisma.FieldRef<"User", 'Role'>
   readonly isEmailVerified: Prisma.FieldRef<"User", 'Boolean'>
-  readonly resturantsId: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }
@@ -1370,10 +1254,6 @@ export type UserCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions
    */
   data: Prisma.UserCreateManyInput | Prisma.UserCreateManyInput[]
   skipDuplicates?: boolean
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.UserIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1444,10 +1324,6 @@ export type UserUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many Users to update.
    */
   limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.UserIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

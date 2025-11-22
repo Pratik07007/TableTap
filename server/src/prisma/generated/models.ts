@@ -10,4 +10,5 @@
  */
 export type * from './models/User'
 export type * from './models/Resturants'
+export type * from './models/MenuItem'
 export type * from './commonInputTypes'
