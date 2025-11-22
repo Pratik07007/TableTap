@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { LayoutDashboard } from "lucide-react";
 
 export default function Page() {
   const router = useRouter();
@@ -48,25 +48,40 @@ export default function Page() {
   };
 
   return (
-    <div className="min-h-screen flex">
-      <div className="hidden md:flex md:w-1/2 from-indigo-500 to-purple-600 items-center justify-center relative">
-        <Image
-          src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop"
-          alt="Restaurant interior"
-          className="absolute inset-0 w-full h-full object-cover opacity-30"
-          width={1000}
-          height={1000}
-        />
-        <div className="relative text-white text-4xl font-bold z-10">TableTap</div>
+    <div className="min-h-screen flex bg-white">
+      {/* Left Side: Branding */}
+      <div className="hidden md:flex md:w-1/2 bg-linear-to-br from-orange-600 to-amber-200 items-center justify-center relative overflow-hidden">
+
+        <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent"></div>
+
+        <div className="relative z-10 text-center px-8">
+          <div className="flex items-center justify-center gap-3 text-white mb-4">
+            <LayoutDashboard className="h-10 w-10" />
+            <span className="text-4xl font-bold tracking-tighter">
+              Table<span className="text-orange-200">Tap</span>
+            </span>
+          </div>
+          <p className="text-orange-100 text-lg font-light max-w-md mx-auto">
+            Join thousands of restaurant owners streamlining their operations today.
+          </p>
+        </div>
       </div>
 
-      <div className="w-full md:w-1/2 flex items-center justify-center bg-gray-50">
-        <div className="w-full max-w-md px-8">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-6">Reset your password</h2>
+      {/* Right Side: Form */}
+      <div className="w-full md:w-1/2 flex items-center justify-center bg-white">
+        <div className="w-full max-w-md px-8 py-12">
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Reset Password</h2>
+            <p className="text-gray-500 text-sm">Create a strong new password for your account.</p>
+          </div>
+
           {!token && (
-            <p className="text-red-500 mb-4">Token not found. Please use the link sent to your email.</p>
+            <div className="p-4 mb-6 bg-red-50 text-red-600 rounded-lg text-sm border border-red-100">
+              Token not found. Please use the link sent to your email.
+            </div>
           )}
-          <form onSubmit={handleSubmit} className="space-y-4">
+
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="relative">
               <input
                 name="password"
@@ -74,12 +89,22 @@ export default function Page() {
                 placeholder="New Password"
                 required
                 disabled={loading}
-                className="w-full px-4 py-2 border text-black border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} disabled={loading} className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600 disabled:opacity-50">
-                {showPassword ? "Hide" : "Show"}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                disabled={loading}
+                className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600 disabled:opacity-50 transition-colors"
+              >
+                {showPassword ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" /></svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                )}
               </button>
             </div>
+
             <div className="relative">
               <input
                 name="confirmPassword"
@@ -87,16 +112,29 @@ export default function Page() {
                 placeholder="Confirm Password"
                 required
                 disabled={loading}
-                className="w-full px-4 py-2 border text-black border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
-              <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} disabled={loading} className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600 disabled:opacity-50">
-                {showConfirmPassword ? "Hide" : "Show"}
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                disabled={loading}
+                className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600 disabled:opacity-50 transition-colors"
+              >
+                {showConfirmPassword ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" /></svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                )}
               </button>
             </div>
+
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-2 rounded transition ${loading ? "bg-gray-400 text-gray-200 cursor-not-allowed" : "bg-indigo-600 text-white hover:bg-indigo-700"}`}
+              className={`w-full py-3.5 rounded-full font-bold shadow-lg transition-all transform hover:-translate-y-0.5 ${loading
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed shadow-none"
+                : "bg-orange-600 text-white hover:bg-orange-700 shadow-orange-600/20"
+                }`}
             >
               {loading ? "Resetting..." : "Reset Password"}
             </button>

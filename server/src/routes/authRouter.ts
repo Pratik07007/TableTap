@@ -14,14 +14,22 @@ import {
 } from "../controller/auth.controller";
 const authRouter = Router();
 
-authRouter.post("/register", registerMiddleware, registerUserController); 
+authRouter.post("/register", registerMiddleware, registerUserController);
 
 authRouter.post("/login", loginMiddleware, loginController);
 
 authRouter.post("/verify-email", verifyEmailController);
 
-authRouter.post("/forgot-password", forgotPasswordMiddleware, forgotPasswordController);
+authRouter.post(
+  "/forgot-password",
+  forgotPasswordMiddleware,
+  forgotPasswordController
+);
 
-authRouter.post("/reset-password", resetPasswordMiddleware, resetPasswordController);
+authRouter.post(
+  "/reset-password",
+  resetPasswordMiddleware,
+  resetPasswordController
+);
 
 export default authRouter;
