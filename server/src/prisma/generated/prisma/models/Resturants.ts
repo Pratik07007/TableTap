@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from "@prisma/client/runtime/library"
+import type * as runtime from "@prisma/client/runtime/client"
 import type * as $Enums from "../enums"
 import type * as Prisma from "../internal/prismaNamespace"
 
@@ -569,10 +569,6 @@ export type ResturantsUncheckedUpdateOneWithoutOwnerNestedInput = {
   delete?: Prisma.ResturantsWhereInput | boolean
   connect?: Prisma.ResturantsWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.ResturantsUpdateToOneWithWhereWithoutOwnerInput, Prisma.ResturantsUpdateWithoutOwnerInput>, Prisma.ResturantsUncheckedUpdateWithoutOwnerInput>
-}
-
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
 }
 
 export type ResturantsCreateNestedOneWithoutMenuItemsInput = {

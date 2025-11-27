@@ -1,10 +1,11 @@
 import cors from "cors";
 import express from "express";
 import dotenv from "dotenv";
-import authRouter from "./routes/authRouter";
-import { resturantRouter } from "./routes/resturantRouter";
-import menuItemRouter from "./routes/menuItemRouter";
 import cookieParser from "cookie-parser";
+
+import authRouter from "./routes/auth.routes";
+import { resturantRouter } from "./routes/resturant.routes";
+import menuItemRouter from "./routes/menu.routes";
 dotenv.config();
 
 const app = express();

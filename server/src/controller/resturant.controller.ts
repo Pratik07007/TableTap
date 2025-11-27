@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
 import { checkSessionAndGetUserId } from "../utils/checkSession";
-import prisma from "../prisma/client";
+
 import {
   createResturantService,
   updateResturantService,
 } from "../service/resturant.service";
+import { prisma } from "../prisma/client";
 export const createResturantController = async (
   req: Request,
   res: Response

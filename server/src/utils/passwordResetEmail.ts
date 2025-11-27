@@ -1,5 +1,5 @@
-import { transporter } from "../utils/nodeMailer";
 import jwt from "jsonwebtoken";
+import { transporter } from "./mail.config";
 
 export const sendPasswordResetEmail = async (email: string) => {
   const token = jwt.sign(

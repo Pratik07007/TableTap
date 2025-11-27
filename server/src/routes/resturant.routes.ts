@@ -1,19 +1,18 @@
 import { Router } from "express";
-import {
-  createResturantInputValidiationMiddleware,
-  updateResturantInputValidationMiddleware,
-} from "../middleware/resturant.middleware";
+
 import {
   createResturantController,
   getMyResturantController,
   updateMyResturantController,
 } from "../controller/resturant.controller";
+import { resturantSchema } from "../types/zod";
+import { validate } from "../middleware/validiate.middleware";
 
 export const resturantRouter = Router();
 
 resturantRouter.post(
   "/create",
-  createResturantInputValidiationMiddleware,
+  validate(resturantSchema),
   createResturantController
 );
 
@@ -21,6 +20,6 @@ resturantRouter.get("/me", getMyResturantController);
 
 resturantRouter.put(
   "/update",
-  updateResturantInputValidationMiddleware,
+  validate(resturantSchema),
   updateMyResturantController
 );

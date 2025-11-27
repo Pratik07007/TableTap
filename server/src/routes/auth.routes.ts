@@ -1,10 +1,5 @@
 import { Router } from "express";
-import {
-  registerMiddleware,
-  loginMiddleware,
-  forgotPasswordMiddleware,
-  resetPasswordMiddleware,
-} from "../middleware/auth.middleware";
+
 import {
   loginController,
   registerUserController,
@@ -14,31 +9,41 @@ import {
   validateSessionController,
   logoutController,
   registerRestaurantController,
-  authDocsController,
 } from "../controller/auth.controller";
+import {
+  forgotPasswordSchema,
+  loginSchema,
+  registerSchema,
+  resetPasswordSchema,
+  verifyEmailSchema,
+} from "../types/zod";
+import { validate } from "../middleware/validiate.middleware";
 const authRouter = Router();
 
-authRouter.post("/register", registerMiddleware, registerUserController);
+authRouter.post("/register", validate(registerSchema), registerUserController);
 
-authRouter.post("/login", loginMiddleware, loginController);
+authRouter.post("/login", validate(loginSchema), loginController);
 
-authRouter.post("/verify-email", verifyEmailController);
+authRouter.post(
+  "/verify-email",
+  validate(verifyEmailSchema),
+  verifyEmailController
+);
 
 authRouter.post(
   "/forgot-password",
-  forgotPasswordMiddleware,
+  validate(forgotPasswordSchema),
   forgotPasswordController
 );
 
 authRouter.post(
   "/reset-password",
-  resetPasswordMiddleware,
+  validate(resetPasswordSchema),
   resetPasswordController
 );
 
 authRouter.get("/validate-session", validateSessionController);
 authRouter.post("/logout", logoutController);
 authRouter.post("/register-restaurant", registerRestaurantController);
-authRouter.get("/docs", authDocsController);
 
 export default authRouter;

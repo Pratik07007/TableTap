@@ -1,22 +1,35 @@
 import z from "zod";
+
 export const registerSchema = z
   .object({
     fName: z.string().min(1, "First name is required"),
     lName: z.string().min(1, "Last name is required"),
-    email: z.string().email("Invalid email address"),
+    email: z.email({ message: "Invalid email address" }),
     password: z
       .string()
       .min(6, "Password must be at least 6 characters long")
+      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .regex(/\d/, "Password must contain at least one number")
       .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/,
-        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+        /[@$!%*?&]/,
+        "Password must contain at least one special character"
       ),
     confirmPassword: z
       .string()
       .min(6, "Confirm password must be at least 6 characters long")
       .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/,
-        "Confirm password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+        /[a-z]/,
+        "Confirm password must contain at least one lowercase letter"
+      )
+      .regex(
+        /[A-Z]/,
+        "Confirm password must contain at least one uppercase letter"
+      )
+      .regex(/\d/, "Confirm password must contain at least one number")
+      .regex(
+        /[@$!%*?&]/,
+        "Confirm password must contain at least one special character"
       ),
     role: z.enum(["ADMIN", "USER"]),
   })
@@ -26,14 +39,14 @@ export const registerSchema = z
   });
 
 export const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
   password: z
     .string()
     .min(6, "Password must be at least 6 characters long")
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/,
-      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
-    ),
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/\d/, "Password must contain at least one number")
+    .regex(/[@$!%*?&]/, "Password must contain at least one special character"),
 });
 
 export const resturantSchema = z.object({
@@ -44,18 +57,14 @@ export const resturantSchema = z.object({
   zip: z.string().min(1, "ZIP code is required"),
   country: z.string().min(1, "Country is required"),
   phone: z.string().min(1, "Phone number is required"),
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
   faceBookUrl: z
     .string()
     .url("Invalid Facebook URL")
     .optional()
     .or(z.literal("")),
-  tikTokUrl: z.string().url("Invalid TikTok URL").optional().or(z.literal("")),
-  instagramUrl: z
-    .string()
-    .url("Invalid Instagram URL")
-    .optional()
-    .or(z.literal("")),
+  tikTokUrl: z.url("Invalid TikTok URL").optional().or(z.literal("")),
+  instagramUrl: z.url("Invalid Instagram URL").optional().or(z.literal("")),
 });
 
 export const menuItemSchema = z.object({
@@ -79,12 +88,42 @@ export const menuItemSchema = z.object({
     "half plate",
     "full plate",
   ]),
-  imageUrl: z.string().url("Invalid image URL").optional().or(z.literal("")),
+  imageUrl: z.url("Invalid image URL").optional().or(z.literal("")),
   isAvailable: z.boolean().optional(),
 });
 
-export const menuItemUpdateSchema = menuItemSchema
-  .partial()
-  .refine((data) => Object.keys(data).length > 0, {
-    message: "At least one field must be provided",
-  });
+
+export const forgotPasswordSchema = z.object({
+  email: z.email("Invalid email address"),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, "Token is required"),
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters long")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/\d/, "Password must contain at least one number")
+    .regex(/[@$!%*?&]/, "Password must contain at least one special character"),
+  confirmPassword: z
+    .string()
+    .min(6, "Confirm password must be at least 6 characters long")
+    .regex(
+      /[a-z]/,
+      "Confirm password must contain at least one lowercase letter"
+    )
+    .regex(
+      /[A-Z]/,
+      "Confirm password must contain at least one uppercase letter"
+    )
+    .regex(/\d/, "Confirm password must contain at least one number")
+    .regex(
+      /[@$!%*?&]/,
+      "Confirm password must contain at least one special character"
+    ),
+});
+
+export const verifyEmailSchema = z.object({
+  token: z.string().min(1, "Token is required"),
+});

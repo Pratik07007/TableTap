@@ -1,8 +1,8 @@
 import bcrypt from "bcryptjs";
-import prisma from "../prisma/client";
-import { sendRegistrationerificationEmail } from "../libs/registrationEmail";
-import { sendPasswordResetEmail } from "../libs/passwordResetEmail";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import { sendRegistrationerificationEmail } from "../utils/registrationEmail";
+import { sendPasswordResetEmail } from "../utils/passwordResetEmail";
+import jwt from "jsonwebtoken";
+import { prisma } from "../prisma/client";
 
 export type TRegisterUser = {
   fName: string;
@@ -15,7 +15,6 @@ export type TRegisterUser = {
 export const registerUserService = async (userData: TRegisterUser) => {
   try {
     const { fName, lName, email, password, role } = userData;
-    // console.log(fName, lName, email, password, role);
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const userAlreadyExists = await prisma.user.findUnique({
@@ -26,44 +25,54 @@ export const registerUserService = async (userData: TRegisterUser) => {
     if (userAlreadyExists) {
       return {
         success: false,
-        message: "User already exists",
+        error: "User already exists",
       };
     }
+
+    const token = jwt.sign({ email }, process.env.JWT_SECRET as string);
+
     const user = await prisma.user.create({
       data: {
         firstName: fName,
         lastName: lName,
         email,
         hash: hashedPassword,
-        role: role === "ADMIN" ? "ADMIN" : "USER",
+        role: role.toUpperCase() as "ADMIN" | "USER",
+        emailVerificationToken: token,
+        emailVerificationExpires: new Date(Date.now() + 1000 * 60 * 5),
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        role: true,
+        isEmailVerified: true,
       },
     });
     try {
-      await sendRegistrationerificationEmail(email);
+      await sendRegistrationerificationEmail(email, token);
     } catch (error) {
       await prisma.user.delete({
         where: {
           email,
         },
       });
-      console.error("Failed to send verification email:", error);
       return {
-        message: "User registered failed",
         success: false,
-        error,
+        error: "User registered failed",
       };
     }
 
     return {
       message: "User registered successfully an email is sent for verification",
       success: true,
-      user,
+      data: { ...user },
     };
   } catch (error) {
     return {
-      message: "User registration failed",
+      error: "User registration failed",
       success: false,
-      error,
     };
   }
 };
@@ -78,7 +87,7 @@ export const verifyEmailService = async (token: string) => {
         message: "Invalid or expired token",
       };
     }
-    console.log(email);
+
     try {
       const user = await prisma.user.findUnique({
         where: {
@@ -123,13 +132,13 @@ export const loginService = async (email: string, password: string) => {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
     return {
-      message: "User not found",
+      error: "User not found",
       success: false,
     };
   }
   if (!user.isEmailVerified) {
     return {
-      message:
+      error:
         "Email not verified please check your email we have send verification email",
       success: false,
     };
@@ -144,6 +153,7 @@ export const loginService = async (email: string, password: string) => {
   const token = jwt.sign(
     {
       id: user.id,
+      role: user.role,
     },
     process.env.JWT_SECRET as string,
     { expiresIn: "24h" }
@@ -215,8 +225,6 @@ export const resetPasswordService = async (
     };
   }
 };
-
-
 
 export const verifyTokenService = async (token: string) => {
   try {
