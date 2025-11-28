@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+
 const registerSchema = z.object({
     fName: z.string().min(1, "First name is required"),
     lName: z.string().min(1, "Last name is required"),
@@ -18,6 +19,7 @@ const registerSchema = z.object({
 });
 
 export default function Page({ searchParams }: { searchParams: Promise<{ role: string }> }) {
+    
     const router = useRouter();
     const { role } = use(searchParams)
 
