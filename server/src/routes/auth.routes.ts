@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { validate } from "../middleware/validiate.middleware";
 
 import {
   loginController,
@@ -6,10 +7,11 @@ import {
   verifyEmailController,
   forgotPasswordController,
   resetPasswordController,
-  validateSessionController,
+  getSessionInfoController,
   logoutController,
-  registerRestaurantController,
+  resendVerificationEmailController,
 } from "../controller/auth.controller";
+
 import {
   forgotPasswordSchema,
   loginSchema,
@@ -17,17 +19,23 @@ import {
   resetPasswordSchema,
   verifyEmailSchema,
 } from "../types/zod";
-import { validate } from "../middleware/validiate.middleware";
+
 const authRouter = Router();
 
 authRouter.post("/register", validate(registerSchema), registerUserController);
-
-authRouter.post("/login", validate(loginSchema), loginController);
 
 authRouter.post(
   "/verify-email",
   validate(verifyEmailSchema),
   verifyEmailController
+);
+
+authRouter.post("/login", validate(loginSchema), loginController);
+
+authRouter.post(
+  "/resend-verification-email",
+  validate(forgotPasswordSchema),
+  resendVerificationEmailController
 );
 
 authRouter.post(
@@ -42,8 +50,7 @@ authRouter.post(
   resetPasswordController
 );
 
-authRouter.get("/validate-session", validateSessionController);
+authRouter.get("/get-session-info", getSessionInfoController);
 authRouter.post("/logout", logoutController);
-authRouter.post("/register-restaurant", registerRestaurantController);
 
 export default authRouter;

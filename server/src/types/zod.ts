@@ -92,37 +92,44 @@ export const menuItemSchema = z.object({
   isAvailable: z.boolean().optional(),
 });
 
-
 export const forgotPasswordSchema = z.object({
   email: z.email("Invalid email address"),
 });
 
-export const resetPasswordSchema = z.object({
-  token: z.string().min(1, "Token is required"),
-  password: z
-    .string()
-    .min(6, "Password must be at least 6 characters long")
-    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/\d/, "Password must contain at least one number")
-    .regex(/[@$!%*?&]/, "Password must contain at least one special character"),
-  confirmPassword: z
-    .string()
-    .min(6, "Confirm password must be at least 6 characters long")
-    .regex(
-      /[a-z]/,
-      "Confirm password must contain at least one lowercase letter"
-    )
-    .regex(
-      /[A-Z]/,
-      "Confirm password must contain at least one uppercase letter"
-    )
-    .regex(/\d/, "Confirm password must contain at least one number")
-    .regex(
-      /[@$!%*?&]/,
-      "Confirm password must contain at least one special character"
-    ),
-});
+export const resetPasswordSchema = z
+  .object({
+    token: z.string().min(1, "Token is required"),
+    password: z
+      .string()
+      .min(6, "Password must be at least 6 characters long")
+      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .regex(/\d/, "Password must contain at least one number")
+      .regex(
+        /[@$!%*?&]/,
+        "Password must contain at least one special character"
+      ),
+    confirmPassword: z
+      .string()
+      .min(6, "Confirm password must be at least 6 characters long")
+      .regex(
+        /[a-z]/,
+        "Confirm password must contain at least one lowercase letter"
+      )
+      .regex(
+        /[A-Z]/,
+        "Confirm password must contain at least one uppercase letter"
+      )
+      .regex(/\d/, "Confirm password must contain at least one number")
+      .regex(
+        /[@$!%*?&]/,
+        "Confirm password must contain at least one special character"
+      ),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 export const verifyEmailSchema = z.object({
   token: z.string().min(1, "Token is required"),

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 
 import { checkSessionAndGetUserId } from "../utils/checkSession";
-import { prisma } from "../prisma/client";
+import { prisma } from "../../prisma/client";
 
 const categoryMap: Record<
   string,

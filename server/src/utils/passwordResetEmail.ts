@@ -1,12 +1,7 @@
-import jwt from "jsonwebtoken";
 import { transporter } from "./mail.config";
 
-export const sendPasswordResetEmail = async (email: string) => {
-  const token = jwt.sign(
-    { email, type: "reset" },
-    process.env.JWT_SECRET as string,
-    { expiresIn: "24h" }
-  );
+export const sendPasswordResetEmail = async (email: string, token: string) => {
+  
   const info = await transporter.sendMail({
     from: `"TableTap" <${process.env.EMAIL_USER}>`,
     to: email,
@@ -15,7 +10,7 @@ export const sendPasswordResetEmail = async (email: string) => {
       <div style="max-width: 600px; margin: 0 auto; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; text-align: center; border-radius: 8px 8px 0 0;">
           <h1 style="color: #fff; margin: 0; font-size: 28px;">Reset your TableTap password</h1>
-          <p style="color: #f0f0f0; margin: 10px 0 0; font-size: 16px;">This link expires in 1 hour.</p>
+          <p style="color: #f0f0f0; margin: 10px 0 0; font-size: 16px;">This link expires in 5 minutes.</p>
         </div>
         <div style="background: #fff; padding: 40px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
           <p style="font-size: 16px; line-height: 1.5; margin: 0 0 24px;">Hi,</p>

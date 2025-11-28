@@ -12,7 +12,7 @@ export const validate =
       }));
       return res.status(400).json({
         success: false,
-        error: { errors },
+        error: errors[0].message,
       });
     }
     req.body = result.data;

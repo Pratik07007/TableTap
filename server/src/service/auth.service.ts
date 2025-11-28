@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import { sendRegistrationerificationEmail } from "../utils/registrationEmail";
 import { sendPasswordResetEmail } from "../utils/passwordResetEmail";
 import jwt from "jsonwebtoken";
-import { prisma } from "../prisma/client";
+import { prisma } from "../../prisma/client";
 
 export type TRegisterUser = {
   fName: string;
@@ -29,7 +29,9 @@ export const registerUserService = async (userData: TRegisterUser) => {
       };
     }
 
-    const token = jwt.sign({ email }, process.env.JWT_SECRET as string);
+    const token = jwt.sign({ email }, process.env.JWT_SECRET as string, {
+      expiresIn: "5m",
+    });
 
     const user = await prisma.user.create({
       data: {
@@ -39,7 +41,7 @@ export const registerUserService = async (userData: TRegisterUser) => {
         hash: hashedPassword,
         role: role.toUpperCase() as "ADMIN" | "USER",
         emailVerificationToken: token,
-        emailVerificationExpires: new Date(Date.now() + 1000 * 60 * 5),
+        emailVerificationExpires: new Date(Date.now() + 1000 * 60 * 5), //expireds in 5 minutes
       },
       select: {
         id: true,
@@ -60,7 +62,7 @@ export const registerUserService = async (userData: TRegisterUser) => {
       });
       return {
         success: false,
-        error: "User registered failed",
+        error: "Registration Email sent failed, please try regisering again",
       };
     }
 
@@ -70,6 +72,7 @@ export const registerUserService = async (userData: TRegisterUser) => {
       data: { ...user },
     };
   } catch (error) {
+    console.error(error);
     return {
       error: "User registration failed",
       success: false,
@@ -79,51 +82,100 @@ export const registerUserService = async (userData: TRegisterUser) => {
 
 export const verifyEmailService = async (token: string) => {
   try {
-    const verify = jwt.verify(token, process.env.JWT_SECRET as string);
-    const { email, type } = verify as { email: string; type: string };
-    if (type != "verify") {
+    const userWithToken = await prisma.user.findFirst({
+      where: {
+        emailVerificationToken: token,
+      },
+    });
+    if (
+      !userWithToken ||
+      (userWithToken.emailVerificationExpires &&
+        userWithToken.emailVerificationExpires < new Date())
+    ) {
       return {
+        error: "Invalid or expired token",
         success: false,
-        message: "Invalid or expired token",
       };
     }
-
-    try {
-      const user = await prisma.user.findUnique({
-        where: {
-          email,
-        },
-      });
-      if (!user) {
-        return {
-          message: "Invalid or expired token",
-          success: false,
-        };
-      }
-      await prisma.user.update({
-        where: {
-          email: user.email,
-        },
-        data: {
-          isEmailVerified: true,
-        },
-      });
-      return {
-        message: "Email verified successfully",
-        success: true,
-      };
-    } catch (error) {
-      return {
-        message: "Invalid or expired token",
-        success: false,
-        error,
-      };
-    }
+    await prisma.user.update({
+      where: {
+        id: userWithToken.id,
+      },
+      data: {
+        isEmailVerified: true,
+      },
+    });
+    await prisma.user.update({
+      where: {
+        id: userWithToken.id,
+      },
+      data: {
+        emailVerificationToken: null,
+        emailVerificationExpires: null,
+      },
+    });
+    return {
+      message: "Email verified successfully",
+      success: true,
+    };
   } catch (error) {
     return {
-      message: "Email verification failed",
+      error: "Invalid or expired token",
       success: false,
-      error,
+    };
+  }
+};
+
+export const resendVerificationEmailService = async (email: string) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return {
+        error: "User not found",
+        success: false,
+      };
+    }
+    if (user.isEmailVerified) {
+      return {
+        error: "Email already verified",
+        success: false,
+      };
+    }
+    const token = jwt.sign({ email }, process.env.JWT_SECRET as string);
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        emailVerificationToken: token,
+        emailVerificationExpires: new Date(Date.now() + 1000 * 60 * 5),
+      },
+    });
+    try {
+      await sendRegistrationerificationEmail(email, token);
+    } catch (error) {
+      await prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          emailVerificationToken: null,
+          emailVerificationExpires: null,
+        },
+      });
+      return {
+        error: "Failed to send verification email",
+        success: false,
+      };
+    }
+    return {
+      message: "Verification email sent successfully",
+      success: true,
+    };
+  } catch (error) {
+    return {
+      error: "Failed to send verification email",
+      success: false,
     };
   }
 };
@@ -146,7 +198,7 @@ export const loginService = async (email: string, password: string) => {
   const isPasswordValid = await bcrypt.compare(password, user.hash);
   if (!isPasswordValid) {
     return {
-      message: "Invalid password",
+      error: "Invalid password",
       success: false,
     };
   }
@@ -169,7 +221,32 @@ export const forgotPasswordService = async (email: string) => {
   try {
     const user = await prisma.user.findUnique({ where: { email } });
     if (user) {
-      await sendPasswordResetEmail(email);
+      const token = jwt.sign({ email }, process.env.JWT_SECRET as string);
+
+      await prisma.user.update({
+        where: { email },
+        data: {
+          resetPasswordToken: token,
+          resetPasswordExpires: new Date(Date.now() + 1000 * 60 * 5),
+        },
+      });
+      try {
+        await sendPasswordResetEmail(email, token);
+      } catch (error) {
+        await prisma.user.update({
+          where: {
+            email,
+          },
+          data: {
+            resetPasswordToken: null,
+            resetPasswordExpires: null,
+          },
+        });
+        return {
+          message: "Failed to send reset email",
+          success: false,
+        };
+      }
     }
     return {
       message: "If the email exists, a reset link has been sent",
@@ -179,7 +256,6 @@ export const forgotPasswordService = async (email: string) => {
     return {
       message: "Failed to initiate password reset",
       success: false,
-      error,
     };
   }
 };
@@ -189,66 +265,33 @@ export const resetPasswordService = async (
   newPassword: string
 ) => {
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET as string) as {
-      email: string;
-      type?: string;
-    };
-    if (payload.type && payload.type !== "reset") {
-      return {
-        message: "Invalid token type",
-        success: false,
-      };
-    }
-    const user = await prisma.user.findUnique({
-      where: { email: payload.email },
+    const userWithResetToken = await prisma.user.findFirst({
+      where: {
+        resetPasswordToken: token,
+      },
     });
-    if (!user) {
+    if (
+      !userWithResetToken ||
+      (userWithResetToken.resetPasswordExpires &&
+        userWithResetToken.resetPasswordExpires < new Date())
+    ) {
       return {
-        message: "Invalid or expired token",
+        error: "Invalid or expired token",
         success: false,
       };
     }
     const hashed = await bcrypt.hash(newPassword, 10);
     await prisma.user.update({
-      where: { email: user.email },
-      data: { hash: hashed },
+      where: { id: userWithResetToken.id },
+      data: {
+        hash: hashed,
+        resetPasswordToken: null,
+        resetPasswordExpires: null,
+      },
     });
     return {
       message: "Password reset successfully",
       success: true,
-    };
-  } catch (error) {
-    return {
-      message: "Invalid or expired token",
-      success: false,
-      error,
-    };
-  }
-};
-
-export const verifyTokenService = async (token: string) => {
-  try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET as string) as {
-      email: string;
-      role: string;
-      name: string;
-    };
-    const user = await prisma.user.findUnique({
-      where: { email: payload.email },
-      include: {
-        resurant: true,
-      },
-    });
-    if (!user) {
-      return {
-        message: "Invalid or expired token",
-        success: false,
-      };
-    }
-    return {
-      message: "Token verified successfully",
-      success: true,
-      data: { user },
     };
   } catch (error) {
     return {

@@ -6,9 +6,9 @@ import {
   verifyEmailService,
   forgotPasswordService,
   resetPasswordService,
+  resendVerificationEmailService,
 } from "../service/auth.service";
-import { createResturantService } from "../service/resturant.service";
-import { prisma } from "../prisma/client";
+import { prisma } from "../../prisma/client";
 
 export const registerUserController = async (req: Request, res: Response) => {
   const { fName, lName, email, password, role } = req.body;
@@ -33,6 +33,18 @@ export const verifyEmailController = async (req: Request, res: Response) => {
       .json({ message: "Token is required", success: false });
   }
   const response = await verifyEmailService(token);
+  if (!response.success) {
+    return res.status(400).json({ ...response });
+  }
+  res.status(200).json({ ...response });
+};
+
+export const resendVerificationEmailController = async (
+  req: Request,
+  res: Response
+) => {
+  const { email } = req.body;
+  const response = await resendVerificationEmailService(email);
   if (!response.success) {
     return res.status(400).json({ ...response });
   }
@@ -74,48 +86,7 @@ export const resetPasswordController = async (req: Request, res: Response) => {
   res.status(200).json({ ...response });
 };
 
-export const registerRestaurantController = async (
-  req: Request,
-  res: Response
-) => {
-  const {
-    name,
-    email,
-    address,
-    city,
-    state,
-    country,
-    zipCode,
-    phoneNumber,
-    faceBookUrl,
-    tikTokUrl,
-    instagramUrl,
-  } = req.body;
-
-  const response = await createResturantService(
-    "!2312",
-    name,
-    address,
-    city,
-    state,
-    country,
-    zipCode,
-    phoneNumber,
-    email,
-    faceBookUrl,
-    tikTokUrl,
-    instagramUrl
-  );
-  if (!response.success) {
-    return res.status(400).json({ ...response });
-  }
-  res.status(201).json({ ...response });
-};
-
-export const validateSessionController = async (
-  req: Request,
-  res: Response
-) => {
+export const getSessionInfoController = async (req: Request, res: Response) => {
   const token = req.cookies.token;
   if (!token) {
     return res
@@ -126,9 +97,19 @@ export const validateSessionController = async (
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET as string) as {
       id: string;
+      role: string;
     };
 
-    const user = await prisma.user.findUnique({ where: { id: payload.id } });
+    const user = await prisma.user.findUnique({
+      where: { id: payload.id },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        firstName: true,
+        lastName: true,
+      },
+    });
     if (!user) {
       return res
         .status(401)
@@ -136,11 +117,7 @@ export const validateSessionController = async (
     }
     return res.status(200).json({
       success: true,
-      data: {
-        email: user.email,
-        role: user.role,
-        name: `${user.firstName} ${user.lastName}`,
-      },
+      data: { ...user },
     });
   } catch (error) {
     return res
@@ -149,12 +126,11 @@ export const validateSessionController = async (
   }
 };
 
-export const logoutController = (req: Request, res: Response) => {
+export const logoutController = (res: Response) => {
   res.clearCookie("token", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "lax" : "lax",
-    path: "/",
+    secure: true,
+    sameSite: true,
   });
   res.status(200).json({ success: true, message: "Logged out successfully" });
 };

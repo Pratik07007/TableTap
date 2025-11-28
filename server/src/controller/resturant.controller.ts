@@ -5,7 +5,8 @@ import {
   createResturantService,
   updateResturantService,
 } from "../service/resturant.service";
-import { prisma } from "../prisma/client";
+import { prisma } from "../../prisma/client";
+
 export const createResturantController = async (
   req: Request,
   res: Response

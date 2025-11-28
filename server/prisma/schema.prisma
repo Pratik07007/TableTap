@@ -1,6 +1,12 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
 generator client {
   provider = "prisma-client"
-  output   = "generated/prisma"
+  output   = "./generated/prisma"
 }
 
 datasource db {
@@ -8,27 +14,28 @@ datasource db {
 }
 
 model User {
-  id              String      @id @default(uuid())
-  firstName       String
-  lastName        String
-  email           String      @unique
-  hash            String
-  role            Role
+  id        String @id @default(uuid())
+  firstName String
+  lastName  String
+  email     String @unique
+  hash      String
+  role      Role
+
   isEmailVerified Boolean     @default(false)
   resurant        Resturants? @relation("UserOwnsRestaurant")
 
   emailVerificationToken   String?
   emailVerificationExpires DateTime?
 
-  passwordResetToken   String?
-  passwordResetExpires DateTime?
+  resetPasswordToken   String?
+  resetPasswordExpires DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Resturants {
-  id            String     @id @default(uuid())
+  id            String  @id @default(uuid())
   name          String
   streetAddress String
   city          String
@@ -36,15 +43,18 @@ model Resturants {
   zip           String
   country       String
   phone         String
-  email         String     @unique
+  email         String  @unique
   faceBookUrl   String?
   tikTokUrl     String?
   instagramUrl  String?
-  userId        String     @unique
-  owner         User       @relation("UserOwnsRestaurant", fields: [userId], references: [id])
-  menuItems     MenuItem[]
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+
+  userId String @unique
+  owner  User   @relation("UserOwnsRestaurant", fields: [userId], references: [id])
+
+  menuItems MenuItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum Role {
@@ -80,10 +90,12 @@ model MenuItem {
   quantityType QuantityType
   imageUrl     String?
   isAvailable  Boolean      @default(true)
+
   restaurantId String?
-  restaurant   Resturants?  @relation(fields: [restaurantId], references: [id])
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  restaurant   Resturants? @relation(fields: [restaurantId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([restaurantId])
 }

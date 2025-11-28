@@ -1,19 +1,11 @@
-import { prisma } from "../prisma/client";
 import { transporter } from "./mail.config";
-import jwt from "jsonwebtoken";
+
 
 export const sendRegistrationerificationEmail = async (
   email: string,
   token: string
 ) => {
-  await prisma.user.update({
-    where: {
-      email,
-    },
-    data: {
-      isEmailVerified: true,
-    },
-  });
+
   const info = await transporter.sendMail({
     from: `"TableTap" <${process.env.EMAIL_USER}>`,
     to: email,

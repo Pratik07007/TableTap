@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { prisma } from "../prisma/client";
+import { prisma } from "../../prisma/client";
 
 export const protect = (...roles: string[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
