@@ -1,5 +1,5 @@
 'use client';
-import { LayoutDashboard, LogOut, Utensils, Settings, Home } from 'lucide-react';
+import { LayoutDashboard, LogOut, Utensils, Settings, Home, UploadCloud } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -44,9 +44,6 @@ export const AdminNavbar = () => {
               </Link>
               <Link href="/menu" className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2">
                 <Utensils size={18} /> Menu
-              </Link>
-              <Link href="/update-restaurant" className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2">
-                <Settings size={18} /> Settings
               </Link>
             </div>
           </div>

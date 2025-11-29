@@ -13,7 +13,6 @@ export const dynamic = 'force-dynamic';
 export default async function Page() {
   const { name, role, isLoggedIn } = await getUserIDandRoleFromToken();
   const user = { name, role }
-  // console.log(user)
 
   return (
     <div className="min-h-screen font-sans bg-white selection:bg-orange-100 selection:text-orange-900">

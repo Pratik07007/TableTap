@@ -18,6 +18,7 @@ export async function proxy(request: NextRequest) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
       id: string;
       role: "ADMIN" | "USER";
+      name: string;
     };
     isLoggedIn = true;
     userRole = decoded.role;
