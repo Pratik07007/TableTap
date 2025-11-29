@@ -90,12 +90,7 @@ export default function UpdateRestaurantPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <div className="border-b border-gray-100 py-4">
-        <div className="max-w-3xl mx-auto px-6 flex items-center gap-2 text-orange-600">
-          <LayoutDashboard className="h-6 w-6" />
-          <span className="text-xl font-bold tracking-tighter text-gray-900">Table<span className="text-orange-600">Tap</span></span>
-        </div>
-      </div>
+
 
       <div className="flex-1 flex items-center justify-center py-12 px-6">
         <div className="max-w-3xl w-full">

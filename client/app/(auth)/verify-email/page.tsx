@@ -1,12 +1,12 @@
 'use client';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import toast from 'react-hot-toast';
 
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
-export default function Page() {
+function VerifyEmailContent() {
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
     const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'loading'>(token ? 'loading' : 'idle');
@@ -98,5 +98,24 @@ export default function Page() {
                 )}
             </div>
         </div>
-    )
+    );
+}
+
+export default function Page() {
+    return (
+        <Suspense fallback={
+            <div className="w-full md:w-1/2 flex items-center justify-center bg-white">
+                <div className="w-full max-w-md px-8 text-center py-12">
+                    <div className="flex flex-col items-center animate-in fade-in">
+                        <div className="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mb-6">
+                            <Loader2 size={32} className="animate-spin" />
+                        </div>
+                        <h1 className="text-2xl font-bold text-gray-900 mb-2">Loading...</h1>
+                    </div>
+                </div>
+            </div>
+        }>
+            <VerifyEmailContent />
+        </Suspense>
+    );
 }

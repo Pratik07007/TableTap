@@ -117,7 +117,7 @@ export const getSessionInfoController = async (req: Request, res: Response) => {
     }
     return res.status(200).json({
       success: true,
-      data: { ...user },
+      user: { ...user },
     });
   } catch (error) {
     return res
@@ -125,12 +125,7 @@ export const getSessionInfoController = async (req: Request, res: Response) => {
       .json({ success: false, message: "Invalid or expired session" });
   }
 };
-
-export const logoutController = (res: Response) => {
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-  });
+export const logoutController = (req: Request, res: Response) => {
+  res.clearCookie("token");
   res.status(200).json({ success: true, message: "Logged out successfully" });
 };

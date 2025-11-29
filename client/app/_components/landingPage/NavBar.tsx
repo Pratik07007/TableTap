@@ -1,20 +1,35 @@
 "use client"
 import { LayoutDashboard, X, Menu } from "lucide-react";
-
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export const Navbar = ({
     isLoggedIn,
-    onLogout,
     user
 }: {
     isLoggedIn: boolean,
-    user: { name: string, role: string } | null
-    onLogout: () => void
+    user: { id: string; email: string; role: string; firstName: string; lastName: string } | null
 }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const router = useRouter();
+
+    const onLogout = async () => {
+        const confirmed = window.confirm("Are you sure you want to log out?");
+        if (confirmed) {
+            try {
+                await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
+                    method: "POST",
+                    credentials: "include",
+                });
+                toast.success("Logged out successfully");
+                router.refresh();
+            } catch {
+                console.log("Error logging out");
+                toast.error("Logout failed");
+            }
+        }
+    };
 
     const navLinks = [
         { name: 'System Features', href: '#features' },
@@ -52,9 +67,9 @@ export const Navbar = ({
                 {/* Auth Section */}
                 <div className="hidden md:flex items-center gap-4">
                     {isLoggedIn && user ? (
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 cursor-pointer">
                             <div className="px-4 py-2 rounded-full bg-orange-50 text-orange-700 text-sm font-semibold">
-                                {user.name} <span className="text-xs">({user.role})</span>
+                                {user.firstName} {user.lastName} <span className="text-xs">({user.role})</span>
                             </div>
                             <button
                                 onClick={onLogout}
@@ -114,7 +129,7 @@ export const Navbar = ({
                         {isLoggedIn && user ? (
                             <div className="flex flex-col gap-3">
                                 <div className="px-4 py-2 rounded-lg bg-orange-50 text-orange-700 text-sm font-semibold">
-                                    {user.name} ({user.role})
+                                    {user.firstName} {user.lastName} ({user.role})
                                 </div>
                                 <button onClick={onLogout} className="w-full py-2 rounded-lg bg-gray-100 text-red-600 font-semibold">
                                     Logout

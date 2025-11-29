@@ -1,17 +1,40 @@
 import { NextResponse, NextRequest } from "next/server";
-import { cookies } from "next/headers";
+import { getSessionUser } from "./utils/getServerSession";
+
 export async function proxy(request: NextRequest) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const { isLoggedIn, user } = await getSessionUser();
   const { pathname } = request.nextUrl;
 
-  if (token && (pathname === "/login" || pathname === "/register")) {
+  const authRoutes = [
+    "/login",
+    "/register",
+    "/reset-password",
+    "/resend-verification-email",
+    "/verify-email",
+    "/forgot-password",
+  ];
+
+  const protectedRoutes = ["/dashboard", "/menu"];
+  const adminOnlyRoute = ["/menu", "register-resturant"];
+
+  if (isLoggedIn && authRoutes.some((route) => pathname.startsWith(route))) {
     return NextResponse.redirect(new URL("/", request.url));
   }
-  if (pathname === "/dashboard") {
-    if (!token) {
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
+
+  if (
+    !isLoggedIn &&
+    protectedRoutes.some((route) => pathname.startsWith(route))
+  ) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // Check admin-only routes
+  if (
+    isLoggedIn &&
+    user?.role !== "ADMIN" &&
+    adminOnlyRoute.some((route) => pathname.startsWith(route))
+  ) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();

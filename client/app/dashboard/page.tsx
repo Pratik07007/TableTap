@@ -1,18 +1,17 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { QrCode, LayoutDashboard, Loader2, User, Smartphone, ArrowRight } from "lucide-react";
+import { QrCode, LayoutDashboard, User, Smartphone, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 // Define the shape of your session data
-interface UserSession {
+type UserSession = {
     email: string;
     role: "ADMIN" | "USER";
     name: string;
-    // Add other fields if your JWT includes them
 }
 
-interface Restaurant {
+type Restaurant = {
     id: string;
     name: string;
     streetAddress: string;
@@ -30,58 +29,33 @@ interface Restaurant {
 function DashBoard() {
     const router = useRouter();
     const [userData, setUserData] = useState<UserSession | null>(null);
-    const [loading, setLoading] = useState(true);
     const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
 
     useEffect(() => {
-        const verifyUser = async () => {
-            try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/validate-session`, {
-                    method: 'GET',
-                    credentials: 'include',
-                });
-                const session = await response.json();
-                if (!response.ok || !session.success) {
-                    router.push('/login');
-                    return;
-                }
-                const data = {
-                    email: session.data.email,
-                    role: session.data.role,
-                    name: session.data.name,
-                } as UserSession;
-                setUserData(data);
-                if (data.role === "ADMIN") {
-                    try {
-                        const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/resturant/me`, { method: 'GET', credentials: 'include' });
-                        const rjson = await r.json();
-                        if (r.ok && rjson.success && rjson.data) {
-                            setRestaurant(rjson.data as Restaurant);
-                        }
-                    } catch { }
-                }
-            } catch {
-                router.push('/login');
-            } finally {
-                setLoading(false);
-            }
+        // TEMPORARY: fake session until endpoint is ready
+        const fakeSession: UserSession = {
+            email: "admin@tabletap.com",
+            role: "ADMIN",
+            name: "Demo Admin",
         };
-        verifyUser();
-    }, [router]);
 
-    // --- Loading State ---
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-white">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center">
-                        <Loader2 className="animate-spin" size={24} />
-                    </div>
-                    <p className="text-gray-500 font-medium">Loading Dashboard...</p>
-                </div>
-            </div>
-        );
-    }
+
+
+        // OPTIONAL: you can still try to fetch restaurant info
+        if (fakeSession.role === "ADMIN") {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/resturant/me`, {
+                method: 'GET',
+                credentials: 'include',
+            })
+                .then(r => r.json())
+                .then(rjson => {
+                    if (rjson.success && rjson.data) {
+                        setRestaurant(rjson.data as Restaurant);
+                    }
+                })
+                .catch(() => { /* ignore */ });
+        }
+    }, [router]);
 
     if (!userData) return null;
 
