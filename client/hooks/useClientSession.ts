@@ -23,7 +23,7 @@ export function useClientSession() {
         setUser(data?.user);
         setLoading(false);
       } catch {
-        setError("We cannot verify your session at this moment");
+        setError("We cannto verify your session at thsi moment");
       } finally {
         setLoading(false);
       }

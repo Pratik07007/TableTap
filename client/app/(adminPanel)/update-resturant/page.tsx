@@ -37,13 +37,13 @@ export default function UpdateRestaurantPage() {
           setExisting(data as Restaurant);
         } else {
           toast.error('No restaurant found. Please create one first.');
-          router.push('/register-restaurant');
+          // router.push('/register-resturant');
         }
       } catch {
         toast.error('Failed to load restaurant');
       }
     })();
-  }, [router]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
