@@ -1,13 +1,12 @@
-import { getSessionUser } from "@/utils/getServerSession"
 import UserSide from "../_components/dashboard/UserSide"
 import AdminSide from "../_components/dashboard/AdminSide"
+import { getUserIDandRoleFromToken } from "@/utils/getUserIdandRoleFromToken"
 
 export default async function Page() {
-    const { user } = await getSessionUser()
-
+    const { role } = await getUserIDandRoleFromToken()
     return (
         <>
-            {user?.role === 'ADMIN' ? (
+            {role === 'ADMIN' ? (
                 <AdminSide />
             ) : (
                 <UserSide />

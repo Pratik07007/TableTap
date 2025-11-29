@@ -206,10 +206,12 @@ export const loginService = async (email: string, password: string) => {
     {
       id: user.id,
       role: user.role,
+      name: `${user.firstName} ${user.lastName}`,
     },
     process.env.JWT_SECRET as string,
     { expiresIn: "24h" }
   );
+
   return {
     message: "Login successful",
     success: true,

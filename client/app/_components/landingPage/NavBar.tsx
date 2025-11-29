@@ -9,7 +9,7 @@ export const Navbar = ({
     user
 }: {
     isLoggedIn: boolean,
-    user: { id: string; email: string; role: string; firstName: string; lastName: string } | null
+    user: { name: string | null, role: string | null } | null
 }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const router = useRouter();
@@ -69,7 +69,7 @@ export const Navbar = ({
                     {isLoggedIn && user ? (
                         <div className="flex items-center gap-4 cursor-pointer">
                             <div className="px-4 py-2 rounded-full bg-orange-50 text-orange-700 text-sm font-semibold">
-                                {user.firstName} {user.lastName} <span className="text-xs">({user.role})</span>
+                                {user.name} <span className="text-xs">({user.role})</span>
                             </div>
                             <button
                                 onClick={onLogout}
@@ -126,10 +126,10 @@ export const Navbar = ({
                     ))}
 
                     <div className="border-t pt-3 mt-2">
-                        {isLoggedIn && user ? (
+                        {isLoggedIn && user? (
                             <div className="flex flex-col gap-3">
                                 <div className="px-4 py-2 rounded-lg bg-orange-50 text-orange-700 text-sm font-semibold">
-                                    {user.firstName} {user.lastName} ({user.role})
+                                    {user.name} ({user.role})
                                 </div>
                                 <button onClick={onLogout} className="w-full py-2 rounded-lg bg-gray-100 text-red-600 font-semibold">
                                     Logout
