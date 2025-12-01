@@ -15,28 +15,3 @@ export const Role = {
 } as const
 
 export type Role = (typeof Role)[keyof typeof Role]
-
-
-export const MenuCategory = {
-  HOT_DRINK: 'HOT_DRINK',
-  COLD_DRINK: 'COLD_DRINK',
-  ALCOHOLIC_DRINK: 'ALCOHOLIC_DRINK',
-  VEGAN_FOOD: 'VEGAN_FOOD',
-  CHINESE: 'CHINESE',
-  NEPALI: 'NEPALI',
-  THAI: 'THAI',
-  CONTINENTAL: 'CONTINENTAL'
-} as const
-
-export type MenuCategory = (typeof MenuCategory)[keyof typeof MenuCategory]
-
-
-export const QuantityType = {
-  SERVING: 'SERVING',
-  HALF_SERVING: 'HALF_SERVING',
-  FULL_SERVING: 'FULL_SERVING',
-  HALF_PLATE: 'HALF_PLATE',
-  FULL_PLATE: 'FULL_PLATE'
-} as const
-
-export type QuantityType = (typeof QuantityType)[keyof typeof QuantityType]

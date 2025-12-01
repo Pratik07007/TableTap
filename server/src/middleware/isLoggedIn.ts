@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-//This middleware function runs before the controller to check if the user is logged in
 export const auth = (req: Request, res: Response, next: NextFunction) => {
   try {
     const token = req.cookies.token;
@@ -12,14 +11,16 @@ export const auth = (req: Request, res: Response, next: NextFunction) => {
         error: "Authentication token not found or invalid",
       });
     }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { role: string; id: string };
     if (!decoded) {
       return res.status(401).json({
         success: false,
         error: "Invalid token format",
       });
     }
+
     (req as any).user = decoded;
+
     next();
   } catch (error) {
     console.error("Error in isLoggedIn middleware:", error);

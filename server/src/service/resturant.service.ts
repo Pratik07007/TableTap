@@ -18,10 +18,10 @@ export const createResturantService = async (
     const ifUserAlreadyHasResturant = await prisma.user.findUnique({
       where: { id: userId },
       select: {
-        resurant: true,
+        resturant: true,
       },
     });
-    if (ifUserAlreadyHasResturant?.resurant) {
+    if (ifUserAlreadyHasResturant?.resturant) {
       return {
         message: "User already has a resturant",
         success: false,
@@ -45,7 +45,7 @@ export const createResturantService = async (
     });
     await prisma.user.update({
       where: { id: userId },
-      data: { resurant: { connect: { id: resturant.id } } },
+      data: { resturant: { connect: { id: resturant.id } } },
     });
     return {
       message: "Resturant created successfully",

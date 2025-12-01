@@ -85,15 +85,15 @@ export const getMyResturantController = async (req: Request, res: Response) => {
   const userId = session.userId as string;
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    include: { resurant: true },
+    include: { resturant: true },
   });
   if (!user) {
     return res.status(404).json({ success: false, message: "User not found" });
   }
-  if (!user.resurant) {
+  if (!user.resturant) {
     return res.status(200).json({ success: true, data: null });
   }
-  return res.status(200).json({ success: true, data: user.resurant });
+  return res.status(200).json({ success: true, data: user.resturant });
 };
 
 export const updateMyResturantController = async (

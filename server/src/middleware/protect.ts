@@ -29,6 +29,8 @@ export const protect = (...roles: string[]) => {
         select: {
           id: true,
           role: true,
+          email: true,
+          resturant: true,
         },
       });
 
@@ -38,8 +40,9 @@ export const protect = (...roles: string[]) => {
           error: "Insufficient permissions",
         });
       }
-
-      if (!roles.includes(user.role.toUpperCase())) {
+      if (
+        !roles.map((r) => r.toUpperCase()).includes(user.role.toUpperCase())
+      ) {
         return res.status(403).json({
           success: false,
           error: "Insufficient permissions",
@@ -50,6 +53,7 @@ export const protect = (...roles: string[]) => {
 
       next();
     } catch (error) {
+      console.log("PROTECT ERROR", error);
       return res.status(401).json({
         success: false,
         error: "Invalid or expired token",

@@ -246,7 +246,7 @@ export type UserWhereInput = {
   resetPasswordExpires?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  resurant?: Prisma.XOR<Prisma.ResturantsNullableScalarRelationFilter, Prisma.ResturantsWhereInput> | null
+  resturant?: Prisma.XOR<Prisma.ResturantsNullableScalarRelationFilter, Prisma.ResturantsWhereInput> | null
 }
 
 export type UserOrderByWithRelationInput = {
@@ -263,7 +263,7 @@ export type UserOrderByWithRelationInput = {
   resetPasswordExpires?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  resurant?: Prisma.ResturantsOrderByWithRelationInput
+  resturant?: Prisma.ResturantsOrderByWithRelationInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -283,7 +283,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   resetPasswordExpires?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  resurant?: Prisma.XOR<Prisma.ResturantsNullableScalarRelationFilter, Prisma.ResturantsWhereInput> | null
+  resturant?: Prisma.XOR<Prisma.ResturantsNullableScalarRelationFilter, Prisma.ResturantsWhereInput> | null
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -338,7 +338,7 @@ export type UserCreateInput = {
   resetPasswordExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  resurant?: Prisma.ResturantsCreateNestedOneWithoutOwnerInput
+  resturant?: Prisma.ResturantsCreateNestedOneWithoutOwnerInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -355,7 +355,7 @@ export type UserUncheckedCreateInput = {
   resetPasswordExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  resurant?: Prisma.ResturantsUncheckedCreateNestedOneWithoutOwnerInput
+  resturant?: Prisma.ResturantsUncheckedCreateNestedOneWithoutOwnerInput
 }
 
 export type UserUpdateInput = {
@@ -372,7 +372,7 @@ export type UserUpdateInput = {
   resetPasswordExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  resurant?: Prisma.ResturantsUpdateOneWithoutOwnerNestedInput
+  resturant?: Prisma.ResturantsUpdateOneWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -389,7 +389,7 @@ export type UserUncheckedUpdateInput = {
   resetPasswordExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  resurant?: Prisma.ResturantsUncheckedUpdateOneWithoutOwnerNestedInput
+  resturant?: Prisma.ResturantsUncheckedUpdateOneWithoutOwnerNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -517,21 +517,21 @@ export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
 
-export type UserCreateNestedOneWithoutResurantInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutResurantInput, Prisma.UserUncheckedCreateWithoutResurantInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutResurantInput
+export type UserCreateNestedOneWithoutResturantInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutResturantInput, Prisma.UserUncheckedCreateWithoutResturantInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutResturantInput
   connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserUpdateOneRequiredWithoutResurantNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutResurantInput, Prisma.UserUncheckedCreateWithoutResurantInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutResurantInput
-  upsert?: Prisma.UserUpsertWithoutResurantInput
+export type UserUpdateOneRequiredWithoutResturantNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutResturantInput, Prisma.UserUncheckedCreateWithoutResturantInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutResturantInput
+  upsert?: Prisma.UserUpsertWithoutResturantInput
   connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutResurantInput, Prisma.UserUpdateWithoutResurantInput>, Prisma.UserUncheckedUpdateWithoutResurantInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutResturantInput, Prisma.UserUpdateWithoutResturantInput>, Prisma.UserUncheckedUpdateWithoutResturantInput>
 }
 
-export type UserCreateWithoutResurantInput = {
+export type UserCreateWithoutResturantInput = {
   id?: string
   firstName: string
   lastName: string
@@ -547,7 +547,7 @@ export type UserCreateWithoutResurantInput = {
   updatedAt?: Date | string
 }
 
-export type UserUncheckedCreateWithoutResurantInput = {
+export type UserUncheckedCreateWithoutResturantInput = {
   id?: string
   firstName: string
   lastName: string
@@ -563,23 +563,23 @@ export type UserUncheckedCreateWithoutResurantInput = {
   updatedAt?: Date | string
 }
 
-export type UserCreateOrConnectWithoutResurantInput = {
+export type UserCreateOrConnectWithoutResturantInput = {
   where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutResurantInput, Prisma.UserUncheckedCreateWithoutResurantInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutResturantInput, Prisma.UserUncheckedCreateWithoutResturantInput>
 }
 
-export type UserUpsertWithoutResurantInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutResurantInput, Prisma.UserUncheckedUpdateWithoutResurantInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutResurantInput, Prisma.UserUncheckedCreateWithoutResurantInput>
+export type UserUpsertWithoutResturantInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutResturantInput, Prisma.UserUncheckedUpdateWithoutResturantInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutResturantInput, Prisma.UserUncheckedCreateWithoutResturantInput>
   where?: Prisma.UserWhereInput
 }
 
-export type UserUpdateToOneWithWhereWithoutResurantInput = {
+export type UserUpdateToOneWithWhereWithoutResturantInput = {
   where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutResurantInput, Prisma.UserUncheckedUpdateWithoutResurantInput>
+  data: Prisma.XOR<Prisma.UserUpdateWithoutResturantInput, Prisma.UserUncheckedUpdateWithoutResturantInput>
 }
 
-export type UserUpdateWithoutResurantInput = {
+export type UserUpdateWithoutResturantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -595,7 +595,7 @@ export type UserUpdateWithoutResurantInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type UserUncheckedUpdateWithoutResurantInput = {
+export type UserUncheckedUpdateWithoutResturantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -627,7 +627,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   resetPasswordExpires?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  resurant?: boolean | Prisma.User$resurantArgs<ExtArgs>
+  resturant?: boolean | Prisma.User$resturantArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -680,7 +680,7 @@ export type UserSelectScalar = {
 
 export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstName" | "lastName" | "email" | "hash" | "role" | "isEmailVerified" | "emailVerificationToken" | "emailVerificationExpires" | "resetPasswordToken" | "resetPasswordExpires" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  resurant?: boolean | Prisma.User$resurantArgs<ExtArgs>
+  resturant?: boolean | Prisma.User$resturantArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -688,7 +688,7 @@ export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {
-    resurant: Prisma.$ResturantsPayload<ExtArgs> | null
+    resturant: Prisma.$ResturantsPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1098,7 +1098,7 @@ readonly fields: UserFieldRefs;
  */
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  resurant<T extends Prisma.User$resurantArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$resurantArgs<ExtArgs>>): Prisma.Prisma__ResturantsClient<runtime.Types.Result.GetResult<Prisma.$ResturantsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  resturant<T extends Prisma.User$resturantArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$resturantArgs<ExtArgs>>): Prisma.Prisma__ResturantsClient<runtime.Types.Result.GetResult<Prisma.$ResturantsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1529,9 +1529,9 @@ export type UserDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
- * User.resurant
+ * User.resturant
  */
-export type User$resurantArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$resturantArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the Resturants
    */

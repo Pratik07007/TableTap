@@ -3,19 +3,27 @@ import {
   createMenuItem,
   deleteMenuItem,
   getMenuItems,
-  updateMenuItem,
+  // getMenuItems,
+  // updateMenuItem,
   makeMenuItemAvailable,
+  updateMenuItem,
 } from "../controller/menuItem.controller";
 
 import { validate } from "../middleware/validiate.middleware";
 import { menuItemSchema } from "../types/zod";
+import { protect } from "../middleware/protect";
 
 const menuItemRouter = Router();
 
-menuItemRouter.post("/", validate(menuItemSchema), createMenuItem);
-menuItemRouter.get("/", getMenuItems);
-menuItemRouter.put("/:id", updateMenuItem);
-menuItemRouter.delete("/:id", deleteMenuItem);
-menuItemRouter.patch("/:id/available", makeMenuItemAvailable);
+menuItemRouter.post(
+  "/",
+  validate(menuItemSchema),
+  protect("admin"),
+  createMenuItem
+);
+menuItemRouter.get("/", protect("admin"), getMenuItems);
+menuItemRouter.put("/:id", protect("admin"), updateMenuItem);
+menuItemRouter.delete("/:id", protect("admin"), deleteMenuItem);
+menuItemRouter.patch("/:id/available", protect("admin"), makeMenuItemAvailable);
 
 export default menuItemRouter;

@@ -366,7 +366,7 @@ export type ResturantsCreateInput = {
   instagramUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  owner: Prisma.UserCreateNestedOneWithoutResurantInput
+  owner: Prisma.UserCreateNestedOneWithoutResturantInput
   menuItems?: Prisma.MenuItemCreateNestedManyWithoutRestaurantInput
 }
 
@@ -404,7 +404,7 @@ export type ResturantsUpdateInput = {
   instagramUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  owner?: Prisma.UserUpdateOneRequiredWithoutResurantNestedInput
+  owner?: Prisma.UserUpdateOneRequiredWithoutResturantNestedInput
   menuItems?: Prisma.MenuItemUpdateManyWithoutRestaurantNestedInput
 }
 
@@ -690,7 +690,7 @@ export type ResturantsCreateWithoutMenuItemsInput = {
   instagramUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  owner: Prisma.UserCreateNestedOneWithoutResurantInput
+  owner: Prisma.UserCreateNestedOneWithoutResturantInput
 }
 
 export type ResturantsUncheckedCreateWithoutMenuItemsInput = {
@@ -742,7 +742,7 @@ export type ResturantsUpdateWithoutMenuItemsInput = {
   instagramUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  owner?: Prisma.UserUpdateOneRequiredWithoutResurantNestedInput
+  owner?: Prisma.UserUpdateOneRequiredWithoutResturantNestedInput
 }
 
 export type ResturantsUncheckedUpdateWithoutMenuItemsInput = {

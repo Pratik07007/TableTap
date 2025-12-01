@@ -1,267 +1,211 @@
-import { Request, Response, NextFunction } from "express";
-
-import { checkSessionAndGetUserId } from "../utils/checkSession";
+import { Response } from "express";
 import { prisma } from "../../prisma/client";
 
-const categoryMap: Record<
-  string,
-  | "HOT_DRINK"
-  | "COLD_DRINK"
-  | "ALCOHOLIC_DRINK"
-  | "VEGAN_FOOD"
-  | "CHINESE"
-  | "NEPALI"
-  | "THAI"
-  | "CONTINENTAL"
-> = {
-  "hot drink": "HOT_DRINK",
-  "cold drink": "COLD_DRINK",
-  "alcoholic drink": "ALCOHOLIC_DRINK",
-  "vegan food": "VEGAN_FOOD",
-  chinese: "CHINESE",
-  nepali: "NEPALI",
-  thai: "THAI",
-  continental: "CONTINENTAL",
-};
-
-const quantityMap: Record<
-  string,
-  "SERVING" | "HALF_SERVING" | "FULL_SERVING" | "HALF_PLATE" | "FULL_PLATE"
-> = {
-  serving: "SERVING",
-  "half serving": "HALF_SERVING",
-  "full serving": "FULL_SERVING",
-  "half plate": "HALF_PLATE",
-  "full plate": "FULL_PLATE",
-};
-
-export const createMenuItem = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const createMenuItem = async (req: any, res: Response) => {
   try {
-    const session = checkSessionAndGetUserId(req);
-    if (!session.success) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Not authenticated" });
-    }
-    const restaurant = await prisma.resturants.findUnique({
-      where: { userId: session.userId as string },
+    const { name, description, price, category, imageUrl, isAvailable, units } =
+      req.body;
+    const upperCategory = category.toUpperCase();
+
+    let categoryRecord = await prisma.category.findFirst({
+      where: { category: upperCategory },
     });
-    if (!restaurant) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No restaurant found for user" });
+
+    if (!categoryRecord) {
+      categoryRecord = await prisma.category.create({
+        data: { category: upperCategory },
+      });
     }
-    const body = req.body || {};
-    const category = categoryMap[String(body.category || "").toLowerCase()];
-    const quantityType =
-      quantityMap[String(body.quantityType || "").toLowerCase()];
-    if (!category || !quantityType) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid category or quantityType" });
-    }
-    const item = await prisma.menuItem.create({
+
+    const menu = await prisma.menuItem.create({
       data: {
-        name: body.name,
-        description: body.description || null,
-        price: Number(body.price),
-        category,
-        quantityType,
-        imageUrl: body.imageUrl || null,
-        isAvailable:
-          typeof body.isAvailable === "boolean" ? body.isAvailable : true,
-        restaurantId: restaurant.id,
+        name,
+        description,
+        price: Number(price),
+        imageUrl,
+        isAvailable,
+        restaurantId: req.user.resturant.id,
+        categoryId: categoryRecord.id,
       },
     });
-    res.status(201).json({ success: true, data: item });
-  } catch (err) {
-    next(err);
+
+    for (const unit of units) {
+      await prisma.unit.create({
+        data: {
+          menuItemId: menu.id,
+          unit,
+        },
+      });
+    }
+
+    res
+      .status(201)
+      .json({ success: true, message: "Menu Item created Successfully" });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(400)
+      .json({ success: false, error: "Menu item creation failed" });
   }
 };
 
-export const getMenuItems = async (
-  _req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const getMenuItems = async (req: any, res: Response) => {
   try {
-    const session = checkSessionAndGetUserId(_req);
-    if (!session.success) {
-      return res.status(200).json({ success: true, data: [] });
-    }
-    const restaurant = await prisma.resturants.findUnique({
-      where: { userId: session.userId as string },
+    const requestedUser = req.user;
+
+    const data = await prisma.menuItem.findMany({
+      where: { restaurantId: requestedUser.resturant.id },
+      include: { unit: true, menuCategory: true },
     });
-    if (!restaurant) {
-      return res.status(200).json({ success: true, data: [] });
-    }
-    const items = await prisma.menuItem.findMany({
-      where: { restaurantId: restaurant.id },
-    });
-    res.status(200).json({ success: true, data: items });
+    res.status(200).json({ success: true, data });
   } catch (err) {
-    next(err);
+    console.log(err);
+    res
+      .status(400)
+      .json({ success: false, error: "Menu item retrieval failed" });
   }
 };
 
-export const updateMenuItem = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const updateMenuItem = async (req: any, res: Response) => {
   try {
-    const session = checkSessionAndGetUserId(req);
-    if (!session.success) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Not authenticated" });
-    }
-    const restaurant = await prisma.resturants.findUnique({
-      where: { userId: session.userId as string },
-    });
-    if (!restaurant) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No restaurant found for user" });
-    }
     const { id } = req.params;
-    const body = req.body || {};
-    const data: any = {};
-    if (typeof body.name !== "undefined") data.name = body.name;
-    if (typeof body.description !== "undefined")
-      data.description = body.description || null;
-    if (typeof body.price !== "undefined") data.price = Number(body.price);
-    if (typeof body.category !== "undefined") {
-      const category = categoryMap[String(body.category || "").toLowerCase()];
-      if (!category)
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid category" });
-      data.category = category;
-    }
-    if (typeof body.quantityType !== "undefined") {
-      const qt = quantityMap[String(body.quantityType || "").toLowerCase()];
-      if (!qt)
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid quantityType" });
-      data.quantityType = qt;
-    }
-    if (typeof body.imageUrl !== "undefined")
-      data.imageUrl = body.imageUrl || null;
-    if (typeof body.isAvailable !== "undefined")
-      data.isAvailable = !!body.isAvailable;
-    const existing = await prisma.menuItem.findUnique({ where: { id } });
-    if (!existing) {
+    const { name, description, price, category, units } = req.body;
+    req.body;
+    const upperCategory = category.toUpperCase();
+
+    const menuItem = await prisma.menuItem.findUnique({
+      where: { id },
+      include: { restaurant: true },
+    });
+
+    if (!menuItem) {
       return res
         .status(404)
         .json({ success: false, message: "Menu item not found" });
     }
-    if (existing.restaurantId !== restaurant.id) {
-      return res.status(403).json({ success: false, message: "Forbidden" });
+    const menuItemOwnerID = menuItem?.restaurant?.userId;
+    const currentUserID = req.user.id;
+
+    if (menuItemOwnerID !== currentUserID) {
+      return res.status(403).json({
+        success: false,
+        error: "You are not the owner of the menu item",
+      });
     }
-    const updated = await prisma.menuItem.update({ where: { id }, data });
+    let categoryRecord = await prisma.category.findFirst({
+      where: { category: upperCategory },
+    });
+
+    if (!categoryRecord) {
+      categoryRecord = await prisma.category.create({
+        data: { category: upperCategory },
+      });
+    }
+
+    if (units && Array.isArray(units)) {
+      await prisma.unit.deleteMany({
+        where: { menuItemId: id },
+      });
+      for (const unit of units) {
+        await prisma.unit.create({
+          data: {
+            menuItemId: id,
+            unit,
+          },
+        });
+      }
+    }
+
+    const updated = await prisma.menuItem.update({
+      where: { id },
+      data: {
+        name,
+        description,
+        price: Number(price),
+        categoryId: categoryRecord.id,
+      },
+      include: { unit: true, menuCategory: true },
+    });
+
     res.status(200).json({ success: true, data: updated });
   } catch (err: any) {
-    if (err?.code === "P2025") {
-      return res
-        .status(404)
-        .json({ success: false, message: "Menu item not found" });
-    }
-    next(err);
+    return res
+      .status(404)
+      .json({ success: false, message: "Menu update request failed" });
   }
 };
 
-export const deleteMenuItem = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const deleteMenuItem = async (req: any, res: Response) => {
   try {
-    const session = checkSessionAndGetUserId(req);
-    if (!session.success) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Not authenticated" });
-    }
-    const restaurant = await prisma.resturants.findUnique({
-      where: { userId: session.userId as string },
-    });
-    if (!restaurant) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No restaurant found for user" });
-    }
     const { id } = req.params;
-    const existing = await prisma.menuItem.findUnique({ where: { id } });
+    const existing = await prisma.menuItem.findUnique({
+      where: { id },
+      include: { restaurant: true },
+    });
+
     if (!existing) {
       return res
         .status(404)
         .json({ success: false, message: "Menu item not found" });
     }
-    if (existing.restaurantId !== restaurant.id) {
-      return res.status(403).json({ success: false, message: "Forbidden" });
+    const menuItemOwner = existing.restaurant?.userId;
+    const deleteRequestedUser = req.user?.id;
+    if (menuItemOwner !== deleteRequestedUser) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "You are not the one who created the menu so you cant delete this item",
+      });
     }
-    const updated = await prisma.menuItem.update({
+    await prisma.menuItem.update({
       where: { id },
       data: { isAvailable: false },
     });
-    res.status(200).json({ success: true, data: updated });
-  } catch (err: any) {
-    if (err?.code === "P2025") {
-      return res
-        .status(404)
-        .json({ success: false, message: "Menu item not found" });
-    }
-    next(err);
+    res.status(200).json({
+      success: true,
+      message: "This items is made unavailable",
+    });
+  } catch {
+    return res
+      .status(404)
+      .json({ success: false, message: "Menu deleation failed" });
   }
 };
 
-export const makeMenuItemAvailable = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const makeMenuItemAvailable = async (req: any, res: Response) => {
   try {
-    const session = checkSessionAndGetUserId(req);
-    if (!session.success) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Not authenticated" });
-    }
-    const restaurant = await prisma.resturants.findUnique({
-      where: { userId: session.userId as string },
-    });
-    if (!restaurant) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No restaurant found for user" });
-    }
     const { id } = req.params;
-    const existing = await prisma.menuItem.findUnique({ where: { id } });
+    const existing = await prisma.menuItem.findUnique({
+      where: { id },
+      include: { restaurant: true },
+    });
+
     if (!existing) {
       return res
         .status(404)
         .json({ success: false, message: "Menu item not found" });
     }
-    if (existing.restaurantId !== restaurant.id) {
-      return res.status(403).json({ success: false, message: "Forbidden" });
+
+    const menuItemOwner = existing.restaurant?.userId;
+    const deleteRequestedUser = req.user?.id;
+    if (menuItemOwner !== deleteRequestedUser) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "You are not the one who created the menu so you cannot make  this item available",
+      });
     }
-    const updated = await prisma.menuItem.update({
+
+    await prisma.menuItem.update({
       where: { id },
       data: { isAvailable: true },
     });
-    res.status(200).json({ success: true, data: updated });
-  } catch (err: any) {
-    if (err?.code === "P2025") {
-      return res
-        .status(404)
-        .json({ success: false, message: "Menu item not found" });
-    }
-    next(err);
+    res
+      .status(200)
+      .json({ success: true, message: "This item  is now available " });
+  } catch {
+    return res
+      .status(404)
+      .json({ success: false, message: "Menu available request failed" });
   }
 };
