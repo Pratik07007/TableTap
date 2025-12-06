@@ -57,7 +57,43 @@ export const getMenuItems = async (req: any, res: Response) => {
       where: { restaurantId: requestedUser.resturant.id },
       include: { unit: true, menuCategory: true },
     });
+
     res.status(200).json({ success: true, data });
+  } catch (err) {
+    console.log(err);
+    res
+      .status(400)
+      .json({ success: false, error: "Menu item retrieval failed" });
+  }
+};
+
+export const getMenuItem = async (req: any, res: Response) => {
+  try {
+    const { id } = req.params;
+    const menuItem = await prisma.menuItem.findUnique({
+      where: { id },
+      include: { unit: true, menuCategory: true },
+    });
+
+    if (!menuItem) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Menu item not found" });
+    }
+
+    const menuItemOwnerID = menuItem.restaurantId;
+    const currentUserID = req.user.resturant.id;
+
+    if (menuItemOwnerID !== currentUserID) {
+      // Actually restaurantId is on menuItem.
+      // req.user.resturant.id should match menuItem.restaurantId
+      return res.status(403).json({
+        success: false,
+        error: "You are not the owner of the menu item",
+      });
+    }
+
+    res.status(200).json({ success: true, data: menuItem });
   } catch (err) {
     console.log(err);
     res
@@ -169,6 +205,32 @@ export const deleteMenuItem = async (req: any, res: Response) => {
     return res
       .status(404)
       .json({ success: false, message: "Menu deleation failed" });
+  }
+};
+
+export const getCategory = async (req: any, res: Response) => {
+  try {
+    const categories = await prisma.category.findMany({
+      distinct: ["category"],
+    });
+    res.status(200).json({ success: true, data: categories });
+  } catch (err: any) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Category retrieval failed" });
+  }
+};
+
+export const getUnits = async (req: any, res: Response) => {
+  try {
+    const units = await prisma.unit.findMany({
+      distinct: ["unit"],
+    });
+    res.status(200).json({ success: true, data: units });
+  } catch (err: any) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Unit retrieval failed" });
   }
 };
 

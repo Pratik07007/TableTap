@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { Store, MapPin, Share2, Phone, Mail, LayoutDashboard, ArrowRight, Loader2 } from 'lucide-react';
+import { Store, MapPin, Share2, Phone, Mail, ArrowRight, Loader2 } from 'lucide-react';
 
 type Restaurant = {
   name: string;
