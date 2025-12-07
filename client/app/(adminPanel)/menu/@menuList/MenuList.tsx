@@ -9,12 +9,10 @@ type MenuItem = {
     id: string;
     name: string;
     description?: string;
-    price: number;
     imageUrl?: string;
     isAvailable: boolean;
-    unit: { unit: string }[];
+    unit: { unit: string; price: number }[];
     menuCategory: { category: string, id: string };
-
 };
 
 export default function MenuList({ initialItems }: { initialItems: MenuItem[] }) {
@@ -123,7 +121,9 @@ export default function MenuList({ initialItems }: { initialItems: MenuItem[] })
                                     <td className="p-4 text-gray-600 capitalize">
                                         {it.unit.map((unit) => unit.unit).join(', ')}
                                     </td>
-                                    <td className="p-4 font-bold text-gray-900">${it.price.toFixed(2)}</td>
+                                    <td className="p-4 font-bold text-gray-900">
+                                        {it.unit.map((unit) => `$${unit.price}`).join(', ')}
+                                    </td>
                                     <td className="p-4 text-center">
                                         <span className={`px-2 py-1 rounded-full text-xs font-bold ${it.isAvailable ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                                             {it.isAvailable ? 'Available' : 'Not Available'}

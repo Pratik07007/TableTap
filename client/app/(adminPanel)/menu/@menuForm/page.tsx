@@ -31,9 +31,9 @@ export default function MenuForm() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    price: '',
     category: '',
     units: [] as string[],
+    unitPrices: {} as Record<string, string>,
     imageUrl: '',
   });
 
@@ -75,9 +75,9 @@ export default function MenuForm() {
       setFormData({
         name: '',
         description: '',
-        price: '',
         category: '',
         units: [],
+        unitPrices: {},
         imageUrl: '',
       });
       return;
@@ -94,13 +94,19 @@ export default function MenuForm() {
           const item = json.data;
           // Map backend data to form
           const units = item.unit ? item.unit.map((u: { unit: string }) => u.unit) : [];
+          const unitPrices: Record<string, string> = {};
+          if (item.unit) {
+            item.unit.forEach((u: { unit: string; price: number }) => {
+              unitPrices[u.unit] = String(u.price);
+            });
+          }
 
           setFormData({
             name: item.name,
             description: item.description || '',
-            price: String(item.price),
             category: item.category || (item.menuCategory ? item.menuCategory.category : ''), // Handle both raw category string or relation
             units: units,
+            unitPrices: unitPrices,
             imageUrl: item.imageUrl || '',
           });
         } else {
@@ -121,12 +127,22 @@ export default function MenuForm() {
     if (loading) return;
 
     setLoading(true);
+
+    const missingPrices = formData.units.filter(u => !formData.unitPrices[u] || formData.unitPrices[u].trim() === '');
+    if (missingPrices.length > 0) {
+      toast.error(`Please set a price for: ${missingPrices.join(', ')}`);
+      setLoading(false);
+      return;
+    }
+
     const payload = {
       name: formData.name,
       description: formData.description,
-      price: Number(formData.price),
+      units: formData.units.map(unitName => ({
+        unit: unitName,
+        price: Number(formData.unitPrices[unitName])
+      })),
       category: formData.category,
-      units: formData.units, // Send as array of units
       imageUrl: formData.imageUrl,
     };
 
@@ -159,9 +175,9 @@ export default function MenuForm() {
         setFormData({
           name: '',
           description: '',
-          price: '',
           category: '',
           units: [],
+          unitPrices: {},
           imageUrl: '',
         });
       }
@@ -182,9 +198,20 @@ export default function MenuForm() {
       if (checked) {
         return { ...prev, units: [...prev.units, value] };
       } else {
-        return { ...prev, units: prev.units.filter(unit => unit !== value) };
+        // Optional: Could remove price from unitPrices here, but keeping it is harmless
+        const newUnits = prev.units.filter(unit => unit !== value);
+        const newPrices = { ...prev.unitPrices };
+        delete newPrices[value]; // Clean up price
+        return { ...prev, units: newUnits, unitPrices: newPrices };
       }
     });
+  };
+
+  const handleUnitPriceChange = (unit: string, price: string) => {
+    setFormData(prev => ({
+      ...prev,
+      unitPrices: { ...prev.unitPrices, [unit]: price }
+    }));
   };
 
   const handleAddCategory = () => {
@@ -204,10 +231,7 @@ export default function MenuForm() {
   };
 
   const handleAddNewUnit = () => {
-    if (newUnit.trim() === "") {
-      toast.error("Unit name cannot be empty.");
-      return;
-    }
+    
     const upperUnit = newUnit.toUpperCase();
     if (units.includes(upperUnit)) {
       toast.error("Unit already exists.");
@@ -245,6 +269,7 @@ export default function MenuForm() {
         </h2>
         {editId && (
           <button
+            type="button"
             onClick={handleCancel}
             className="text-xs font-medium text-gray-500 hover:text-red-600 flex items-center gap-1 bg-gray-100 px-3 py-1.5 rounded-full transition-colors"
           >
@@ -270,25 +295,7 @@ export default function MenuForm() {
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all placeholder:text-gray-400"
             />
           </div>
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide flex items-center gap-1">
-              <DollarSign size={14} /> Price
-            </label>
-            <div className="relative">
-              <span className="absolute left-4 top-3.5 text-gray-500 font-bold text-sm">$</span>
-              <input
-                name="price"
-                type="number"
-                step="0.01"
-                value={formData.price}
-                onChange={handleChange}
-                placeholder="0.00"
-                required
-                aria-label="Price"
-                className="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all placeholder:text-gray-400"
-              />
-            </div>
-          </div>
+          {/* Price removed from here, moved to units */}
         </div>
 
         {/* Description */}
@@ -368,23 +375,39 @@ export default function MenuForm() {
             <Scale size={14} /> Serving Size / Quantity Type
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {units.map((q) => (
-              <label key={q} className="cursor-pointer relative">
-                <input
-                  type="checkbox"
-                  name="units"
-                  value={q}
-                  checked={formData.units.includes(q)}
-                  onChange={handleUnitChange}
-                  className="peer sr-only"
-                  aria-label={`Select unit ${q}`}
-                  required={formData.units.length === 0}
-                />
-                <div className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-600 text-sm font-medium text-center capitalize transition-all peer-checked:border-orange-500 peer-checked:bg-orange-50 peer-checked:text-orange-700 peer-hover:bg-gray-50">
-                  {q}
+            {units.map((q) => {
+              const isSelected = formData.units.includes(q);
+              return (
+                <div key={q} className={`relative p-3 rounded-xl border transition-all ${isSelected ? 'border-orange-500 bg-orange-50' : 'border-gray-200 bg-white'}`}>
+                  <label className="flex items-center gap-2 cursor-pointer mb-2">
+                    <input
+                      type="checkbox"
+                      name="units"
+                      value={q}
+                      checked={isSelected}
+                      onChange={handleUnitChange}
+                      className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                      aria-label={`Select unit ${q}`}
+                    />
+                    <span className={`font-medium capitalize ${isSelected ? 'text-orange-900' : 'text-gray-600'}`}>{q}</span>
+                  </label>
+                  {isSelected && (
+                    <div className="relative mt-2">
+                      <span className="absolute left-3 top-2.5 text-xs font-bold text-gray-500">$</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={formData.unitPrices[q] || ''}
+                        onChange={(e) => handleUnitPriceChange(q, e.target.value)}
+                        className="w-full pl-6 pr-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
+                        required
+                      />
+                    </div>
+                  )}
                 </div>
-              </label>
-            ))}
+              );
+            })}
             {/* Add custom option if needed, but keeping simple for now */}
           </div>
           <div className="flex items-center gap-2 pt-2">

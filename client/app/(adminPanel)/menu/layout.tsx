@@ -13,7 +13,7 @@ export default function Layout({
     <div className="min-h-screen bg-gray-50 pb-12">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 py-6 mb-8 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-1 flex items-center gap-3">
+        <div className="max-w-[96%] mx-auto px-4 flex items-center gap-3">
           <div className="p-2 bg-orange-50 rounded-lg text-orange-600">
             <Utensils size={24} />
           </div>
@@ -24,7 +24,7 @@ export default function Layout({
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-1 space-y-2">
+      <div className="max-w-[96%] mx-auto px-4 space-y-2">
         {children}
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-8 items-start">
           <div className="xl:col-span-3 xl:sticky xl:top-32 order-2 xl:order-1">

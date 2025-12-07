@@ -133,21 +133,41 @@ export const updateMenuItem = async (req: any, res: Response) => {
         data: { category: upperCategory },
       });
     }
+  
+    const updated = await prisma.$transaction(async (tx) => {
+    
+    
+      await tx.menuItem.update({
+        where: { id },
+        data: {
+          name,
+          description,
+          categoryId: categoryRecord.id,
+          imageUrl: req.body.imageUrl,
+    
+        },
+      });
 
-    const updated = await prisma.menuItem.update({
-      where: { id },
-      data: {
-        name,
-        description,
-        unit: {
-          create: units.map((unit: { unit: string; price: number }) => ({
+
+      await tx.unit.deleteMany({
+        where: { menuItemId: id },
+      });
+
+      if (units && units.length > 0) {
+        await tx.unit.createMany({
+          data: units.map((unit: { unit: string; price: number }) => ({
             unit: unit.unit,
             price: unit.price,
+            menuItemId: id,
           })),
-        },
-        categoryId: categoryRecord.id,
-      },
-      include: { unit: true, menuCategory: true },
+        });
+      }
+
+      // 4. Return the fully updated item
+      return tx.menuItem.findUnique({
+        where: { id },
+        include: { unit: true, menuCategory: true },
+      });
     });
 
     res.status(200).json({ success: true, data: updated });
