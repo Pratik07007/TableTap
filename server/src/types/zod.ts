@@ -70,9 +70,13 @@ export const resturantSchema = z.object({
 export const menuItemSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional().or(z.literal("")),
-  price: z.number().min(0, "Price must be positive"),
   category: z.string(),
-  units: z.array(z.string()),
+  units: z.array(
+    z.object({
+      unit: z.string(),
+      price: z.number().min(0, "Price must be positive"),
+    })
+  ),
   imageUrl: z.url("Invalid image URL").optional().or(z.literal("")),
   isAvailable: z.boolean().optional(),
 });

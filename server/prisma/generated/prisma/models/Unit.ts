@@ -20,46 +20,70 @@ export type UnitModel = runtime.Types.Result.DefaultSelection<Prisma.$UnitPayloa
 
 export type AggregateUnit = {
   _count: UnitCountAggregateOutputType | null
+  _avg: UnitAvgAggregateOutputType | null
+  _sum: UnitSumAggregateOutputType | null
   _min: UnitMinAggregateOutputType | null
   _max: UnitMaxAggregateOutputType | null
+}
+
+export type UnitAvgAggregateOutputType = {
+  price: number | null
+}
+
+export type UnitSumAggregateOutputType = {
+  price: number | null
 }
 
 export type UnitMinAggregateOutputType = {
   id: string | null
   menuItemId: string | null
   unit: string | null
+  price: number | null
 }
 
 export type UnitMaxAggregateOutputType = {
   id: string | null
   menuItemId: string | null
   unit: string | null
+  price: number | null
 }
 
 export type UnitCountAggregateOutputType = {
   id: number
   menuItemId: number
   unit: number
+  price: number
   _all: number
 }
 
+
+export type UnitAvgAggregateInputType = {
+  price?: true
+}
+
+export type UnitSumAggregateInputType = {
+  price?: true
+}
 
 export type UnitMinAggregateInputType = {
   id?: true
   menuItemId?: true
   unit?: true
+  price?: true
 }
 
 export type UnitMaxAggregateInputType = {
   id?: true
   menuItemId?: true
   unit?: true
+  price?: true
 }
 
 export type UnitCountAggregateInputType = {
   id?: true
   menuItemId?: true
   unit?: true
+  price?: true
   _all?: true
 }
 
@@ -101,6 +125,18 @@ export type UnitAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: UnitAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: UnitSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: UnitMinAggregateInputType
@@ -131,6 +167,8 @@ export type UnitGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   _count?: UnitCountAggregateInputType | true
+  _avg?: UnitAvgAggregateInputType
+  _sum?: UnitSumAggregateInputType
   _min?: UnitMinAggregateInputType
   _max?: UnitMaxAggregateInputType
 }
@@ -139,7 +177,10 @@ export type UnitGroupByOutputType = {
   id: string
   menuItemId: string
   unit: string
+  price: number
   _count: UnitCountAggregateOutputType | null
+  _avg: UnitAvgAggregateOutputType | null
+  _sum: UnitSumAggregateOutputType | null
   _min: UnitMinAggregateOutputType | null
   _max: UnitMaxAggregateOutputType | null
 }
@@ -166,6 +207,7 @@ export type UnitWhereInput = {
   id?: Prisma.StringFilter<"Unit"> | string
   menuItemId?: Prisma.StringFilter<"Unit"> | string
   unit?: Prisma.StringFilter<"Unit"> | string
+  price?: Prisma.FloatFilter<"Unit"> | number
   menuItem?: Prisma.XOR<Prisma.MenuItemScalarRelationFilter, Prisma.MenuItemWhereInput>
 }
 
@@ -173,6 +215,7 @@ export type UnitOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   menuItemId?: Prisma.SortOrder
   unit?: Prisma.SortOrder
+  price?: Prisma.SortOrder
   menuItem?: Prisma.MenuItemOrderByWithRelationInput
 }
 
@@ -183,6 +226,7 @@ export type UnitWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.UnitWhereInput | Prisma.UnitWhereInput[]
   menuItemId?: Prisma.StringFilter<"Unit"> | string
   unit?: Prisma.StringFilter<"Unit"> | string
+  price?: Prisma.FloatFilter<"Unit"> | number
   menuItem?: Prisma.XOR<Prisma.MenuItemScalarRelationFilter, Prisma.MenuItemWhereInput>
 }, "id">
 
@@ -190,9 +234,12 @@ export type UnitOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   menuItemId?: Prisma.SortOrder
   unit?: Prisma.SortOrder
+  price?: Prisma.SortOrder
   _count?: Prisma.UnitCountOrderByAggregateInput
+  _avg?: Prisma.UnitAvgOrderByAggregateInput
   _max?: Prisma.UnitMaxOrderByAggregateInput
   _min?: Prisma.UnitMinOrderByAggregateInput
+  _sum?: Prisma.UnitSumOrderByAggregateInput
 }
 
 export type UnitScalarWhereWithAggregatesInput = {
@@ -202,11 +249,13 @@ export type UnitScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Unit"> | string
   menuItemId?: Prisma.StringWithAggregatesFilter<"Unit"> | string
   unit?: Prisma.StringWithAggregatesFilter<"Unit"> | string
+  price?: Prisma.FloatWithAggregatesFilter<"Unit"> | number
 }
 
 export type UnitCreateInput = {
   id?: string
   unit: string
+  price: number
   menuItem: Prisma.MenuItemCreateNestedOneWithoutUnitInput
 }
 
@@ -214,11 +263,13 @@ export type UnitUncheckedCreateInput = {
   id?: string
   menuItemId: string
   unit: string
+  price: number
 }
 
 export type UnitUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  price?: Prisma.FloatFieldUpdateOperationsInput | number
   menuItem?: Prisma.MenuItemUpdateOneRequiredWithoutUnitNestedInput
 }
 
@@ -226,23 +277,27 @@ export type UnitUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   menuItemId?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  price?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
 export type UnitCreateManyInput = {
   id?: string
   menuItemId: string
   unit: string
+  price: number
 }
 
 export type UnitUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  price?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
 export type UnitUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   menuItemId?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  price?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
 export type UnitListRelationFilter = {
@@ -259,18 +314,29 @@ export type UnitCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   menuItemId?: Prisma.SortOrder
   unit?: Prisma.SortOrder
+  price?: Prisma.SortOrder
+}
+
+export type UnitAvgOrderByAggregateInput = {
+  price?: Prisma.SortOrder
 }
 
 export type UnitMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   menuItemId?: Prisma.SortOrder
   unit?: Prisma.SortOrder
+  price?: Prisma.SortOrder
 }
 
 export type UnitMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   menuItemId?: Prisma.SortOrder
   unit?: Prisma.SortOrder
+  price?: Prisma.SortOrder
+}
+
+export type UnitSumOrderByAggregateInput = {
+  price?: Prisma.SortOrder
 }
 
 export type UnitCreateNestedManyWithoutMenuItemInput = {
@@ -315,14 +381,24 @@ export type UnitUncheckedUpdateManyWithoutMenuItemNestedInput = {
   deleteMany?: Prisma.UnitScalarWhereInput | Prisma.UnitScalarWhereInput[]
 }
 
+export type FloatFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type UnitCreateWithoutMenuItemInput = {
   id?: string
   unit: string
+  price: number
 }
 
 export type UnitUncheckedCreateWithoutMenuItemInput = {
   id?: string
   unit: string
+  price: number
 }
 
 export type UnitCreateOrConnectWithoutMenuItemInput = {
@@ -358,26 +434,31 @@ export type UnitScalarWhereInput = {
   id?: Prisma.StringFilter<"Unit"> | string
   menuItemId?: Prisma.StringFilter<"Unit"> | string
   unit?: Prisma.StringFilter<"Unit"> | string
+  price?: Prisma.FloatFilter<"Unit"> | number
 }
 
 export type UnitCreateManyMenuItemInput = {
   id?: string
   unit: string
+  price: number
 }
 
 export type UnitUpdateWithoutMenuItemInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  price?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
 export type UnitUncheckedUpdateWithoutMenuItemInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  price?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
 export type UnitUncheckedUpdateManyWithoutMenuItemInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
+  price?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
 
@@ -386,6 +467,7 @@ export type UnitSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   id?: boolean
   menuItemId?: boolean
   unit?: boolean
+  price?: boolean
   menuItem?: boolean | Prisma.MenuItemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["unit"]>
 
@@ -393,6 +475,7 @@ export type UnitSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   id?: boolean
   menuItemId?: boolean
   unit?: boolean
+  price?: boolean
   menuItem?: boolean | Prisma.MenuItemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["unit"]>
 
@@ -400,6 +483,7 @@ export type UnitSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   id?: boolean
   menuItemId?: boolean
   unit?: boolean
+  price?: boolean
   menuItem?: boolean | Prisma.MenuItemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["unit"]>
 
@@ -407,9 +491,10 @@ export type UnitSelectScalar = {
   id?: boolean
   menuItemId?: boolean
   unit?: boolean
+  price?: boolean
 }
 
-export type UnitOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "menuItemId" | "unit", ExtArgs["result"]["unit"]>
+export type UnitOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "menuItemId" | "unit" | "price", ExtArgs["result"]["unit"]>
 export type UnitInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   menuItem?: boolean | Prisma.MenuItemDefaultArgs<ExtArgs>
 }
@@ -429,6 +514,7 @@ export type $UnitPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     id: string
     menuItemId: string
     unit: string
+    price: number
   }, ExtArgs["result"]["unit"]>
   composites: {}
 }
@@ -856,6 +942,7 @@ export interface UnitFieldRefs {
   readonly id: Prisma.FieldRef<"Unit", 'String'>
   readonly menuItemId: Prisma.FieldRef<"Unit", 'String'>
   readonly unit: Prisma.FieldRef<"Unit", 'String'>
+  readonly price: Prisma.FieldRef<"Unit", 'Float'>
 }
     
 

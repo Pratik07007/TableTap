@@ -13,6 +13,7 @@ export const validate =
       return res.status(400).json({
         success: false,
         error: errors[0].message,
+        where: errors[0].field,
       });
     }
     req.body = result.data;

@@ -118,7 +118,6 @@ export const MenuItemScalarFieldEnum = {
   id: 'id',
   name: 'name',
   description: 'description',
-  price: 'price',
   imageUrl: 'imageUrl',
   isAvailable: 'isAvailable',
   restaurantId: 'restaurantId',
@@ -133,7 +132,8 @@ export type MenuItemScalarFieldEnum = (typeof MenuItemScalarFieldEnum)[keyof typ
 export const UnitScalarFieldEnum = {
   id: 'id',
   menuItemId: 'menuItemId',
-  unit: 'unit'
+  unit: 'unit',
+  price: 'price'
 } as const
 
 export type UnitScalarFieldEnum = (typeof UnitScalarFieldEnum)[keyof typeof UnitScalarFieldEnum]

@@ -3,8 +3,9 @@ import { prisma } from "../../prisma/client";
 
 export const createMenuItem = async (req: any, res: Response) => {
   try {
-    const { name, description, price, category, imageUrl, isAvailable, units } =
+    const { name, description, category, imageUrl, isAvailable, units } =
       req.body;
+
     const upperCategory = category.toUpperCase();
 
     let categoryRecord = await prisma.category.findFirst({
@@ -21,23 +22,18 @@ export const createMenuItem = async (req: any, res: Response) => {
       data: {
         name,
         description,
-        price: Number(price),
+        unit: {
+          create: units.map((unit: { unit: string; price: number }) => ({
+            unit: unit.unit,
+            price: unit.price,
+          })),
+        },
         imageUrl,
         isAvailable,
         restaurantId: req.user.resturant.id,
         categoryId: categoryRecord.id,
       },
     });
-
-    for (const unit of units) {
-      await prisma.unit.create({
-        data: {
-          menuItemId: menu.id,
-          unit,
-        },
-      });
-    }
-
     res
       .status(201)
       .json({ success: true, message: "Menu Item created Successfully" });
@@ -105,7 +101,7 @@ export const getMenuItem = async (req: any, res: Response) => {
 export const updateMenuItem = async (req: any, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, description, price, category, units } = req.body;
+    const { name, description, category, units } = req.body;
     req.body;
     const upperCategory = category.toUpperCase();
 
@@ -138,26 +134,17 @@ export const updateMenuItem = async (req: any, res: Response) => {
       });
     }
 
-    if (units && Array.isArray(units)) {
-      await prisma.unit.deleteMany({
-        where: { menuItemId: id },
-      });
-      for (const unit of units) {
-        await prisma.unit.create({
-          data: {
-            menuItemId: id,
-            unit,
-          },
-        });
-      }
-    }
-
     const updated = await prisma.menuItem.update({
       where: { id },
       data: {
         name,
         description,
-        price: Number(price),
+        unit: {
+          create: units.map((unit: { unit: string; price: number }) => ({
+            unit: unit.unit,
+            price: unit.price,
+          })),
+        },
         categoryId: categoryRecord.id,
       },
       include: { unit: true, menuCategory: true },
