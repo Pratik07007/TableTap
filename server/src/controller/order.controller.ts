@@ -4,8 +4,19 @@ import { prisma } from "../../prisma/client";
 
 export const createOrder = async (req: any, res: Response) => {
   try {
-    const { items, discount, userId } = req.body;
+    const { items, discount } = req.body;
+
+
+    const createOrderRequestedUserId = req.user.id;
     const restaurantId = req.user.resturant.id;
+
+    const resturantOwner =req.user.resturant.userId;
+    
+    
+   if(createOrderRequestedUserId!==resturantOwner){
+    return res.status(400).json({ success: false, message: "You are not the owner of the resturant" });
+   }
+
 
     if (!items || items.length === 0) {
       return res.status(400).json({ success: false, message: "No items in order" });
@@ -54,7 +65,7 @@ export const createOrder = async (req: any, res: Response) => {
                 discount: discount || 0,
                 finalAmount,
                 status: "PENDING",
-                userId: userId || null, // Optional user
+                userId: createOrderRequestedUserId,
                 restaurantId: restaurantId,
                 items: {
                     create: orderItemsData
