@@ -195,6 +195,7 @@ export default function MenuForm() {
   const handleUnitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = e.target;
     setFormData(prev => {
+      
       if (checked) {
         return { ...prev, units: [...prev.units, value] };
       } else {
