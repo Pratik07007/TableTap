@@ -83,3 +83,93 @@ export const createOrder = async (req: any, res: Response) => {
     res.status(400).json({ success: false, message: error.message || "Order creation failed" });
   }
 };
+
+export const getAllOrders = async (req: any, res: Response) => {
+  try {
+    const { page = 1, limit = 10, email } = req.query;
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const whereClause: any = {};
+
+    // Filter by restaurant if user is associated with one
+    const userRestaurantId = req.user.resturant?.id;
+    if (userRestaurantId) {
+        whereClause.restaurantId = userRestaurantId;
+    }
+
+    if (email) {
+      whereClause.user = {
+        email: {
+          contains: String(email),
+          mode: 'insensitive' 
+        }
+      };
+    }
+
+    
+    const totalOrders = await prisma.order.count({
+      where: whereClause
+    });
+
+    const orders = await prisma.order.findMany({
+      where: whereClause,
+      skip: skip,
+      take: Number(limit),
+      include: {
+        user: {
+            select: {
+                firstName: true,
+                lastName: true,
+                email: true
+            }
+        },
+        items: {
+          include: {
+            menuItem: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    const totalPages = Math.ceil(totalOrders / Number(limit));
+
+    res.status(200).json({
+      success: true,
+      data: orders,
+      pagination: {
+        totalOrders,
+        totalPages,
+        currentPage: Number(page),
+        limit: Number(limit)
+      }
+    });
+  } catch (error: any) {
+    console.error("Get All Orders Error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch orders" });
+  }
+};
+
+export const updateOrderStatus = async (req: any, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = ["PENDING", "COMPLETED", "CANCELLED"];
+    if (!validStatuses.includes(status)) {
+        return res.status(400).json({ success: false, message: "Invalid status" });
+    }
+
+    const order = await prisma.order.update({
+        where: { id },
+        data: { status },
+    });
+
+    res.status(200).json({ success: true, data: order });
+  } catch(error: any) {
+    console.error("Update Order Status Error:", error);
+    res.status(500).json({ success: false, message: "Failed to update order status" });
+  }
+};

@@ -55,5 +55,6 @@ const protectedRoutes = [
   "/menu",
   "/register-resturant",
   "/update-resturant",
+  "/orders-details",
 ];
 const adminOnlyRoute = ["/menu", "/register-resturant", "/update-resturant"];
