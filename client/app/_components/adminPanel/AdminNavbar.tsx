@@ -1,11 +1,23 @@
-'use client';
-import { LayoutDashboard, LogOut, Utensils, Settings, Home, UploadCloud } from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
+"use client";
+import {
+  LayoutDashboard,
+  LogOut,
+  Utensils,
+  Home,
+  Store,
+  ShoppingBag,
+  ClipboardList,
+} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { useState } from "react";
+import { UpdateRestaurantModal } from "./UpdateResturantModal";
 
 export const AdminNavbar = () => {
   const router = useRouter();
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [restaurantData, setRestaurantData] = useState<any>(null); // Using any for simplicity here, ideally strict type
 
   const onLogout = async () => {
     const confirmed = window.confirm("Are you sure you want to log out?");
@@ -24,44 +36,112 @@ export const AdminNavbar = () => {
     }
   };
 
+  const handleRestaurantClick = async () => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/resturant/me`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+      const json = await res.json();
+
+      if (res.ok && json.success && json.data) {
+        // Handle nested data structure if necessary, though controller sends user.resturant directly or inside data
+        const data = json.data?.resturant ?? json.data;
+        if (data) {
+          setRestaurantData(data);
+          setIsUpdateModalOpen(true);
+        } else {
+          router.push("/register-resturant");
+        }
+      } else {
+        // If not found or error, redirect to register
+        router.push("/register-resturant");
+      }
+    } catch (error) {
+      console.error("Failed to check restaurant status", error);
+      toast.error("Failed to check restaurant information");
+    }
+  };
+
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center gap-8">
-            {/* Logo */}
-            <Link href="/dashboard" className="flex items-center gap-2 text-orange-600">
-              <LayoutDashboard className="h-8 w-8" />
-              <span className="text-2xl font-bold text-gray-900">
-                Table<span className="text-orange-600">Tap</span>
-              </span>
-            </Link>
-
-            {/* Navigation Links */}
-            <div className="hidden md:flex items-center space-x-4">
-              <Link href="/dashboard" className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2">
-                <Home size={18} /> Dashboard
-              </Link>
-              <Link href="/menu" className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2">
-                <Utensils size={18} /> Menu
-              </Link>
-            </div>
-          </div>
-
-          {/* Right Side */}
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={onLogout}
-                className="flex items-center gap-2 text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+    <>
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center gap-8">
+              {/* Logo */}
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 text-orange-600"
               >
-                <LogOut size={18} />
-                <span className="hidden sm:inline">Logout</span>
-              </button>
+                <LayoutDashboard className="h-8 w-8" />
+                <span className="text-2xl font-bold text-gray-900">
+                  Table<span className="text-orange-600">Tap</span>
+                </span>
+              </Link>
+
+              {/* Navigation Links */}
+              <div className="hidden md:flex items-center space-x-4">
+                <Link
+                  href="/dashboard"
+                  className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2"
+                >
+                  <Home size={18} /> Dashboard
+                </Link>
+                <Link
+                  href="/menu"
+                  className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2"
+                >
+                  <Utensils size={18} /> Menu
+                </Link>
+                <Link
+                  href="/take-orders"
+                  className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2"
+                >
+                  <ShoppingBag size={18} /> Take Orders
+                </Link>
+                <Link
+                  href="/orders-details"
+                  className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2"
+                >
+                  <ClipboardList size={18} /> Orders
+                </Link>
+                <button
+                  onClick={handleRestaurantClick}
+                  className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2"
+                >
+                  <Store size={18} /> Restaurant Info
+                </button>
+              </div>
+            </div>
+
+            {/* Right Side */}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={onLogout}
+                  className="flex items-center gap-2 text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  <LogOut size={18} />
+                  <span className="hidden sm:inline">Logout</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      {/* Modal */}
+      {restaurantData && (
+        <UpdateRestaurantModal
+          isOpen={isUpdateModalOpen}
+          onClose={() => setIsUpdateModalOpen(false)}
+          existingData={restaurantData}
+        />
+      )}
+    </>
   );
 };

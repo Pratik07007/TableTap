@@ -91,7 +91,6 @@ export const getAllOrders = async (req: any, res: Response) => {
 
     const whereClause: any = {};
 
-    // Filter by restaurant if user is associated with one
     const userRestaurantId = req.user.resturant?.id;
     if (userRestaurantId) {
         whereClause.restaurantId = userRestaurantId;

@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
-import jwt from "jsonwebtoken";
+import { Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
 import {
   loginService,
   registerUserService,
@@ -7,8 +7,8 @@ import {
   forgotPasswordService,
   resetPasswordService,
   resendVerificationEmailService,
-} from "../service/auth.service";
-import { prisma } from "../../prisma/client";
+} from '../service/auth.service';
+import { prisma } from '../../prisma/client';
 
 export const registerUserController = async (req: Request, res: Response) => {
   const { fName, lName, email, password, role } = req.body;
@@ -28,9 +28,7 @@ export const registerUserController = async (req: Request, res: Response) => {
 export const verifyEmailController = async (req: Request, res: Response) => {
   const { token } = req.body;
   if (!token) {
-    return res
-      .status(400)
-      .json({ message: "Token is required", success: false });
+    return res.status(400).json({ message: 'Token is required', success: false });
   }
   const response = await verifyEmailService(token);
   if (!response.success) {
@@ -39,10 +37,7 @@ export const verifyEmailController = async (req: Request, res: Response) => {
   res.status(200).json({ ...response });
 };
 
-export const resendVerificationEmailController = async (
-  req: Request,
-  res: Response
-) => {
+export const resendVerificationEmailController = async (req: Request, res: Response) => {
   const { email } = req.body;
   const response = await resendVerificationEmailService(email);
   if (!response.success) {
@@ -58,12 +53,12 @@ export const loginController = async (req: Request, res: Response) => {
   if (!response.success) {
     return res.status(400).json({ ...response });
   }
-  res.cookie("token", response.token, {
+  res.cookie('token', response.token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "lax" : "lax",
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'lax',
     maxAge: 24 * 60 * 60 * 1000,
-    path: "/",
+    path: '/',
   });
   res.status(200).json({ success: true, message: response.message });
 };
@@ -89,9 +84,7 @@ export const resetPasswordController = async (req: Request, res: Response) => {
 export const getSessionInfoController = async (req: Request, res: Response) => {
   const token = req.cookies.token;
   if (!token) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Not authenticated" });
+    return res.status(401).json({ success: false, message: 'Not authenticated' });
   }
 
   try {
@@ -111,21 +104,17 @@ export const getSessionInfoController = async (req: Request, res: Response) => {
       },
     });
     if (!user) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid or expired session" });
+      return res.status(401).json({ success: false, message: 'Invalid or expired session' });
     }
     return res.status(200).json({
       success: true,
       user: { ...user },
     });
   } catch (error) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Invalid or expired session" });
+    return res.status(401).json({ success: false, message: 'Invalid or expired session' });
   }
 };
 export const logoutController = (req: Request, res: Response) => {
-  res.clearCookie("token");
-  res.status(200).json({ success: true, message: "Logged out successfully" });
+  res.clearCookie('token');
+  res.status(200).json({ success: true, message: 'Logged out successfully' });
 };
