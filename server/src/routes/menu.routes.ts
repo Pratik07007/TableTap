@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createMenuItem, deleteMenuItem, getMenuItems, getMenuItem, getCategory, getUnits, makeMenuItemAvailable, updateMenuItem } from '../controller/menuItem.controller';
+import { createMenuItem, deleteMenuItem, getMenuItems, getMenuItem, getCategory, getUnits, makeMenuItemAvailable, updateMenuItem, getPublicMenuItems } from '../controller/menuItem.controller';
 
 import { validate } from '../middleware/validiate.middleware';
 import { menuItemSchema } from '../types/zod';
@@ -9,6 +9,7 @@ const menuItemRouter = Router();
 
 menuItemRouter.post('/', validate(menuItemSchema), protect('admin'), createMenuItem);
 menuItemRouter.get('/', protect('admin'), getMenuItems);
+menuItemRouter.get('/public/:restaurantId', getPublicMenuItems);
 menuItemRouter.get('/:id', protect('admin'), getMenuItem);
 menuItemRouter.put('/:id', protect('admin'), updateMenuItem);
 menuItemRouter.delete('/:id', protect('admin'), deleteMenuItem);

@@ -1,19 +1,6 @@
-import { prisma } from "../../prisma/client";
+import { prisma } from '../../prisma/client';
 
-export const createResturantService = async (
-  userId: string,
-  name: string,
-  address: string,
-  city: string,
-  state: string,
-  country: string,
-  zipCode: string,
-  phoneNumber: string,
-  email: string,
-  faceBookUrl: string,
-  tikTokUrl: string,
-  instagramUrl: string
-) => {
+export const createResturantService = async (userId: string, name: string, address: string, city: string, state: string, country: string, zipCode: string, phoneNumber: string, email: string, faceBookUrl: string, tikTokUrl: string, instagramUrl: string) => {
   try {
     const ifUserAlreadyHasResturant = await prisma.user.findUnique({
       where: { id: userId },
@@ -23,7 +10,7 @@ export const createResturantService = async (
     });
     if (ifUserAlreadyHasResturant?.resturant) {
       return {
-        message: "User already has a resturant",
+        message: 'User already has a resturant',
         success: false,
       };
     }
@@ -48,38 +35,25 @@ export const createResturantService = async (
       data: { resturant: { connect: { id: resturant.id } } },
     });
     return {
-      message: "Resturant created successfully",
+      message: 'Resturant created successfully',
       success: true,
       data: { resturant },
     };
   } catch (error) {
     return {
-      message: "Resturant creation failed",
+      message: 'Resturant creation failed',
       success: false,
       error,
     };
   }
 };
 
-export const updateResturantService = async (
-  userId: string,
-  name: string,
-  address: string,
-  city: string,
-  state: string,
-  country: string,
-  zipCode: string,
-  phoneNumber: string,
-  email: string,
-  faceBookUrl: string,
-  tikTokUrl: string,
-  instagramUrl: string
-) => {
+export const updateResturantService = async (userId: string, name: string, address: string, city: string, state: string, country: string, zipCode: string, phoneNumber: string, email: string, faceBookUrl: string, tikTokUrl: string, instagramUrl: string) => {
   try {
     const existing = await prisma.resturants.findUnique({ where: { userId } });
     if (!existing) {
       return {
-        message: "No restaurant exists for this user",
+        message: 'No restaurant exists for this user',
         success: false,
       };
     }
@@ -100,13 +74,13 @@ export const updateResturantService = async (
       },
     });
     return {
-      message: "Resturant updated successfully",
+      message: 'Resturant updated successfully',
       success: true,
       data: { resturant: updated },
     };
   } catch (error) {
     return {
-      message: "Resturant update failed",
+      message: 'Resturant update failed',
       success: false,
       error,
     };

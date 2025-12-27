@@ -1,15 +1,15 @@
-import bcrypt from "bcryptjs";
-import { sendRegistrationerificationEmail } from "../utils/registrationEmail";
-import { sendPasswordResetEmail } from "../utils/passwordResetEmail";
-import jwt from "jsonwebtoken";
-import { prisma } from "../../prisma/client";
+import bcrypt from 'bcryptjs';
+import { sendRegistrationerificationEmail } from '../utils/registrationEmail';
+import { sendPasswordResetEmail } from '../utils/passwordResetEmail';
+import jwt from 'jsonwebtoken';
+import { prisma } from '../../prisma/client';
 
 export type TRegisterUser = {
   fName: string;
   lName: string;
   email: string;
   password: string;
-  role: "ADMIN" | "USER";
+  role: 'ADMIN' | 'USER';
 };
 
 export const registerUserService = async (userData: TRegisterUser) => {
@@ -24,32 +24,25 @@ export const registerUserService = async (userData: TRegisterUser) => {
     });
     if (userAlreadyExists) {
       return {
+        code: 409,
         success: false,
-        error: "User already exists",
+        error: 'User already exists',
       };
     }
 
     const token = jwt.sign({ email }, process.env.JWT_SECRET as string, {
-      expiresIn: "5m",
+      expiresIn: '5m',
     });
 
-    const user = await prisma.user.create({
+    await prisma.user.create({
       data: {
         firstName: fName,
         lastName: lName,
         email,
         hash: hashedPassword,
-        role: role.toUpperCase() as "ADMIN" | "USER",
+        role: role.toUpperCase() as 'ADMIN' | 'USER',
         emailVerificationToken: token,
-        emailVerificationExpires: new Date(Date.now() + 1000 * 60 * 5), //expireds in 5 minutes
-      },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        role: true,
-        isEmailVerified: true,
+        emailVerificationExpires: new Date(Date.now() + 1000 * 60 * 5),
       },
     });
     try {
@@ -61,20 +54,21 @@ export const registerUserService = async (userData: TRegisterUser) => {
         },
       });
       return {
+        code: 500, //internal server error(failed to send email)
         success: false,
-        error: "Registration Email sent failed, please try regisering again",
+        error: 'Registration Email sent failed, please try regisering again',
       };
     }
-
     return {
-      message: "User registered successfully an email is sent for verification",
+      code: 201, //created
+      message: 'User registered successfully an email is sent for verification',
       success: true,
-      data: { ...user },
     };
   } catch (error) {
-    console.error(error);
+    console.error('ERROR FROM AUTH SERVICE', error);
     return {
-      error: "User registration failed",
+      code: 500, //internal server error
+      error: 'User registration failed',
       success: false,
     };
   }
@@ -87,13 +81,10 @@ export const verifyEmailService = async (token: string) => {
         emailVerificationToken: token,
       },
     });
-    if (
-      !userWithToken ||
-      (userWithToken.emailVerificationExpires &&
-        userWithToken.emailVerificationExpires < new Date())
-    ) {
+    if (!userWithToken || (userWithToken.emailVerificationExpires && userWithToken.emailVerificationExpires < new Date())) {
       return {
-        error: "Invalid or expired token",
+        code: 400,
+        error: 'Invalid or expired token',
         success: false,
       };
     }
@@ -103,24 +94,20 @@ export const verifyEmailService = async (token: string) => {
       },
       data: {
         isEmailVerified: true,
-      },
-    });
-    await prisma.user.update({
-      where: {
-        id: userWithToken.id,
-      },
-      data: {
         emailVerificationToken: null,
         emailVerificationExpires: null,
       },
     });
     return {
-      message: "Email verified successfully",
+      code: 200,
+      message: 'Email verified successfully',
       success: true,
     };
   } catch (error) {
+    console.error('ERROR FROM AUTH SERVICE', error);
     return {
-      error: "Invalid or expired token",
+      code: 500,
+      error: 'Invalid or expired token',
       success: false,
     };
   }
@@ -131,17 +118,19 @@ export const resendVerificationEmailService = async (email: string) => {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       return {
-        error: "User not found",
+        code: 404,
+        error: 'User not found',
         success: false,
       };
     }
     if (user.isEmailVerified) {
       return {
-        error: "Email already verified",
+        code: 409,
+        error: 'Email already verified',
         success: false,
       };
     }
-    const token = jwt.sign({ email }, process.env.JWT_SECRET as string);
+    const token = jwt.sign({ email }, process.env.JWT_SECRET as string, { expiresIn: '5m' });
     await prisma.user.update({
       where: {
         id: user.id,
@@ -154,6 +143,7 @@ export const resendVerificationEmailService = async (email: string) => {
     try {
       await sendRegistrationerificationEmail(email, token);
     } catch (error) {
+      console.error('ERROR FROM AUTH SERVICE', error);
       await prisma.user.update({
         where: {
           id: user.id,
@@ -164,17 +154,21 @@ export const resendVerificationEmailService = async (email: string) => {
         },
       });
       return {
-        error: "Failed to send verification email",
+        code: 500,
+        error: 'Failed to send verification email',
         success: false,
       };
     }
     return {
-      message: "Verification email sent successfully",
+      code: 200,
+      message: 'Verification email sent successfully',
       success: true,
     };
   } catch (error) {
+    console.error('ERROR FROM AUTH SERVICE', error);
     return {
-      error: "Failed to send verification email",
+      code: 500,
+      error: 'Failed to send verification email',
       success: false,
     };
   }
@@ -184,21 +178,23 @@ export const loginService = async (email: string, password: string) => {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
     return {
-      error: "User not found",
+      code: 404,
+      error: 'User not found',
       success: false,
     };
   }
   if (!user.isEmailVerified) {
     return {
-      error:
-        "Email not verified please check your email we have send verification email",
+      code: 401,
+      error: 'Email not verified please check your email we have send verification email',
       success: false,
     };
   }
   const isPasswordValid = await bcrypt.compare(password, user.hash);
   if (!isPasswordValid) {
     return {
-      error: "Invalid password",
+      code: 401,
+      error: 'Invalid password',
       success: false,
     };
   }
@@ -209,11 +205,12 @@ export const loginService = async (email: string, password: string) => {
       name: `${user.firstName} ${user.lastName}`,
     },
     process.env.JWT_SECRET as string,
-    { expiresIn: "24h" }
+    { expiresIn: '24h' }
   );
 
   return {
-    message: "Login successful",
+    code: 200,
+    message: 'Login successful',
     success: true,
     token,
   };
@@ -223,7 +220,7 @@ export const forgotPasswordService = async (email: string) => {
   try {
     const user = await prisma.user.findUnique({ where: { email } });
     if (user) {
-      const token = jwt.sign({ email }, process.env.JWT_SECRET as string);
+      const token = jwt.sign({ email }, process.env.JWT_SECRET as string, { expiresIn: '5m' });
 
       await prisma.user.update({
         where: { email },
@@ -245,40 +242,37 @@ export const forgotPasswordService = async (email: string) => {
           },
         });
         return {
-          message: "Failed to send reset email",
+          code: 500,
+          message: 'Failed to send reset email',
           success: false,
         };
       }
     }
     return {
-      message: "If the email exists, a reset link has been sent",
+      code: 200,
+      message: 'If the email exists, a reset link has been sent',
       success: true,
     };
   } catch (error) {
     return {
-      message: "Failed to initiate password reset",
+      code: 500,
+      message: 'Failed to initiate password reset',
       success: false,
     };
   }
 };
 
-export const resetPasswordService = async (
-  token: string,
-  newPassword: string
-) => {
+export const resetPasswordService = async (token: string, newPassword: string) => {
   try {
     const userWithResetToken = await prisma.user.findFirst({
       where: {
         resetPasswordToken: token,
       },
     });
-    if (
-      !userWithResetToken ||
-      (userWithResetToken.resetPasswordExpires &&
-        userWithResetToken.resetPasswordExpires < new Date())
-    ) {
+    if (!userWithResetToken || (userWithResetToken.resetPasswordExpires && userWithResetToken.resetPasswordExpires < new Date())) {
       return {
-        error: "Invalid or expired token",
+        code: 400,
+        error: 'Invalid or expired token',
         success: false,
       };
     }
@@ -287,19 +281,25 @@ export const resetPasswordService = async (
       where: { id: userWithResetToken.id },
       data: {
         hash: hashed,
+      },
+    });
+    await prisma.user.update({
+      where: { id: userWithResetToken.id },
+      data: {
         resetPasswordToken: null,
         resetPasswordExpires: null,
       },
     });
     return {
-      message: "Password reset successfully",
+      code: 200,
+      message: 'Password reset successfully',
       success: true,
     };
   } catch (error) {
     return {
-      message: "Invalid or expired token",
+      code: 500,
+      error: 'Failed to reset password',
       success: false,
-      error,
     };
   }
 };

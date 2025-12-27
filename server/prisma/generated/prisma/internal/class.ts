@@ -17,10 +17,10 @@ import type * as Prisma from "./prismaNamespace"
 
 const config: runtime.GetPrismaClientConfig = {
   "previewFeatures": [],
-  "clientVersion": "7.0.1",
-  "engineVersion": "f09f2815f091dbba658cdcd2264306d88bb5bda6",
+  "clientVersion": "7.2.0",
+  "engineVersion": "0c8ef2ce45c83248ab3df073180d5eda9e8be7a3",
   "activeProvider": "postgresql",
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client\"\n  output   = \"./generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel User {\n  id        String @id @default(uuid())\n  firstName String\n  lastName  String\n  email     String @unique\n  hash      String\n  role      Role\n\n  isEmailVerified Boolean     @default(false)\n  resturant       Resturants? @relation(\"UserOwnsRestaurant\")\n\n  emailVerificationToken   String?\n  emailVerificationExpires DateTime?\n\n  resetPasswordToken   String?\n  resetPasswordExpires DateTime?\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n  orders    Order[]\n}\n\nmodel Resturants {\n  id            String  @id @default(uuid())\n  name          String\n  streetAddress String\n  city          String\n  state         String\n  zip           String\n  country       String\n  phone         String\n  email         String  @unique\n  faceBookUrl   String?\n  tikTokUrl     String?\n  instagramUrl  String?\n\n  userId String @unique\n  owner  User   @relation(\"UserOwnsRestaurant\", fields: [userId], references: [id])\n\n  menuItems MenuItem[]\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n  orders    Order[]\n}\n\nenum Role {\n  USER\n  ADMIN\n}\n\nmodel MenuItem {\n  id          String  @id @default(uuid())\n  name        String\n  description String?\n  unit        Unit[]\n  imageUrl    String?\n  isAvailable Boolean @default(true)\n\n  restaurantId String?\n  restaurant   Resturants? @relation(fields: [restaurantId], references: [id])\n\n  createdAt    DateTime    @default(now())\n  updatedAt    DateTime    @updatedAt\n  menuCategory Category    @relation(fields: [categoryId], references: [id])\n  categoryId   String\n  orderItems   OrderItem[]\n}\n\nmodel Unit {\n  id         String   @id @default(uuid())\n  menuItemId String\n  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)\n  unit       String\n  price      Float\n}\n\nmodel Category {\n  id        String     @id @default(uuid())\n  category  String\n  menuItems MenuItem[]\n}\n\nmodel Order {\n  id          String      @id @default(uuid())\n  totalAmount Float\n  discount    Float       @default(0)\n  finalAmount Float\n  status      OrderStatus @default(PENDING)\n\n  userId String?\n  user   User?   @relation(fields: [userId], references: [id])\n\n  restaurantId String?\n  restaurant   Resturants? @relation(fields: [restaurantId], references: [id])\n\n  items OrderItem[]\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n\nmodel OrderItem {\n  id      String @id @default(uuid())\n  orderId String\n  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)\n\n  menuItemId String\n  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])\n\n  unitName String // Snapshot of the unit name (e.g., \"Full\")\n  price    Float // Snapshot of the price per unit\n  quantity Int\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n\nenum OrderStatus {\n  PENDING\n  COMPLETED\n  CANCELLED\n}\n",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client\"\n  output   = \"./generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel User {\n  id        String @id @default(uuid())\n  firstName String\n  lastName  String\n  email     String @unique\n  hash      String\n  role      Role\n\n  isEmailVerified Boolean     @default(false)\n  resturant       Resturants? @relation(\"UserOwnsRestaurant\")\n\n  emailVerificationToken   String?\n  emailVerificationExpires DateTime?\n\n  resetPasswordToken   String?\n  resetPasswordExpires DateTime?\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n  orders    Order[]\n}\n\nmodel Resturants {\n  id            String  @id @default(uuid())\n  name          String\n  streetAddress String\n  city          String\n  state         String\n  zip           String\n  country       String\n  phone         String\n  email         String  @unique\n  faceBookUrl   String?\n  tikTokUrl     String?\n  instagramUrl  String?\n\n  userId String @unique\n  owner  User   @relation(\"UserOwnsRestaurant\", fields: [userId], references: [id])\n\n  menuItems MenuItem[]\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n  orders    Order[]\n}\n\nenum Role {\n  USER\n  ADMIN\n}\n\nmodel MenuItem {\n  id          String  @id @default(uuid())\n  name        String\n  description String?\n  unit        Unit[]\n  imageUrl    String?\n  isAvailable Boolean @default(true)\n\n  restaurantId String?\n  restaurant   Resturants? @relation(fields: [restaurantId], references: [id])\n\n  createdAt    DateTime    @default(now())\n  updatedAt    DateTime    @updatedAt\n  menuCategory Category    @relation(fields: [categoryId], references: [id])\n  categoryId   String\n  orderItems   OrderItem[]\n}\n\nmodel Unit {\n  id         String   @id @default(uuid())\n  menuItemId String\n  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)\n  unit       String\n  price      Float\n}\n\nmodel Category {\n  id        String     @id @default(uuid())\n  category  String\n  menuItems MenuItem[]\n}\n\nmodel Order {\n  id          String      @id @default(uuid())\n  totalAmount Float\n  discount    Float       @default(0)\n  finalAmount Float\n  status      OrderStatus @default(PENDING)\n\n  userId String?\n  user   User?   @relation(fields: [userId], references: [id])\n\n  restaurantId String?\n  restaurant   Resturants? @relation(fields: [restaurantId], references: [id])\n\n  items OrderItem[]\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n\nmodel OrderItem {\n  id      String @id @default(uuid())\n  orderId String\n  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)\n\n  menuItemId String\n  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])\n\n  unitName String // Snapshot of the unit name (e.g., \"Full\")\n  price    Float // Snapshot of the price per unit\n  quantity Int\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n\nenum OrderStatus {\n  PENDING\n  COMPLETED\n  CANCELLED\n}\n",
   "runtimeDataModel": {
     "models": {},
     "enums": {},
@@ -62,7 +62,7 @@ export interface PrismaClientConstructor {
    * const users = await prisma.user.findMany()
    * ```
    * 
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
+   * Read more in our [docs](https://pris.ly/d/client).
    */
 
   new <
@@ -84,7 +84,7 @@ export interface PrismaClientConstructor {
  * const users = await prisma.user.findMany()
  * ```
  * 
- * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
+ * Read more in our [docs](https://pris.ly/d/client).
  */
 
 export interface PrismaClient<
@@ -113,7 +113,7 @@ export interface PrismaClient<
    * const result = await prisma.$executeRaw`UPDATE User SET cool = ${true} WHERE email = ${'user@email.com'};`
    * ```
    *
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
+   * Read more in our [docs](https://pris.ly/d/raw-queries).
    */
   $executeRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<number>;
 
@@ -125,7 +125,7 @@ export interface PrismaClient<
    * const result = await prisma.$executeRawUnsafe('UPDATE User SET cool = $1 WHERE email = $2 ;', true, 'user@email.com')
    * ```
    *
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
+   * Read more in our [docs](https://pris.ly/d/raw-queries).
    */
   $executeRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<number>;
 
@@ -136,7 +136,7 @@ export interface PrismaClient<
    * const result = await prisma.$queryRaw`SELECT * FROM User WHERE id = ${1} OR email = ${'user@email.com'};`
    * ```
    *
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
+   * Read more in our [docs](https://pris.ly/d/raw-queries).
    */
   $queryRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<T>;
 
@@ -148,7 +148,7 @@ export interface PrismaClient<
    * const result = await prisma.$queryRawUnsafe('SELECT * FROM User WHERE id = $1 OR email = $2;', 1, 'user@email.com')
    * ```
    *
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
+   * Read more in our [docs](https://pris.ly/d/raw-queries).
    */
   $queryRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<T>;
 

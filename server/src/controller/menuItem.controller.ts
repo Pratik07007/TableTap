@@ -1,10 +1,9 @@
-import { Response } from "express";
-import { prisma } from "../../prisma/client";
+import { Response } from 'express';
+import { prisma } from '../../prisma/client';
 
 export const createMenuItem = async (req: any, res: Response) => {
   try {
-    const { name, description, category, imageUrl, isAvailable, units } =
-      req.body;
+    const { name, description, category, imageUrl, isAvailable, units } = req.body;
 
     const upperCategory = category.toUpperCase();
 
@@ -34,14 +33,10 @@ export const createMenuItem = async (req: any, res: Response) => {
         categoryId: categoryRecord.id,
       },
     });
-    res
-      .status(201)
-      .json({ success: true, message: "Menu Item created Successfully" });
+    res.status(201).json({ success: true, message: 'Menu Item created Successfully' });
   } catch (error) {
     console.log(error);
-    res
-      .status(400)
-      .json({ success: false, error: "Menu item creation failed" });
+    res.status(400).json({ success: false, error: 'Menu item creation failed' });
   }
 };
 
@@ -57,9 +52,26 @@ export const getMenuItems = async (req: any, res: Response) => {
     res.status(200).json({ success: true, data });
   } catch (err) {
     console.log(err);
-    res
-      .status(400)
-      .json({ success: false, error: "Menu item retrieval failed" });
+    res.status(400).json({ success: false, error: 'Menu item retrieval failed' });
+  }
+};
+
+export const getPublicMenuItems = async (req: any, res: Response) => {
+  try {
+    const { restaurantId } = req.params;
+
+    const data = await prisma.menuItem.findMany({
+      where: {
+        restaurantId: restaurantId,
+        isAvailable: true,
+      },
+      include: { unit: true, menuCategory: true },
+    });
+
+    res.status(200).json({ success: true, data });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ success: false, error: 'Public menu item retrieval failed' });
   }
 };
 
@@ -72,9 +84,7 @@ export const getMenuItem = async (req: any, res: Response) => {
     });
 
     if (!menuItem) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Menu item not found" });
+      return res.status(404).json({ success: false, message: 'Menu item not found' });
     }
 
     const menuItemOwnerID = menuItem.restaurantId;
@@ -85,16 +95,14 @@ export const getMenuItem = async (req: any, res: Response) => {
       // req.user.resturant.id should match menuItem.restaurantId
       return res.status(403).json({
         success: false,
-        error: "You are not the owner of the menu item",
+        error: 'You are not the owner of the menu item',
       });
     }
 
     res.status(200).json({ success: true, data: menuItem });
   } catch (err) {
     console.log(err);
-    res
-      .status(400)
-      .json({ success: false, error: "Menu item retrieval failed" });
+    res.status(400).json({ success: false, error: 'Menu item retrieval failed' });
   }
 };
 
@@ -111,9 +119,7 @@ export const updateMenuItem = async (req: any, res: Response) => {
     });
 
     if (!menuItem) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Menu item not found" });
+      return res.status(404).json({ success: false, message: 'Menu item not found' });
     }
     const menuItemOwnerID = menuItem?.restaurant?.userId;
     const currentUserID = req.user.id;
@@ -121,7 +127,7 @@ export const updateMenuItem = async (req: any, res: Response) => {
     if (menuItemOwnerID !== currentUserID) {
       return res.status(403).json({
         success: false,
-        error: "You are not the owner of the menu item",
+        error: 'You are not the owner of the menu item',
       });
     }
     let categoryRecord = await prisma.category.findFirst({
@@ -133,10 +139,8 @@ export const updateMenuItem = async (req: any, res: Response) => {
         data: { category: upperCategory },
       });
     }
-  
+
     const updated = await prisma.$transaction(async (tx) => {
-    
-    
       await tx.menuItem.update({
         where: { id },
         data: {
@@ -144,10 +148,8 @@ export const updateMenuItem = async (req: any, res: Response) => {
           description,
           categoryId: categoryRecord.id,
           imageUrl: req.body.imageUrl,
-    
         },
       });
-
 
       await tx.unit.deleteMany({
         where: { menuItemId: id },
@@ -172,9 +174,7 @@ export const updateMenuItem = async (req: any, res: Response) => {
 
     res.status(200).json({ success: true, data: updated });
   } catch (err: any) {
-    return res
-      .status(404)
-      .json({ success: false, message: "Menu update request failed" });
+    return res.status(404).json({ success: false, message: 'Menu update request failed' });
   }
 };
 
@@ -187,17 +187,14 @@ export const deleteMenuItem = async (req: any, res: Response) => {
     });
 
     if (!existing) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Menu item not found" });
+      return res.status(404).json({ success: false, message: 'Menu item not found' });
     }
     const menuItemOwner = existing.restaurant?.userId;
     const deleteRequestedUser = req.user?.id;
     if (menuItemOwner !== deleteRequestedUser) {
       return res.status(403).json({
         success: false,
-        message:
-          "You are not the one who created the menu so you cant delete this item",
+        message: 'You are not the one who created the menu so you cant delete this item',
       });
     }
     await prisma.menuItem.update({
@@ -206,38 +203,32 @@ export const deleteMenuItem = async (req: any, res: Response) => {
     });
     res.status(200).json({
       success: true,
-      message: "This items is made unavailable",
+      message: 'This items is made unavailable',
     });
   } catch {
-    return res
-      .status(404)
-      .json({ success: false, message: "Menu deleation failed" });
+    return res.status(404).json({ success: false, message: 'Menu deleation failed' });
   }
 };
 
 export const getCategory = async (req: any, res: Response) => {
   try {
     const categories = await prisma.category.findMany({
-      distinct: ["category"],
+      distinct: ['category'],
     });
     res.status(200).json({ success: true, data: categories });
   } catch (err: any) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Category retrieval failed" });
+    return res.status(400).json({ success: false, message: 'Category retrieval failed' });
   }
 };
 
 export const getUnits = async (req: any, res: Response) => {
   try {
     const units = await prisma.unit.findMany({
-      distinct: ["unit"],
+      distinct: ['unit'],
     });
     res.status(200).json({ success: true, data: units });
   } catch (err: any) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Unit retrieval failed" });
+    return res.status(400).json({ success: false, message: 'Unit retrieval failed' });
   }
 };
 
@@ -250,9 +241,7 @@ export const makeMenuItemAvailable = async (req: any, res: Response) => {
     });
 
     if (!existing) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Menu item not found" });
+      return res.status(404).json({ success: false, message: 'Menu item not found' });
     }
 
     const menuItemOwner = existing.restaurant?.userId;
@@ -260,8 +249,7 @@ export const makeMenuItemAvailable = async (req: any, res: Response) => {
     if (menuItemOwner !== deleteRequestedUser) {
       return res.status(403).json({
         success: false,
-        message:
-          "You are not the one who created the menu so you cannot make  this item available",
+        message: 'You are not the one who created the menu so you cannot make  this item available',
       });
     }
 
@@ -269,12 +257,8 @@ export const makeMenuItemAvailable = async (req: any, res: Response) => {
       where: { id },
       data: { isAvailable: true },
     });
-    res
-      .status(200)
-      .json({ success: true, message: "This item  is now available " });
+    res.status(200).json({ success: true, message: 'This item  is now available ' });
   } catch {
-    return res
-      .status(404)
-      .json({ success: false, message: "Menu available request failed" });
+    return res.status(404).json({ success: false, message: 'Menu available request failed' });
   }
 };

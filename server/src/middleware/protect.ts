@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
-import { prisma } from "../../prisma/client";
+import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import { prisma } from '../../prisma/client';
 
 export const protect = (...roles: string[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -8,7 +8,7 @@ export const protect = (...roles: string[]) => {
     if (!token) {
       return res.status(401).json({
         success: false,
-        error: "Authentication token not found",
+        error: 'Authentication token not found',
       });
     }
 
@@ -21,7 +21,7 @@ export const protect = (...roles: string[]) => {
       if (!decoded) {
         return res.status(401).json({
           success: false,
-          error: "Invalid authentication token",
+          error: 'Invalid authentication token',
         });
       }
       const user = await prisma.user.findUnique({
@@ -37,15 +37,13 @@ export const protect = (...roles: string[]) => {
       if (!user) {
         return res.status(401).json({
           success: false,
-          error: "Insufficient permissions",
+          error: 'Insufficient permissions',
         });
       }
-      if (
-        !roles.map((r) => r.toUpperCase()).includes(user.role.toUpperCase())
-      ) {
+      if (roles.length > 0 && !roles.map((r) => r.toUpperCase()).includes(user.role.toUpperCase())) {
         return res.status(403).json({
           success: false,
-          error: "Insufficient permissions",
+          error: 'Insufficient permissions',
         });
       }
 
@@ -53,10 +51,10 @@ export const protect = (...roles: string[]) => {
 
       next();
     } catch (error) {
-      console.log("PROTECT ERROR", error);
+      console.log('PROTECT ERROR', error);
       return res.status(401).json({
         success: false,
-        error: "Invalid or expired token",
+        error: 'Invalid or expired token',
       });
     }
   };
