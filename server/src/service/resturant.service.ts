@@ -1,5 +1,19 @@
 import { prisma } from '../../prisma/client';
 
+export type TRestaurant = {
+  name: string;
+  streetAddress: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+  phone: string;
+  email: string;
+  faceBookUrl?: string | null;
+  tikTokUrl?: string | null;
+  instagramUrl?: string | null;
+};
+
 export const createResturantService = async (userId: string, name: string, address: string, city: string, state: string, country: string, zipCode: string, phoneNumber: string, email: string, faceBookUrl: string, tikTokUrl: string, instagramUrl: string) => {
   try {
     const resturant = await prisma.resturants.create({
@@ -33,23 +47,11 @@ export const createResturantService = async (userId: string, name: string, addre
   }
 };
 
-export const updateResturantService = async (userId: string, name: string, address: string, city: string, state: string, country: string, zipCode: string, phoneNumber: string, email: string, faceBookUrl: string, tikTokUrl: string, instagramUrl: string) => {
+export const updateResturantService = async (userId: string, resturantData: TRestaurant) => {
   try {
     const updated = await prisma.resturants.update({
       where: { userId },
-      data: {
-        name,
-        streetAddress: address,
-        city,
-        state,
-        zip: zipCode,
-        country,
-        phone: phoneNumber,
-        email,
-        faceBookUrl,
-        tikTokUrl,
-        instagramUrl,
-      },
+      data: resturantData,
     });
     return {
       code: 200,

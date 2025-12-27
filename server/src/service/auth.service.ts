@@ -12,6 +12,8 @@ export type TRegisterUser = {
   role: 'ADMIN' | 'USER';
 };
 
+
+
 export const registerUserService = async (userData: TRegisterUser) => {
   try {
     const { fName, lName, email, password, role } = userData;

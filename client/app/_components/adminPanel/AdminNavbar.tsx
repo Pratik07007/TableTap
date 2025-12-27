@@ -97,15 +97,6 @@ export const AdminNavbar = () => {
           </div>
         </div>
       </nav>
-
-      {/* Modal */}
-      {restaurantData && (
-        <UpdateRestaurantModal
-          isOpen={isUpdateModalOpen}
-          onClose={() => setIsUpdateModalOpen(false)}
-          existingData={restaurantData}
-        />
-      )}
     </>
   );
 };

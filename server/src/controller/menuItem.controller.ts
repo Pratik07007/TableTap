@@ -51,7 +51,7 @@ export const getMenuItems = async (req: any, res: Response) => {
 
     res.status(200).json({ success: true, data });
   } catch (err) {
-    console.log(err);
+    console.log('errrr', err);
     res.status(400).json({ success: false, error: 'Menu item retrieval failed' });
   }
 };

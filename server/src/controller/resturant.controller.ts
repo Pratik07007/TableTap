@@ -37,13 +37,11 @@ export const updateMyResturantController = async (req: any, res: Response) => {
   if (!requestedAdmin.resturant) {
     return res.status(404).json({ success: false, data: null, message: 'Resturant not found' });
   }
-  const { name, streetAddress, city, state, country, zip, phone, email, faceBookUrl, tikTokUrl, instagramUrl } = req.body;
-
-  const resp = await updateResturantService(requestedAdmin.id, name, streetAddress, city, state, country, zip, phone, email, faceBookUrl, tikTokUrl, instagramUrl);
+  const resp = await updateResturantService(requestedAdmin.id, req.body);
   if (!resp.success) {
-    return res.status(400).json({ ...resp });
+    return res.status(resp.code).json({ ...resp });
   }
-  return res.status(200).json({
+  return res.status(resp.code).json({
     success: true,
     message: 'Resturant updated successfully',
     data: resp.data,

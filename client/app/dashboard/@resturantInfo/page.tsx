@@ -9,7 +9,7 @@ async function getRestaurantData() {
       headers: {
         Cookie: (await cookies()).toString(),
       },
-      next: { revalidate: 3600 },
+      cache: "no-cache",
     }
   );
 
@@ -23,8 +23,22 @@ export default async function Page() {
 
   if (!restaurant) {
     return (
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 h-full flex items-center justify-center text-gray-500">
-        Failed to load restaurant information.
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-10 flex flex-col items-center justify-center text-center">
+        <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mb-4">
+          <Store className="text-orange-600" size={32} />
+        </div>
+        <h3 className="text-xl font-bold text-gray-900 mb-2">
+          No Restaurant Found
+        </h3>
+        <p className="text-gray-500 mb-6 max-w-xs">
+          It looks like you haven't set up your restaurant profile yet.
+        </p>
+        <Link
+          href="/register-resturant"
+          className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-xl font-semibold transition-all shadow-sm hover:shadow-md"
+        >
+          Register Restaurant
+        </Link>
       </div>
     );
   }
