@@ -51,7 +51,7 @@ CREATE TABLE "MenuItem" (
     "description" TEXT,
     "imageUrl" TEXT,
     "isAvailable" BOOLEAN NOT NULL DEFAULT true,
-    "restaurantId" TEXT,
+    "resturantID" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -79,7 +79,7 @@ CREATE TABLE "Category" (
 -- CreateTable
 CREATE TABLE "Order" (
     "id" TEXT NOT NULL,
-    "restaurantId" TEXT NOT NULL,
+    "resturantID" TEXT NOT NULL,
     "totalAmount" DOUBLE PRECISION NOT NULL,
     "discount" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "status" "OrderStatus" NOT NULL DEFAULT 'PENDING',
@@ -128,13 +128,13 @@ CREATE INDEX "_CategoryToMenuItem_B_index" ON "_CategoryToMenuItem"("B");
 ALTER TABLE "Resturants" ADD CONSTRAINT "Resturants_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "MenuItem" ADD CONSTRAINT "MenuItem_restaurantId_fkey" FOREIGN KEY ("restaurantId") REFERENCES "Resturants"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "MenuItem" ADD CONSTRAINT "MenuItem_resturantID_fkey" FOREIGN KEY ("resturantID") REFERENCES "Resturants"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "MenuItemUnit" ADD CONSTRAINT "MenuItemUnit_menuItemId_fkey" FOREIGN KEY ("menuItemId") REFERENCES "MenuItem"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Order" ADD CONSTRAINT "Order_restaurantId_fkey" FOREIGN KEY ("restaurantId") REFERENCES "Resturants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Order" ADD CONSTRAINT "Order_resturantID_fkey" FOREIGN KEY ("resturantID") REFERENCES "Resturants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Order" ADD CONSTRAINT "Order_waiterId_fkey" FOREIGN KEY ("waiterId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

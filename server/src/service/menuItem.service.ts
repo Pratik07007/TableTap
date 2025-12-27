@@ -1,6 +1,22 @@
 import { prisma } from '../../prisma/client';
 
-export const createMenuService = async (userId: string, restaurantId: string, data: { name: string; description: string; category: string; imageUrl: string; isAvailable: boolean; units: { unit: string; price: number }[] }) => {
+export const getMenusService = async (resturantID: string) => {
+  try {
+    const data = await prisma.menuItem.findMany({
+      where: { resturantID },
+      include: {
+        menuCategory: true,
+        unit: true,
+      },
+    });
+
+    return { success: true, data, code: 200 };
+  } catch (err) {
+    return { success: false, error: 'Menu item retrieval failed', code: 400 };
+  }
+};
+
+export const createMenuService = async (resturantID: string, data: { name: string; description: string; category: string; imageUrl: string; isAvailable: boolean; units: { unit: string; price: number }[] }) => {
   try {
     const { name, description, category, imageUrl, isAvailable, units } = data;
     const upperCategory = category.toUpperCase();
@@ -19,27 +35,27 @@ export const createMenuService = async (userId: string, restaurantId: string, da
       data: {
         name,
         description,
-        unit: {
-          create: units.map((unit) => ({
-            unit: unit.unit,
-            price: unit.price,
-          })),
-        },
         imageUrl,
         isAvailable,
-        restaurantId: restaurantId,
+        resturantID: resturantID,
         categoryId: categoryRecord.id,
       },
+    });
+
+    await prisma.unit.createMany({
+      data: units.map((unit) => ({
+        unit: unit.unit,
+        price: unit.price,
+        menuItemId: menu.id,
+      })),
     });
 
     return {
       success: true,
       message: 'Menu Item created Successfully',
       code: 201,
-      data: menu,
     };
   } catch (error) {
-    console.log(error);
     return {
       success: false,
       error: 'Menu item creation failed',
@@ -48,25 +64,11 @@ export const createMenuService = async (userId: string, restaurantId: string, da
   }
 };
 
-export const getMenusService = async (restaurantId: string) => {
-  try {
-    const data = await prisma.menuItem.findMany({
-      where: { restaurantId },
-      // include: { unit: true, menuCategory: true },
-    });
-
-    return { success: true, data, code: 200 };
-  } catch (err) {
-    console.log('errrr', err);
-    return { success: false, error: 'Menu item retrieval failed', code: 400 };
-  }
-};
-
-export const getPublicMenusService = async (restaurantId: string) => {
+export const getPublicMenusService = async (resturantID: string) => {
   try {
     const data = await prisma.menuItem.findMany({
       where: {
-        restaurantId: restaurantId,
+        resturantID: resturantID,
         isAvailable: true,
       },
       include: { unit: true, menuCategory: true },
@@ -79,7 +81,7 @@ export const getPublicMenusService = async (restaurantId: string) => {
   }
 };
 
-export const getMenuService = async (id: string, currentRestaurantId: string) => {
+export const getMenuService = async (id: string, currentresturantID: string) => {
   try {
     const menuItem = await prisma.menuItem.findUnique({
       where: { id },
@@ -90,9 +92,9 @@ export const getMenuService = async (id: string, currentRestaurantId: string) =>
       return { success: false, message: 'Menu item not found', code: 404 };
     }
 
-    const menuItemOwnerID = menuItem.restaurantId;
+    const menuItemOwnerID = menuItem.resturantID;
 
-    if (menuItemOwnerID !== currentRestaurantId) {
+    if (menuItemOwnerID !== currentresturantID) {
       return {
         success: false,
         error: 'You are not the owner of the menu item',

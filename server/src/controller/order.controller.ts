@@ -6,7 +6,7 @@ export const createOrder = async (req: any, res: Response) => {
     const { items, discount } = req.body;
 
     const createOrderRequestedUserId = req.user.id;
-    const restaurantId = req.user.resturant.id;
+    const resturantID = req.user.resturant.id;
 
     const resturantOwner = req.user.resturant.userId;
 
@@ -62,7 +62,7 @@ export const createOrder = async (req: any, res: Response) => {
           finalAmount,
           status: 'PENDING',
           userId: createOrderRequestedUserId,
-          restaurantId: restaurantId,
+          resturantID: resturantID,
           items: {
             create: orderItemsData,
           },
@@ -82,14 +82,14 @@ export const createOrder = async (req: any, res: Response) => {
 
 export const createCustomerOrder = async (req: any, res: Response) => {
   try {
-    const { items, restaurantId } = req.body;
+    const { items, resturantID } = req.body;
     const userId = req.user.id;
 
     if (!items || items.length === 0) {
       return res.status(400).json({ success: false, message: 'No items in order' });
     }
 
-    if (!restaurantId) {
+    if (!resturantID) {
       return res.status(400).json({ success: false, message: 'Restaurant ID is required' });
     }
 
@@ -110,7 +110,7 @@ export const createCustomerOrder = async (req: any, res: Response) => {
         }
 
         // Verify item belongs to the restaurant
-        if (menuItem.restaurantId !== restaurantId) {
+        if (menuItem.resturantID !== resturantID) {
           throw new Error(`Item ${menuItem.name} does not belong to this restaurant`);
         }
 
@@ -141,7 +141,7 @@ export const createCustomerOrder = async (req: any, res: Response) => {
           finalAmount,
           status: 'PENDING',
           userId: userId,
-          restaurantId: restaurantId,
+          resturantID: resturantID,
           items: {
             create: orderItemsData,
           },
@@ -215,9 +215,9 @@ export const getAllOrders = async (req: any, res: Response) => {
 
     const whereClause: any = {};
 
-    const userRestaurantId = req.user.resturant?.id;
-    if (userRestaurantId) {
-      whereClause.restaurantId = userRestaurantId;
+    const userresturantID = req.user.resturant?.id;
+    if (userresturantID) {
+      whereClause.resturantID = userresturantID;
     }
 
     if (email) {

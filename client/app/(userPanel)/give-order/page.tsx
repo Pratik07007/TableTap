@@ -2,13 +2,13 @@ import { cookies } from "next/headers";
 import GiveOrderClient from "./GiveOrderClient";
 import { redirect } from "next/navigation";
 
-async function getPublicMenu(restaurantId: string | undefined) {
-  if (!restaurantId) return { success: false, data: [] };
+async function getPublicMenu(resturantID: string | undefined) {
+  if (!resturantID) return { success: false, data: [] };
 
   try {
     const apiUrl = `${
       process.env.BACKEND_URL || "http://localhost:8080"
-    }/api/menu/public/${restaurantId}`;
+    }/api/menu/public/${resturantID}`;
     const res = await fetch(apiUrl, {
       cache: "no-store",
     });
@@ -30,9 +30,9 @@ export default async function GiveOrderPage({
   searchParams: Promise<{ rest_id?: string }>;
 }) {
   const params = await searchParams;
-  const restaurantId = params.rest_id;
+  const resturantID = params.rest_id;
 
-  if (!restaurantId) {
+  if (!resturantID) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 flex-col gap-4 p-4 text-center">
         <h1 className="text-2xl font-bold text-gray-800">Invalid Restaurant</h1>
@@ -43,12 +43,12 @@ export default async function GiveOrderPage({
     );
   }
 
-  const response = await getPublicMenu(restaurantId);
+  const response = await getPublicMenu(resturantID);
 
   return (
     <GiveOrderClient
       menuItems={response.data || []}
-      restaurantId={restaurantId}
+      resturantID={resturantID}
     />
   );
 }

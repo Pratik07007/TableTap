@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import toast from 'react-hot-toast';
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import toast from "react-hot-toast";
 import {
   Type,
   DollarSign,
@@ -14,13 +14,13 @@ import {
   Save,
   Plus,
   X,
-  Edit2
-} from 'lucide-react';
+  Edit2,
+} from "lucide-react";
 
 export default function MenuForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const editId = searchParams.get('editId');
+  const editId = searchParams.get("editId");
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
@@ -29,40 +29,46 @@ export default function MenuForm() {
   const [newCategory, setNewCategory] = useState("");
   const [newUnit, setNewUnit] = useState("");
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    category: '',
+    name: "",
+    description: "",
+    category: "",
     units: [] as string[],
     unitPrices: {} as Record<string, string>,
-    imageUrl: '',
+    imageUrl: "",
   });
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/menu-items/get/categories`, {
-          credentials: 'include',
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/menu-items/get/categories`,
+          {
+            credentials: "include",
+          }
+        );
         const json = await res.json();
         if (res.ok && json.success) {
           setCategories(json.data.map((c: { category: string }) => c.category));
         }
       } catch (error) {
-        console.error('Failed to fetch categories', error);
+        console.error("Failed to fetch categories", error);
       }
     };
 
     const fetchUnits = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/menu-items/get/units`, {
-          credentials: 'include',
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/menu-items/get/units`,
+          {
+            credentials: "include",
+          }
+        );
         const json = await res.json();
         if (res.ok && json.success) {
           setUnits(json.data.map((u: { unit: string }) => u.unit));
         }
       } catch (error) {
-        console.error('Failed to fetch units', error);
+        console.error("Failed to fetch units", error);
       }
     };
 
@@ -73,12 +79,12 @@ export default function MenuForm() {
   useEffect(() => {
     if (!editId) {
       setFormData({
-        name: '',
-        description: '',
-        category: '',
+        name: "",
+        description: "",
+        category: "",
         units: [],
         unitPrices: {},
-        imageUrl: '',
+        imageUrl: "",
       });
       return;
     }
@@ -86,14 +92,19 @@ export default function MenuForm() {
     const fetchItem = async () => {
       setFetching(true);
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/menu-items/${editId}`, {
-          credentials: 'include',
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/menu-items/${editId}`,
+          {
+            credentials: "include",
+          }
+        );
         const json = await res.json();
         if (res.ok && json.success) {
           const item = json.data;
           // Map backend data to form
-          const units = item.unit ? item.unit.map((u: { unit: string }) => u.unit) : [];
+          const units = item.unit
+            ? item.unit.map((u: { unit: string }) => u.unit)
+            : [];
           const unitPrices: Record<string, string> = {};
           if (item.unit) {
             item.unit.forEach((u: { unit: string; price: number }) => {
@@ -103,17 +114,19 @@ export default function MenuForm() {
 
           setFormData({
             name: item.name,
-            description: item.description || '',
-            category: item.category || (item.menuCategory ? item.menuCategory.category : ''), // Handle both raw category string or relation
+            description: item.description || "",
+            category:
+              item.category ||
+              (item.menuCategory ? item.menuCategory.category : ""), // Handle both raw category string or relation
             units: units,
             unitPrices: unitPrices,
-            imageUrl: item.imageUrl || '',
+            imageUrl: item.imageUrl || "",
           });
         } else {
-          toast.error('Failed to load item details');
+          toast.error("Failed to load item details");
         }
       } catch (error) {
-        toast.error('Network error');
+        toast.error("Network error");
       } finally {
         setFetching(false);
       }
@@ -128,9 +141,11 @@ export default function MenuForm() {
 
     setLoading(true);
 
-    const missingPrices = formData.units.filter(u => !formData.unitPrices[u] || formData.unitPrices[u].trim() === '');
+    const missingPrices = formData.units.filter(
+      (u) => !formData.unitPrices[u] || formData.unitPrices[u].trim() === ""
+    );
     if (missingPrices.length > 0) {
-      toast.error(`Please set a price for: ${missingPrices.join(', ')}`);
+      toast.error(`Please set a price for: ${missingPrices.join(", ")}`);
       setLoading(false);
       return;
     }
@@ -138,80 +153,84 @@ export default function MenuForm() {
     const payload = {
       name: formData.name,
       description: formData.description,
-      units: formData.units.map(unitName => ({
+      units: formData.units.map((unitName) => ({
         unit: unitName,
-        price: Number(formData.unitPrices[unitName])
+        price: Number(formData.unitPrices[unitName]),
       })),
       category: formData.category,
       imageUrl: formData.imageUrl,
     };
 
-    const method = editId ? 'PUT' : 'POST';
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/menu-items${editId ? `/${editId}` : ''}`;
+    const method = editId ? "PUT" : "POST";
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/menu-items${
+      editId ? `/${editId}` : ""
+    }`;
 
     try {
       const res = await fetch(url, {
         method,
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       const json = await res.json();
 
       if (!res.ok || !json.success) {
-        const msg = Array.isArray(json.message) ? json.message[0]?.message : json.message;
-        toast.error(typeof msg === 'string' ? msg : 'Save failed');
+        const msg = Array.isArray(json.message)
+          ? json.message[0]?.message
+          : json.message;
+        toast.error(typeof msg === "string" ? msg : "Save failed");
         return;
       }
 
-      toast.success(editId ? 'Menu item updated' : 'Menu item added');
+      toast.success(editId ? "Menu item updated" : "Menu item added");
 
-      // Refresh the list and clear edit mode
       router.refresh();
       if (editId) {
-        router.push('/menu');
+        router.push("/menu");
       } else {
-        // Reset form if adding new
         setFormData({
-          name: '',
-          description: '',
-          category: '',
+          name: "",
+          description: "",
+          category: "",
           units: [],
           unitPrices: {},
-          imageUrl: '',
+          imageUrl: "",
         });
       }
     } catch (error) {
-      toast.error('Network error');
+      toast.error("Network error");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleUnitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = e.target;
-    setFormData(prev => {
-      
+    setFormData((prev) => {
       if (checked) {
         return { ...prev, units: [...prev.units, value] };
       } else {
-        // Optional: Could remove price from unitPrices here, but keeping it is harmless
-        const newUnits = prev.units.filter(unit => unit !== value);
+        const newUnits = prev.units.filter((unit) => unit !== value);
         const newPrices = { ...prev.unitPrices };
-        delete newPrices[value]; // Clean up price
+        delete newPrices[value];
         return { ...prev, units: newUnits, unitPrices: newPrices };
       }
     });
   };
 
   const handleUnitPriceChange = (unit: string, price: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      unitPrices: { ...prev.unitPrices, [unit]: price }
+      unitPrices: { ...prev.unitPrices, [unit]: price },
     }));
   };
 
@@ -225,29 +244,28 @@ export default function MenuForm() {
       toast.error("Category already exists.");
       return;
     }
-    setCategories(prev => [...prev, upperCategory]);
-    setFormData(prev => ({ ...prev, category: upperCategory }));
+    setCategories((prev) => [...prev, upperCategory]);
+    setFormData((prev) => ({ ...prev, category: upperCategory }));
     setNewCategory("");
     toast.success(`Category "${upperCategory}" added and selected.`);
   };
 
   const handleAddNewUnit = () => {
-    
     const upperUnit = newUnit.toUpperCase();
     if (units.includes(upperUnit)) {
       toast.error("Unit already exists.");
       return;
     }
-    setUnits(prev => [...prev, upperUnit]);
+    setUnits((prev) => [...prev, upperUnit]);
     if (!formData.units.includes(upperUnit)) {
-      setFormData(prev => ({ ...prev, units: [...prev.units, upperUnit] }));
+      setFormData((prev) => ({ ...prev, units: [...prev.units, upperUnit] }));
     }
     setNewUnit("");
     toast.success(`Unit "${upperUnit}" added and selected.`);
   };
 
   const handleCancel = () => {
-    router.push('/menu');
+    router.back();
   };
 
   if (fetching) {
@@ -265,8 +283,12 @@ export default function MenuForm() {
     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-          {editId ? <Edit2 size={18} className="text-orange-600" /> : <Plus size={18} className="text-orange-600" />}
-          {editId ? 'Edit Menu Item' : 'Add New Item'}
+          {editId ? (
+            <Edit2 size={18} className="text-orange-600" />
+          ) : (
+            <Plus size={18} className="text-orange-600" />
+          )}
+          {editId ? "Edit Menu Item" : "Add New Item"}
         </h2>
         {editId && (
           <button
@@ -329,9 +351,13 @@ export default function MenuForm() {
               aria-label="Category"
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
             >
-              <option value="" disabled>Select a category</option>
+              <option value="" disabled>
+                Select a category
+              </option>
               {categories.map((c) => (
-                <option key={c} value={c}>{c}</option>
+                <option key={c} value={c}>
+                  {c}
+                </option>
               ))}
             </select>
             <div className="flex items-center gap-2 pt-2">
@@ -379,7 +405,14 @@ export default function MenuForm() {
             {units.map((q) => {
               const isSelected = formData.units.includes(q);
               return (
-                <div key={q} className={`relative p-3 rounded-xl border transition-all ${isSelected ? 'border-orange-500 bg-orange-50' : 'border-gray-200 bg-white'}`}>
+                <div
+                  key={q}
+                  className={`relative p-3 rounded-xl border transition-all ${
+                    isSelected
+                      ? "border-orange-500 bg-orange-50"
+                      : "border-gray-200 bg-white"
+                  }`}
+                >
                   <label className="flex items-center gap-2 cursor-pointer mb-2">
                     <input
                       type="checkbox"
@@ -390,17 +423,27 @@ export default function MenuForm() {
                       className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
                       aria-label={`Select unit ${q}`}
                     />
-                    <span className={`font-medium capitalize ${isSelected ? 'text-orange-900' : 'text-gray-600'}`}>{q}</span>
+                    <span
+                      className={`font-medium capitalize ${
+                        isSelected ? "text-orange-900" : "text-gray-600"
+                      }`}
+                    >
+                      {q}
+                    </span>
                   </label>
                   {isSelected && (
                     <div className="relative mt-2">
-                      <span className="absolute left-3 top-2.5 text-xs font-bold text-gray-500">$</span>
+                      <span className="absolute left-3 top-2.5 text-xs font-bold text-gray-500">
+                        $
+                      </span>
                       <input
                         type="number"
                         step="0.01"
                         placeholder="0.00"
-                        value={formData.unitPrices[q] || ''}
-                        onChange={(e) => handleUnitPriceChange(q, e.target.value)}
+                        value={formData.unitPrices[q] || ""}
+                        onChange={(e) =>
+                          handleUnitPriceChange(q, e.target.value)
+                        }
                         className="w-full pl-6 pr-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
                         required
                       />
@@ -436,10 +479,11 @@ export default function MenuForm() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full md:w-auto px-8 py-3 rounded-full font-bold shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 ${loading
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none'
-              : 'bg-orange-600 text-white hover:bg-orange-700 shadow-orange-600/20'
-              }`}
+            className={`w-full md:w-auto px-8 py-3 rounded-full font-bold shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 ${
+              loading
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed shadow-none"
+                : "bg-orange-600 text-white hover:bg-orange-700 shadow-orange-600/20"
+            }`}
           >
             {loading ? (
               <>
@@ -448,7 +492,7 @@ export default function MenuForm() {
             ) : (
               <>
                 {editId ? <Save size={18} /> : <Plus size={18} />}
-                {editId ? 'Update Item' : 'Add to Menu'}
+                {editId ? "Update Item" : "Add to Menu"}
               </>
             )}
           </button>
@@ -457,4 +501,3 @@ export default function MenuForm() {
     </div>
   );
 }
-

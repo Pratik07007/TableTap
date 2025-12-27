@@ -21,7 +21,7 @@ model User {
   emailVerificationToken   String?
   emailVerificationExpires DateTime?
 
-  resetPasswordToken   String? 
+  resetPasswordToken   String?
   resetPasswordExpires DateTime?
 
   createdAt DateTime @default(now())
@@ -66,8 +66,8 @@ model MenuItem {
   imageUrl    String?
   isAvailable Boolean @default(true)
 
-  restaurantId String?
-  restaurant   Resturants? @relation(fields: [restaurantId], references: [id])
+  resturantID String
+  restaurant  Resturants @relation(fields: [resturantID], references: [id])
 
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
@@ -100,8 +100,8 @@ model Order {
   userId String?
   user   User?   @relation(fields: [userId], references: [id])
 
-  restaurantId String?
-  restaurant   Resturants? @relation(fields: [restaurantId], references: [id])
+  resturantID String?
+  restaurant  Resturants? @relation(fields: [resturantID], references: [id])
 
   items OrderItem[]
 

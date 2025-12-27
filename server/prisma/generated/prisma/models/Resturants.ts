@@ -546,6 +546,11 @@ export type ResturantsMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
+export type ResturantsScalarRelationFilter = {
+  is?: Prisma.ResturantsWhereInput
+  isNot?: Prisma.ResturantsWhereInput
+}
+
 export type ResturantsCreateNestedOneWithoutOwnerInput = {
   create?: Prisma.XOR<Prisma.ResturantsCreateWithoutOwnerInput, Prisma.ResturantsUncheckedCreateWithoutOwnerInput>
   connectOrCreate?: Prisma.ResturantsCreateOrConnectWithoutOwnerInput
@@ -584,12 +589,10 @@ export type ResturantsCreateNestedOneWithoutMenuItemsInput = {
   connect?: Prisma.ResturantsWhereUniqueInput
 }
 
-export type ResturantsUpdateOneWithoutMenuItemsNestedInput = {
+export type ResturantsUpdateOneRequiredWithoutMenuItemsNestedInput = {
   create?: Prisma.XOR<Prisma.ResturantsCreateWithoutMenuItemsInput, Prisma.ResturantsUncheckedCreateWithoutMenuItemsInput>
   connectOrCreate?: Prisma.ResturantsCreateOrConnectWithoutMenuItemsInput
   upsert?: Prisma.ResturantsUpsertWithoutMenuItemsInput
-  disconnect?: Prisma.ResturantsWhereInput | boolean
-  delete?: Prisma.ResturantsWhereInput | boolean
   connect?: Prisma.ResturantsWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.ResturantsUpdateToOneWithWhereWithoutMenuItemsInput, Prisma.ResturantsUpdateWithoutMenuItemsInput>, Prisma.ResturantsUncheckedUpdateWithoutMenuItemsInput>
 }

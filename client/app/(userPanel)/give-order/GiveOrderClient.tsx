@@ -35,10 +35,10 @@ type CartItem = {
 
 export default function GiveOrderClient({
   menuItems,
-  restaurantId,
+  resturantID,
 }: {
   menuItems: MenuItem[];
-  restaurantId: string;
+  resturantID: string;
 }) {
   const router = useRouter();
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -111,7 +111,7 @@ export default function GiveOrderClient({
           unitName: item.unitName,
           quantity: item.quantity,
         })),
-        restaurantId: restaurantId,
+        resturantID: resturantID,
       };
 
       const res = await fetch(

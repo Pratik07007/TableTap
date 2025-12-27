@@ -1,27 +1,26 @@
 import { Response } from 'express';
 import { createMenuService, getMenusService, getPublicMenusService, getMenuService, updateMenuService, deleteMenuService, getCategoryService, getUnitsService, makeMenuAvailableService } from '../service/menuItem.service';
 
-export const createMenuItem = async (req: any, res: Response) => {
-  const result = await createMenuService(req.user.id, req.user.resturant.id, req.body);
-  if (result.success) {
-    res.status(result.code).json({ success: true, message: result.message, data: result.data });
-  } else {
-    res.status(result.code).json({ success: false, error: result.error });
-  }
-};
-
 export const getMenuItems = async (req: any, res: Response) => {
   const result = await getMenusService(req.user.resturant.id);
   if (result.success) {
-    res.status(result.code).json({ success: true, data: result.data });
+    res.status(result.code).json({ ...result });
+  } else {
+    res.status(result.code).json({ ...result });
+  }
+};
+export const createMenuItem = async (req: any, res: Response) => {
+  const result = await createMenuService(req.user.resturant.id, req.body);
+  if (result.success) {
+    res.status(result.code).json({ success: true, message: result.message });
   } else {
     res.status(result.code).json({ success: false, error: result.error });
   }
 };
 
 export const getPublicMenuItems = async (req: any, res: Response) => {
-  const { restaurantId } = req.params;
-  const result = await getPublicMenusService(restaurantId);
+  const { resturantID } = req.params;
+  const result = await getPublicMenusService(resturantID);
   if (result.success) {
     res.status(result.code).json({ success: true, data: result.data });
   } else {
