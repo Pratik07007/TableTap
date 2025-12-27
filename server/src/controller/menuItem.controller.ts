@@ -1,264 +1,88 @@
 import { Response } from 'express';
-import { prisma } from '../../prisma/client';
+import { createMenuService, getMenusService, getPublicMenusService, getMenuService, updateMenuService, deleteMenuService, getCategoryService, getUnitsService, makeMenuAvailableService } from '../service/menuItem.service';
 
 export const createMenuItem = async (req: any, res: Response) => {
-  try {
-    const { name, description, category, imageUrl, isAvailable, units } = req.body;
-
-    const upperCategory = category.toUpperCase();
-
-    let categoryRecord = await prisma.category.findFirst({
-      where: { category: upperCategory },
-    });
-
-    if (!categoryRecord) {
-      categoryRecord = await prisma.category.create({
-        data: { category: upperCategory },
-      });
-    }
-
-    const menu = await prisma.menuItem.create({
-      data: {
-        name,
-        description,
-        unit: {
-          create: units.map((unit: { unit: string; price: number }) => ({
-            unit: unit.unit,
-            price: unit.price,
-          })),
-        },
-        imageUrl,
-        isAvailable,
-        restaurantId: req.user.resturant.id,
-        categoryId: categoryRecord.id,
-      },
-    });
-    res.status(201).json({ success: true, message: 'Menu Item created Successfully' });
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ success: false, error: 'Menu item creation failed' });
+  const result = await createMenuService(req.user.id, req.user.resturant.id, req.body);
+  if (result.success) {
+    res.status(result.code).json({ success: true, message: result.message, data: result.data });
+  } else {
+    res.status(result.code).json({ success: false, error: result.error });
   }
 };
 
 export const getMenuItems = async (req: any, res: Response) => {
-  try {
-    const requestedUser = req.user;
-
-    const data = await prisma.menuItem.findMany({
-      where: { restaurantId: requestedUser.resturant.id },
-      include: { unit: true, menuCategory: true },
-    });
-
-    res.status(200).json({ success: true, data });
-  } catch (err) {
-    console.log('errrr', err);
-    res.status(400).json({ success: false, error: 'Menu item retrieval failed' });
+  const result = await getMenusService(req.user.resturant.id);
+  if (result.success) {
+    res.status(result.code).json({ success: true, data: result.data });
+  } else {
+    res.status(result.code).json({ success: false, error: result.error });
   }
 };
 
 export const getPublicMenuItems = async (req: any, res: Response) => {
-  try {
-    const { restaurantId } = req.params;
-
-    const data = await prisma.menuItem.findMany({
-      where: {
-        restaurantId: restaurantId,
-        isAvailable: true,
-      },
-      include: { unit: true, menuCategory: true },
-    });
-
-    res.status(200).json({ success: true, data });
-  } catch (err) {
-    console.log(err);
-    res.status(400).json({ success: false, error: 'Public menu item retrieval failed' });
+  const { restaurantId } = req.params;
+  const result = await getPublicMenusService(restaurantId);
+  if (result.success) {
+    res.status(result.code).json({ success: true, data: result.data });
+  } else {
+    res.status(result.code).json({ success: false, error: result.error });
   }
 };
 
 export const getMenuItem = async (req: any, res: Response) => {
-  try {
-    const { id } = req.params;
-    const menuItem = await prisma.menuItem.findUnique({
-      where: { id },
-      include: { unit: true, menuCategory: true },
-    });
-
-    if (!menuItem) {
-      return res.status(404).json({ success: false, message: 'Menu item not found' });
-    }
-
-    const menuItemOwnerID = menuItem.restaurantId;
-    const currentUserID = req.user.resturant.id;
-
-    if (menuItemOwnerID !== currentUserID) {
-      // Actually restaurantId is on menuItem.
-      // req.user.resturant.id should match menuItem.restaurantId
-      return res.status(403).json({
-        success: false,
-        error: 'You are not the owner of the menu item',
-      });
-    }
-
-    res.status(200).json({ success: true, data: menuItem });
-  } catch (err) {
-    console.log(err);
-    res.status(400).json({ success: false, error: 'Menu item retrieval failed' });
+  const { id } = req.params;
+  const result = await getMenuService(id, req.user.resturant.id);
+  if (result.success) {
+    res.status(result.code).json({ success: true, data: result.data });
+  } else {
+    res.status(result.code).json({ success: false, error: result.error, message: result.message });
   }
 };
 
 export const updateMenuItem = async (req: any, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { name, description, category, units } = req.body;
-    req.body;
-    const upperCategory = category.toUpperCase();
-
-    const menuItem = await prisma.menuItem.findUnique({
-      where: { id },
-      include: { restaurant: true },
-    });
-
-    if (!menuItem) {
-      return res.status(404).json({ success: false, message: 'Menu item not found' });
-    }
-    const menuItemOwnerID = menuItem?.restaurant?.userId;
-    const currentUserID = req.user.id;
-
-    if (menuItemOwnerID !== currentUserID) {
-      return res.status(403).json({
-        success: false,
-        error: 'You are not the owner of the menu item',
-      });
-    }
-    let categoryRecord = await prisma.category.findFirst({
-      where: { category: upperCategory },
-    });
-
-    if (!categoryRecord) {
-      categoryRecord = await prisma.category.create({
-        data: { category: upperCategory },
-      });
-    }
-
-    const updated = await prisma.$transaction(async (tx) => {
-      await tx.menuItem.update({
-        where: { id },
-        data: {
-          name,
-          description,
-          categoryId: categoryRecord.id,
-          imageUrl: req.body.imageUrl,
-        },
-      });
-
-      await tx.unit.deleteMany({
-        where: { menuItemId: id },
-      });
-
-      if (units && units.length > 0) {
-        await tx.unit.createMany({
-          data: units.map((unit: { unit: string; price: number }) => ({
-            unit: unit.unit,
-            price: unit.price,
-            menuItemId: id,
-          })),
-        });
-      }
-
-      // 4. Return the fully updated item
-      return tx.menuItem.findUnique({
-        where: { id },
-        include: { unit: true, menuCategory: true },
-      });
-    });
-
-    res.status(200).json({ success: true, data: updated });
-  } catch (err: any) {
-    return res.status(404).json({ success: false, message: 'Menu update request failed' });
+  const { id } = req.params;
+  const result = await updateMenuService(id, req.user.id, req.body);
+  if (result.success) {
+    res.status(result.code).json({ success: true, data: result.data });
+  } else {
+    res.status(result.code).json({ success: false, message: result.message, error: result.error });
   }
 };
 
 export const deleteMenuItem = async (req: any, res: Response) => {
-  try {
-    const { id } = req.params;
-    const existing = await prisma.menuItem.findUnique({
-      where: { id },
-      include: { restaurant: true },
-    });
-
-    if (!existing) {
-      return res.status(404).json({ success: false, message: 'Menu item not found' });
-    }
-    const menuItemOwner = existing.restaurant?.userId;
-    const deleteRequestedUser = req.user?.id;
-    if (menuItemOwner !== deleteRequestedUser) {
-      return res.status(403).json({
-        success: false,
-        message: 'You are not the one who created the menu so you cant delete this item',
-      });
-    }
-    await prisma.menuItem.update({
-      where: { id },
-      data: { isAvailable: false },
-    });
-    res.status(200).json({
-      success: true,
-      message: 'This items is made unavailable',
-    });
-  } catch {
-    return res.status(404).json({ success: false, message: 'Menu deleation failed' });
+  const { id } = req.params;
+  const result = await deleteMenuService(id, req.user.id);
+  if (result.success) {
+    res.status(result.code).json({ success: true, message: result.message });
+  } else {
+    res.status(result.code).json({ success: false, message: result.message });
   }
 };
 
 export const getCategory = async (req: any, res: Response) => {
-  try {
-    const categories = await prisma.category.findMany({
-      distinct: ['category'],
-    });
-    res.status(200).json({ success: true, data: categories });
-  } catch (err: any) {
-    return res.status(400).json({ success: false, message: 'Category retrieval failed' });
+  const result = await getCategoryService();
+  if (result.success) {
+    res.status(result.code).json({ success: true, data: result.data });
+  } else {
+    res.status(result.code).json({ success: false, message: result.message });
   }
 };
 
 export const getUnits = async (req: any, res: Response) => {
-  try {
-    const units = await prisma.unit.findMany({
-      distinct: ['unit'],
-    });
-    res.status(200).json({ success: true, data: units });
-  } catch (err: any) {
-    return res.status(400).json({ success: false, message: 'Unit retrieval failed' });
+  const result = await getUnitsService();
+  if (result.success) {
+    res.status(result.code).json({ success: true, data: result.data });
+  } else {
+    res.status(result.code).json({ success: false, message: result.message, err: result.err });
   }
 };
 
 export const makeMenuItemAvailable = async (req: any, res: Response) => {
-  try {
-    const { id } = req.params;
-    const existing = await prisma.menuItem.findUnique({
-      where: { id },
-      include: { restaurant: true },
-    });
-
-    if (!existing) {
-      return res.status(404).json({ success: false, message: 'Menu item not found' });
-    }
-
-    const menuItemOwner = existing.restaurant?.userId;
-    const deleteRequestedUser = req.user?.id;
-    if (menuItemOwner !== deleteRequestedUser) {
-      return res.status(403).json({
-        success: false,
-        message: 'You are not the one who created the menu so you cannot make  this item available',
-      });
-    }
-
-    await prisma.menuItem.update({
-      where: { id },
-      data: { isAvailable: true },
-    });
-    res.status(200).json({ success: true, message: 'This item  is now available ' });
-  } catch {
-    return res.status(404).json({ success: false, message: 'Menu available request failed' });
+  const { id } = req.params;
+  const result = await makeMenuAvailableService(id, req.user.id);
+  if (result.success) {
+    res.status(result.code).json({ success: true, message: result.message });
+  } else {
+    res.status(result.code).json({ success: false, message: result.message });
   }
 };

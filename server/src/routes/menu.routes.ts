@@ -7,8 +7,9 @@ import { protect } from '../middleware/protect';
 
 const menuItemRouter = Router();
 
-menuItemRouter.post('/', validate(menuItemSchema), protect('admin'), createMenuItem);
 menuItemRouter.get('/', protect('admin'), getMenuItems);
+
+menuItemRouter.post('/', validate(menuItemSchema), protect('admin'), createMenuItem);
 menuItemRouter.get('/public/:restaurantId', getPublicMenuItems);
 menuItemRouter.get('/:id', protect('admin'), getMenuItem);
 menuItemRouter.put('/:id', protect('admin'), updateMenuItem);
