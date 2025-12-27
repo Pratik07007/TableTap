@@ -1,23 +1,22 @@
-import { cookies } from "next/headers";
 import GiveOrderClient from "./GiveOrderClient";
-import { redirect } from "next/navigation";
 
 async function getPublicMenu(resturantID: string | undefined) {
   if (!resturantID) return { success: false, data: [] };
 
   try {
-    const apiUrl = `${
-      process.env.BACKEND_URL || "http://localhost:8080"
-    }/api/menu/public/${resturantID}`;
-    const res = await fetch(apiUrl, {
-      cache: "no-store",
-    });
-
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/menu-items/public/${resturantID}`,
+      {
+        cache: "no-store",
+        credentials: "include",
+      }
+    );
+    const data = await res.json();
     if (!res.ok) {
       console.error(`Failed to fetch menu: ${res.status}`);
       return { success: false, data: [] };
     }
-    return await res.json();
+    return data;
   } catch (error) {
     console.error("Fetch error:", error);
     return { success: false, data: [] };

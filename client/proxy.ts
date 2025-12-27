@@ -26,7 +26,6 @@ export async function proxy(request: NextRequest) {
     console.error("Error validaiting the permissions");
   }
 
-  // Simple checks
   if (isLoggedIn && authRoutes.includes(pathname)) {
     return NextResponse.redirect(new URL("/", request.url));
   }
@@ -36,6 +35,9 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isLoggedIn && userRole !== "ADMIN" && adminOnlyRoute.includes(pathname)) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+  if (userRole === "ADMIN" && userOnlyRoute.includes(pathname)) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
@@ -56,5 +58,9 @@ const protectedRoutes = [
   "/register-resturant",
   "/update-resturant",
   "/orders-details",
+  "/give-order",
+  "/my-orders",
 ];
+
+const userOnlyRoute = ["/give-order", "/my-orders"];
 const adminOnlyRoute = ["/menu", "/register-resturant", "/update-resturant"];

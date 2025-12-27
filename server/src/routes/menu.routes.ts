@@ -12,6 +12,7 @@ menuItemRouter.get('/', protect('admin'), getMenuItems);
 menuItemRouter.post('/', validate(menuItemSchema), protect('admin'), createMenuItem);
 
 menuItemRouter.get('/public/:resturantID', getPublicMenuItems);
+
 menuItemRouter.get('/:id', protect('admin'), getMenuItem);
 menuItemRouter.put('/:id', protect('admin'), updateMenuItem);
 menuItemRouter.delete('/:id', protect('admin'), deleteMenuItem);

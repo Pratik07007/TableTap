@@ -68,7 +68,7 @@ export const getPublicMenusService = async (resturantID: string) => {
   try {
     const data = await prisma.menuItem.findMany({
       where: {
-        resturantID: resturantID,
+        resturantID,
         isAvailable: true,
       },
       include: { unit: true, menuCategory: true },
