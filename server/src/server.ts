@@ -23,7 +23,7 @@ app.use(express.json());
 
 app.use('/api/auth', authRouter); // ✅ done
 
-app.use('/api/resturant', resturantRouter);
+app.use('/api/resturant', resturantRouter); // ✅ done
 
 app.use('/api/menu-items', menuItemRouter);
 app.use('/api/orders', orderRouter);

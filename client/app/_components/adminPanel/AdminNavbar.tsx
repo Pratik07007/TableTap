@@ -16,7 +16,7 @@ import { UpdateRestaurantModal } from "./UpdateResturantModal";
 
 export const AdminNavbar = () => {
   const router = useRouter();
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+
   const [restaurantData, setRestaurantData] = useState<any>(null); // Using any for simplicity here, ideally strict type
 
   const onLogout = async () => {
@@ -33,36 +33,6 @@ export const AdminNavbar = () => {
         console.log("Error logging out");
         toast.error("Logout failed");
       }
-    }
-  };
-
-  const handleRestaurantClick = async () => {
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/resturant/me`,
-        {
-          method: "GET",
-          credentials: "include",
-        }
-      );
-      const json = await res.json();
-
-      if (res.ok && json.success && json.data) {
-        // Handle nested data structure if necessary, though controller sends user.resturant directly or inside data
-        const data = json.data?.resturant ?? json.data;
-        if (data) {
-          setRestaurantData(data);
-          setIsUpdateModalOpen(true);
-        } else {
-          router.push("/register-resturant");
-        }
-      } else {
-        // If not found or error, redirect to register
-        router.push("/register-resturant");
-      }
-    } catch (error) {
-      console.error("Failed to check restaurant status", error);
-      toast.error("Failed to check restaurant information");
     }
   };
 
@@ -109,12 +79,6 @@ export const AdminNavbar = () => {
                 >
                   <ClipboardList size={18} /> Orders
                 </Link>
-                <button
-                  onClick={handleRestaurantClick}
-                  className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2"
-                >
-                  <Store size={18} /> Restaurant Info
-                </button>
               </div>
             </div>
 
