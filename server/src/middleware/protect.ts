@@ -4,10 +4,10 @@ import { prisma } from '../../prisma/client';
 
 export const protect = (...roles: string[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
+    console.log(' Protect called');
     const token = req.cookies.token;
     if (!token) {
       return res.status(401).json({
-        success: false,
         error: 'Authentication token not found',
       });
     }
@@ -20,7 +20,6 @@ export const protect = (...roles: string[]) => {
 
       if (!decoded) {
         return res.status(401).json({
-          success: false,
           error: 'Invalid authentication token',
         });
       }
@@ -31,29 +30,27 @@ export const protect = (...roles: string[]) => {
           role: true,
           email: true,
           resturant: true,
+          firstName: true,
+          lastName: true,
         },
       });
 
       if (!user) {
         return res.status(401).json({
-          success: false,
           error: 'Insufficient permissions',
         });
       }
       if (roles.length > 0 && !roles.map((r) => r.toUpperCase()).includes(user.role.toUpperCase())) {
         return res.status(403).json({
-          success: false,
           error: 'Insufficient permissions',
         });
       }
 
       (req as any).user = user;
-
       next();
     } catch (error) {
-      console.log('PROTECT ERROR', error);
+      console.log('Error From src/middleware/protect.ts', error);
       return res.status(401).json({
-        success: false,
         error: 'Invalid or expired token',
       });
     }

@@ -21,7 +21,7 @@ app.use(cookieParser());
 
 app.use(express.json());
 
-app.use('/api/auth', authRouter); 
+app.use('/api/auth', authRouter); // ✅ done
 
 app.use('/api/resturant', resturantRouter);
 
