@@ -65,6 +65,8 @@ export const menuItemSchema = z.object({
   isAvailable: z.boolean().optional(),
 });
 
+export const updateMenuItemSchema = menuItemSchema.partial();
+
 export const forgotPasswordSchema = z.object({
   email: z.email('Invalid email address'),
 });
@@ -97,3 +99,13 @@ export const verifyEmailSchema = z.object({
 });
 
 export const updateResturantSchema = resturantSchema.partial();
+
+export type RegisterInput = z.infer<typeof registerSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;
+export type ResturantInput = z.infer<typeof resturantSchema>;
+export type MenuItemInput = z.infer<typeof menuItemSchema>;
+export type UpdateMenuItemInput = z.infer<typeof updateMenuItemSchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
+export type UpdateResturantInput = z.infer<typeof updateResturantSchema>;

@@ -109,10 +109,9 @@ export const getMenuService = async (id: string, currentresturantID: string) => 
   }
 };
 
-export const updateMenuService = async (id: string, userId: string, data: { name: string; description: string; category: string; units: { unit: string; price: number }[]; imageUrl?: string }) => {
+export const updateMenuService = async (id: string, userId: string, data: any) => {
   try {
-    const { name, description, category, units } = data;
-    const upperCategory = category.toUpperCase();
+    const upperCategory = data.category.toUpperCase();
 
     const menuItem = await prisma.menuItem.findUnique({
       where: { id },
@@ -146,8 +145,8 @@ export const updateMenuService = async (id: string, userId: string, data: { name
       await tx.menuItem.update({
         where: { id },
         data: {
-          name,
-          description,
+          name: data.name,
+          description: data.description,
           categoryId: categoryRecord.id,
           imageUrl: data.imageUrl,
         },
@@ -157,9 +156,9 @@ export const updateMenuService = async (id: string, userId: string, data: { name
         where: { menuItemId: id },
       });
 
-      if (units && units.length > 0) {
+      if (data.units && data.units.length > 0) {
         await tx.unit.createMany({
-          data: units.map((unit) => ({
+          data: data.units.map((unit: { unit: string; price: number }) => ({
             unit: unit.unit,
             price: unit.price,
             menuItemId: id,
@@ -213,28 +212,6 @@ export const deleteMenuService = async (id: string, userId: string) => {
   }
 };
 
-export const getCategoryService = async () => {
-  try {
-    const categories = await prisma.category.findMany({
-      distinct: ['category'],
-    });
-    return { success: true, data: categories, code: 200 };
-  } catch (err: any) {
-    return { success: false, message: 'Category retrieval failed', code: 400 };
-  }
-};
-
-export const getUnitsService = async () => {
-  try {
-    const units = await prisma.unit.findMany({
-      distinct: ['unit'],
-    });
-    return { success: true, data: units, code: 200 };
-  } catch (err: any) {
-    return { success: false, message: 'Unit retrieval failed', err, code: 400 };
-  }
-};
-
 export const makeMenuAvailableService = async (id: string, userId: string) => {
   try {
     const existing = await prisma.menuItem.findUnique({
@@ -263,5 +240,27 @@ export const makeMenuAvailableService = async (id: string, userId: string) => {
     return { success: true, message: 'This item  is now available ', code: 200 };
   } catch {
     return { success: false, message: 'Menu available request failed', code: 404 };
+  }
+};
+
+export const getCategoryService = async () => {
+  try {
+    const categories = await prisma.category.findMany({
+      distinct: ['category'],
+    });
+    return { success: true, data: categories, code: 200 };
+  } catch (err: any) {
+    return { success: false, message: 'Category retrieval failed', code: 400 };
+  }
+};
+
+export const getUnitsService = async () => {
+  try {
+    const units = await prisma.unit.findMany({
+      distinct: ['unit'],
+    });
+    return { success: true, data: units, code: 200 };
+  } catch (err: any) {
+    return { success: false, message: 'Unit retrieval failed', err, code: 400 };
   }
 };

@@ -17,6 +17,7 @@ menuItemRouter.get('/:id', protect('admin'), getMenuItem);
 menuItemRouter.put('/:id', protect('admin'), updateMenuItem);
 menuItemRouter.delete('/:id', protect('admin'), deleteMenuItem);
 menuItemRouter.patch('/:id/available', protect('admin'), makeMenuItemAvailable);
+
 menuItemRouter.get('/get/categories', protect('admin'), getCategory);
 menuItemRouter.get('/get/units', protect('admin'), getUnits);
 

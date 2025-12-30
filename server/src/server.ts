@@ -25,7 +25,8 @@ app.use('/api/auth', authRouter); // ✅ done
 
 app.use('/api/resturant', resturantRouter); // ✅ done
 
-app.use('/api/menu-items', menuItemRouter);
+app.use('/api/menu-items', menuItemRouter); // ✅ done
+
 app.use('/api/orders', orderRouter);
 
 app.listen(PORT, () => {
