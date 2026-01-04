@@ -109,3 +109,15 @@ export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
 export type UpdateResturantInput = z.infer<typeof updateResturantSchema>;
+
+export const generateBillSchema = z.object({
+  orderId: z.string().min(1, 'Order ID is required'),
+});
+
+export const payBillSchema = z.object({
+  billId: z.string().min(1, 'Bill ID is required'),
+  paymentMethod: z.enum(['CASH', 'CARD', 'ONLINE']),
+});
+
+export type GenerateBillInput = z.infer<typeof generateBillSchema>;
+export type PayBillInput = z.infer<typeof payBillSchema>;

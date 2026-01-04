@@ -175,6 +175,7 @@ export const getMyOrdersService = async (userId: string, page: number = 1, limit
             name: true, // Include restaurant name for display
           },
         },
+        bill: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -240,6 +241,7 @@ export const getAllOrdersService = async (resturantId: string | undefined, page:
             menuItem: true,
           },
         },
+        bill: true,
       },
       orderBy: {
         createdAt: 'desc',

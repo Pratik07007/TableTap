@@ -6,6 +6,7 @@ import authRouter from './routes/auth.routes';
 import { resturantRouter } from './routes/resturant.routes';
 import menuItemRouter from './routes/menu.routes';
 import orderRouter from './routes/order.routes';
+import billingRouter from './routes/billing.routes';
 dotenv.config();
 
 const app = express();
@@ -28,6 +29,7 @@ app.use('/api/resturant', resturantRouter); // ✅ done
 app.use('/api/menu-items', menuItemRouter); // ✅ done
 
 app.use('/api/orders', orderRouter);
+app.use('/api/billing', billingRouter);
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);

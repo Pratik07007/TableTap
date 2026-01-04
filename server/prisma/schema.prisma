@@ -105,6 +105,8 @@ model Order {
 
   items OrderItem[]
 
+  bill Bill?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -129,4 +131,31 @@ enum OrderStatus {
   PENDING
   COMPLETED
   CANCELLED
+}
+
+model Bill {
+  id         String @id @default(uuid())
+  billNumber Int    @unique @default(autoincrement())
+
+  orderId String @unique
+  order   Order  @relation(fields: [orderId], references: [id])
+
+  totalAmount   Float
+  paymentStatus PaymentStatus  @default(PENDING)
+  paymentMethod PaymentMethod?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  ONLINE
 }
