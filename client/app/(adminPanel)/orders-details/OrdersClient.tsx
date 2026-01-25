@@ -255,13 +255,45 @@ export default function OrdersClient({
                             handleStatusChange(order.id, e.target.value)
                           }
                           className="text-xs border-gray-200 rounded-md py-1 px-2 focus:ring-0 focus:border-gray-300 cursor-pointer"
-                          disabled={loadingId === order.id}
+                          disabled={
+                            loadingId === order.id ||
+                            order.status === "CANCELLED"
+                          }
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <option value="PENDING">Pending</option>
-                          <option value="COOKING">Cooking</option>
-                          <option value="READY">Ready</option>
-                          <option value="CANCELLED">Cancelled</option>
+                          <option
+                            value="PENDING"
+                            disabled={order.status !== "PENDING"}
+                          >
+                            Pending
+                          </option>
+                          <option
+                            value="COOKING"
+                            disabled={
+                              order.status !== "PENDING" &&
+                              order.status !== "COOKING"
+                            }
+                          >
+                            Cooking
+                          </option>
+                          <option
+                            value="READY"
+                            disabled={
+                              order.status !== "COOKING" &&
+                              order.status !== "READY"
+                            }
+                          >
+                            Ready
+                          </option>
+                          <option
+                            value="CANCELLED"
+                            disabled={
+                              order.status !== "PENDING" &&
+                              order.status !== "CANCELLED"
+                            }
+                          >
+                            Cancelled
+                          </option>
                         </select>
                       )}
                     </div>
@@ -481,12 +513,14 @@ export default function OrdersClient({
 function StatusBadge({ status }: { status: string }) {
   const styles = {
     PENDING: "bg-amber-100 text-amber-700 border-amber-200",
+    READY: "bg-emerald-100 text-emerald-700 border-emerald-200",
     COMPLETED: "bg-emerald-100 text-emerald-700 border-emerald-200",
     CANCELLED: "bg-red-100 text-red-700 border-red-200",
   };
 
   const icons = {
     PENDING: Clock,
+    READY: CheckCircle,
     COMPLETED: CheckCircle,
     CANCELLED: XCircle,
   };

@@ -269,9 +269,42 @@ export const getAllOrdersService = async (resturantId: string | undefined, page:
 
 export const updateOrderStatusService = async (id: string, status: string) => {
   try {
-    const validStatuses = ['PENDING', 'COOKING', 'READY', 'CANCELLED'];
+    const validStatuses = ['PENDING', 'COOKING', 'READY', 'COMPLETED', 'CANCELLED'];
     if (!validStatuses.includes(status)) {
       return { success: false, message: 'Invalid status', code: 400 };
+    }
+
+    const currentOrder = await prisma.order.findUnique({
+      where: { id },
+      select: { status: true },
+    });
+
+    if (!currentOrder) {
+      return { success: false, message: 'Order not found', code: 404 };
+    }
+
+    const currentStatus = currentOrder.status;
+
+    // Strict State Machine
+    let isValidTransition = false;
+
+    if (currentStatus === 'PENDING') {
+      if (status === 'COOKING' || status === 'CANCELLED') isValidTransition = true;
+    } else if (currentStatus === 'COOKING') {
+      if (status === 'READY') isValidTransition = true;
+    } else if (currentStatus === 'READY') {
+      if (status === 'COMPLETED') isValidTransition = true;
+    }
+    // COMPLETED and CANCELLED are terminal, no transitions allowed out of them.
+    // Also, if status is same (no change), it's technically valid or ignored, but let's allow it or just update.
+    if (currentStatus === (status as any)) isValidTransition = true;
+
+    if (!isValidTransition) {
+      return {
+        success: false,
+        message: `Invalid transition from ${currentStatus} to ${status}`,
+        code: 400,
+      };
     }
 
     const order = await prisma.order.update({
