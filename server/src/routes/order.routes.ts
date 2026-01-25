@@ -1,5 +1,5 @@
 import express from 'express';
-import { createOrder, getAllOrders, updateOrderStatus, createCustomerOrder, getMyOrders } from '../controller/order.controller';
+import { createOrder, getAllOrders, updateOrderStatus, createCustomerOrder, getMyOrders, cancelOrder, updateOrder } from '../controller/order.controller';
 import { protect } from '../middleware/protect';
 
 const orderRouter = express.Router();
@@ -12,5 +12,7 @@ orderRouter.patch('/:id/status', protect('ADMIN'), updateOrderStatus);
 //Order Creation from USER side
 orderRouter.post('/customer/create', protect('USER'), createCustomerOrder);
 orderRouter.get('/my-orders', protect('USER'), getMyOrders);
+orderRouter.patch('/:id/cancel', protect('USER'), cancelOrder);
+orderRouter.put('/:id/update', protect('USER'), updateOrder);
 
 export default orderRouter;

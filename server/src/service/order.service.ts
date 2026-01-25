@@ -285,3 +285,122 @@ export const updateOrderStatusService = async (id: string, status: string) => {
     return { success: false, message: 'Failed to update order status', code: 500 };
   }
 };
+
+export const cancelOrderService = async (userId: string, orderId: string) => {
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order) {
+      return { success: false, message: 'Order not found', code: 404 };
+    }
+
+    if (order.userId !== userId) {
+      return { success: false, message: 'Unauthorized', code: 403 };
+    }
+
+    if (order.status !== 'PENDING') {
+      return { success: false, message: 'Only pending orders can be cancelled', code: 400 };
+    }
+
+    const updatedOrder = await prisma.order.update({
+      where: { id: orderId },
+      data: { status: 'CANCELLED' },
+    });
+
+    return { success: true, data: updatedOrder, code: 200 };
+  } catch (error: any) {
+    console.error('Cancel Order Error:', error);
+    return { success: false, message: 'Failed to cancel order', code: 500 };
+  }
+};
+
+export const updateOrderService = async (userId: string, orderId: string, newItems: any[]) => {
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
+    });
+
+    if (!order) {
+      return { success: false, message: 'Order not found', code: 404 };
+    }
+
+    if (order.userId !== userId) {
+      return { success: false, message: 'Unauthorized', code: 403 };
+    }
+
+    if (order.status !== 'PENDING') {
+      return { success: false, message: 'Only pending orders can be updated', code: 400 };
+    }
+
+    if (!newItems || newItems.length === 0) {
+      return { success: false, message: 'No items provided', code: 400 };
+    }
+
+    // Transaction to ensure atomicity
+    const updatedOrder = await prisma.$transaction(async (tx) => {
+      // 1. Delete existing items
+      await tx.orderItem.deleteMany({
+        where: { orderId: orderId },
+      });
+
+      let totalAmount = 0;
+      const orderItemsData = [];
+
+      // 2. Validate and prepare new items
+      for (const item of newItems) {
+        const menuItem = await tx.menuItem.findUnique({
+          where: { id: item.menuItemId },
+          include: { unit: true },
+        });
+
+        if (!menuItem) {
+          throw new Error(`Menu item not found: ${item.menuItemId}`);
+        }
+
+        const unitData = menuItem.unit.find((u) => u.unit === item.unitName);
+        if (!unitData) {
+          throw new Error(`Unit '${item.unitName}' not found for item '${menuItem.name}'`);
+        }
+
+        const price = unitData.price;
+        totalAmount += price * item.quantity;
+
+        orderItemsData.push({
+          menuItemId: item.menuItemId,
+          unitName: item.unitName,
+          price: price,
+          quantity: item.quantity,
+          orderId: orderId,
+        });
+      }
+
+      const finalAmount = totalAmount;
+
+      // 3. Create new items
+      await tx.orderItem.createMany({
+        data: orderItemsData,
+      });
+
+      // 4. Update Order
+      const result = await tx.order.update({
+        where: { id: orderId },
+        data: {
+          totalAmount,
+          finalAmount,
+          updatedAt: new Date(),
+        },
+        include: { items: { include: { menuItem: true } } },
+      });
+
+      return result;
+    });
+
+    return { success: true, data: updatedOrder, code: 200 };
+  } catch (error: any) {
+    console.error('Update Order Error:', error);
+    return { success: false, message: error.message || 'Failed to update order', code: 500 };
+  }
+};

@@ -17,7 +17,7 @@ import { motion } from "framer-motion";
 
 type OrderItem = {
   id: string;
-  menuItem: { name: string; imageUrl?: string };
+  menuItem: { id: string; name: string; imageUrl?: string };
   unitName: string;
   quantity: number;
   price: number;
@@ -56,6 +56,37 @@ export default function MyOrdersClient({
         return "bg-red-50 text-red-700 border-red-200 ring-red-100";
       default:
         return "bg-gray-50 text-gray-700 border-gray-200 ring-gray-100";
+    }
+  };
+
+  const handleCancel = async (orderId: string) => {
+    if (!confirm("Are you sure you want to cancel this order?")) return;
+
+    try {
+      setIsRefreshing(true);
+      const res = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
+        }/api/orders/${orderId}/cancel`,
+        {
+          method: "PATCH", // Changed to PATCH as per routes
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        },
+      );
+
+      if (res.ok) {
+        handleRefresh();
+      } else {
+        alert("Failed to cancel order");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error cancelling order");
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -100,7 +131,6 @@ export default function MyOrdersClient({
               Looks like you haven't placed any orders yet. Scan a QR code at a
               restaurant to get started!
             </p>
-            {/* Note: In a real app we might link to a generic 'explore' page or assume they scan a QR code */}
           </div>
         ) : (
           initialOrders.map((order, index) => (
@@ -128,7 +158,7 @@ export default function MyOrdersClient({
                   </div>
                   <div
                     className={`px-3 py-1 rounded-full text-xs font-bold border ring-1 ${getStatusColor(
-                      order.status
+                      order.status,
                     )}`}
                   >
                     {order.status}
@@ -186,11 +216,165 @@ export default function MyOrdersClient({
                     ${order.totalAmount.toFixed(2)}
                   </div>
                 </div>
+
+                {order.status === "PENDING" && (
+                  <div className="mt-4 pt-4 border-t border-gray-50 flex gap-3">
+                    <EditOrderButton order={order} onRefresh={handleRefresh} />
+                    <button
+                      onClick={() => handleCancel(order.id)}
+                      className="flex-1 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-100"
+                    >
+                      Cancel Order
+                    </button>
+                  </div>
+                )}
               </div>
             </motion.div>
           ))
         )}
       </div>
     </div>
+  );
+}
+
+function EditOrderButton({
+  order,
+  onRefresh,
+}: {
+  order: Order;
+  onRefresh: () => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [items, setItems] = useState<OrderItem[]>(order.items);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleUpdate = async () => {
+    try {
+      setIsSaving(true);
+      const payload = {
+        items: items.map((i) => ({
+          menuItemId: i.menuItem.id,
+          unitName: i.unitName,
+          quantity: i.quantity,
+        })),
+      };
+
+      const res = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
+        }/api/orders/${order.id}/update`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(payload),
+        },
+      );
+
+      if (res.ok) {
+        setIsOpen(false);
+        onRefresh();
+      } else {
+        alert("Failed to update order");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error updating order");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const updateQuantity = (index: number, delta: number) => {
+    const newItems = [...items];
+    const item = { ...newItems[index] };
+    item.quantity += delta;
+    if (item.quantity <= 0) {
+      newItems.splice(index, 1);
+    } else {
+      newItems[index] = item;
+    }
+    setItems(newItems);
+  };
+
+  return (
+    <>
+      <button
+        onClick={() => setIsOpen(true)}
+        className="flex-1 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border border-gray-200"
+      >
+        Edit Order
+      </button>
+
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+              <h3 className="font-bold text-lg">Edit Order</h3>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-gray-400"
+              >
+                &times;
+              </button>
+            </div>
+            <div className="p-4 space-y-4 max-h-[60vh] overflow-y-auto">
+              {items.length === 0 ? (
+                <p className="text-center text-gray-500 py-4">
+                  Order is empty. Saving will remove all items?
+                </p>
+              ) : (
+                items.map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-sm text-gray-900">
+                        {item.menuItem.name}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {item.unitName} - ${item.price}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => updateQuantity(idx, -1)}
+                        className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      >
+                        -
+                      </button>
+                      <span className="w-4 text-center font-medium">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => updateQuantity(idx, 1)}
+                        className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="p-4 border-t border-gray-100 bg-gray-50 flex gap-3">
+              <button
+                onClick={() => setIsOpen(false)}
+                className="flex-1 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdate}
+                disabled={isSaving || items.length === 0}
+                className="flex-1 py-2.5 text-sm font-medium text-white bg-black rounded-lg hover:opacity-90 disabled:opacity-50"
+              >
+                {isSaving ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

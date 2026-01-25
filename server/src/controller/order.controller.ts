@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { createOrderService, createCustomerOrderService, getMyOrdersService, getAllOrdersService, updateOrderStatusService } from '../service/order.service';
+import { createOrderService, createCustomerOrderService, getMyOrdersService, getAllOrdersService, updateOrderStatusService, cancelOrderService, updateOrderService } from '../service/order.service';
 
 export const createOrder = async (req: any, res: Response) => {
   const result = await createOrderService(req.user.id, req.user.resturant.id, req.user.resturant.userId, req.body);
@@ -54,6 +54,29 @@ export const updateOrderStatus = async (req: any, res: Response) => {
   const { id } = req.params;
   const { status } = req.body;
   const result = await updateOrderStatusService(id, status);
+
+  if (result.success) {
+    res.status(result.code).json({ success: true, data: result.data });
+  } else {
+    res.status(result.code).json({ success: false, message: result.message });
+  }
+};
+
+export const cancelOrder = async (req: any, res: Response) => {
+  const { id } = req.params;
+  const result = await cancelOrderService(req.user.id, id);
+
+  if (result.success) {
+    res.status(result.code).json({ success: true, data: result.data });
+  } else {
+    res.status(result.code).json({ success: false, message: result.message });
+  }
+};
+
+export const updateOrder = async (req: any, res: Response) => {
+  const { id } = req.params;
+  const { items } = req.body;
+  const result = await updateOrderService(req.user.id, id, items);
 
   if (result.success) {
     res.status(result.code).json({ success: true, data: result.data });
