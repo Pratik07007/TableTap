@@ -3,7 +3,6 @@ import { createOrderService, createCustomerOrderService, getMyOrdersService, get
 
 export const createOrder = async (req: any, res: Response) => {
   const result = await createOrderService(req.user.id, req.user.resturant.id, req.user.resturant.userId, req.body);
-
   if (result.success) {
     res.status(result.code).json({ success: true, data: result.data });
   } else {

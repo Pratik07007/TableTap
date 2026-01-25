@@ -441,7 +441,7 @@ export default function OrdersClient({
                     <Eye className="h-4 w-4" />
                     View Bill & Payment
                   </button>
-                ) : selectedOrder.status === "COMPLETED" ? (
+                ) : selectedOrder.status === "READY" ? (
                   <button
                     onClick={() => handleGenerateBill(selectedOrder.id)}
                     disabled={loadingId === selectedOrder.id}
