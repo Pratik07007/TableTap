@@ -38,7 +38,7 @@ interface Order {
   totalAmount: number;
   discount: number;
   finalAmount: number;
-  status: "PENDING" | "COMPLETED" | "CANCELLED";
+  status: "PENDING" | "COOKING" | "READY" | "CANCELLED";
   createdAt: string;
   user: User;
   items: OrderItem[];
@@ -80,7 +80,7 @@ export default function OrdersClient({
           process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
         }/api/orders/${orderId}/status`,
         { status: newStatus },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       toast.success("Order status updated");
       startTransition(() => {
@@ -89,7 +89,7 @@ export default function OrdersClient({
       // Update selected order if it's open
       if (selectedOrder && selectedOrder.id === orderId) {
         setSelectedOrder((prev) =>
-          prev ? { ...prev, status: newStatus as any } : null
+          prev ? { ...prev, status: newStatus as any } : null,
         );
       }
     } catch (error: any) {
@@ -107,7 +107,7 @@ export default function OrdersClient({
           process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
         }/api/billing/generate`,
         { orderId },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       toast.success("Bill generated successfully");
       router.push(`/billing/${orderId}`);
@@ -259,7 +259,8 @@ export default function OrdersClient({
                           onClick={(e) => e.stopPropagation()}
                         >
                           <option value="PENDING">Pending</option>
-                          <option value="COMPLETED">Completed</option>
+                          <option value="COOKING">Cooking</option>
+                          <option value="READY">Ready</option>
                           <option value="CANCELLED">Cancelled</option>
                         </select>
                       )}

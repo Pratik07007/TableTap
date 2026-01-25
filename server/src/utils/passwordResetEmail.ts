@@ -17,6 +17,7 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
           <p style="font-size: 16px; line-height: 1.5; margin: 0 0 24px;">
             You requested to reset your password. Click the button below to proceed.
           </p>
+          
           <div style="text-align: center; margin: 32px 0;">
             <a href="${process.env.FRONTEND_URL}/reset-password?token=${token}"
                style="display: inline-block; background: #667eea; color: #fff; padding: 14px 28px; border-radius: 6px; font-size: 16px; font-weight: 600; text-decoration: none;">

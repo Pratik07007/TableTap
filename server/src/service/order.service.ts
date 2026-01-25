@@ -269,7 +269,7 @@ export const getAllOrdersService = async (resturantId: string | undefined, page:
 
 export const updateOrderStatusService = async (id: string, status: string) => {
   try {
-    const validStatuses = ['PENDING', 'COMPLETED', 'CANCELLED'];
+    const validStatuses = ['PENDING', 'COOKING', 'READY', 'CANCELLED'];
     if (!validStatuses.includes(status)) {
       return { success: false, message: 'Invalid status', code: 400 };
     }

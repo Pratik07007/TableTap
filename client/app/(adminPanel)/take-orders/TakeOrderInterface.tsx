@@ -16,7 +16,7 @@ type MenuItem = {
 };
 
 type CartItem = {
-    uniqueId: string; // Combination of itemId + unitName to distinguish different units of same item
+    uniqueId: string; 
     menuItemId: string;
     name: string;
     unitName: string;

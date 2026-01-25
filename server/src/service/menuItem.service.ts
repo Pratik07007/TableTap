@@ -3,7 +3,7 @@ import { prisma } from '../../prisma/client';
 export const getMenusService = async (resturantID: string) => {
   try {
     const data = await prisma.menuItem.findMany({
-      where: { resturantID },
+      where: { resturantID, isAvailable: true },
       include: {
         menuCategory: true,
         unit: true,
