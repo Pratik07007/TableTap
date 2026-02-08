@@ -98,7 +98,7 @@ export const sendInvoiceEmail = async (email: string, params: {
           </tbody>
         </table>
         <div style="background:#fafafa;border:1px solid #eee;border-radius:8px;padding:16px;display:flex;justify-content:space-between;align-items:center">
-          <div style="font-size:14px;color:#666">Total Due</div>
+          <div style="font-size:14px;color:#666">Total</div>
           <div style="font-size:18px;font-weight:800;color:#111">$${params.totalAmount.toFixed(2)}</div>
         </div>
         <div style="margin-top:16px;font-size:12px;color:#777">For reference, keep this email with your order ID.</div>
