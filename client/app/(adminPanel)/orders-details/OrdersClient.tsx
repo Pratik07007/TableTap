@@ -38,7 +38,7 @@ interface Order {
   totalAmount: number;
   discount: number;
   finalAmount: number;
-  status: "PENDING" | "COOKING" | "READY" | "CANCELLED";
+  status: "PENDING" | "COOKING" | "READY" | "COMPLETED" | "CANCELLED";
   createdAt: string;
   user: User;
   items: OrderItem[];
@@ -46,7 +46,7 @@ interface Order {
     id: string;
     totalAmount: number;
     paymentStatus: "PENDING" | "PAID" | "FAILED";
-    paymentMethod?: "CASH" | "CARD" | "ONLINE";
+    paymentMethod?: "CASH" | "ONLINE";
   };
 }
 
@@ -286,6 +286,15 @@ export default function OrdersClient({
                             Ready
                           </option>
                           <option
+                            value="COMPLETED"
+                            disabled={
+                              order.status !== "READY" &&
+                              order.status !== "COMPLETED"
+                            }
+                          >
+                            Completed
+                          </option>
+                          <option
                             value="CANCELLED"
                             disabled={
                               order.status !== "PENDING" &&
@@ -473,7 +482,7 @@ export default function OrdersClient({
                     <Eye className="h-4 w-4" />
                     View Bill & Payment
                   </button>
-                ) : selectedOrder.status === "READY" ? (
+                ) : selectedOrder.status === "COMPLETED" ? (
                   <button
                     onClick={() => handleGenerateBill(selectedOrder.id)}
                     disabled={loadingId === selectedOrder.id}

@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import {
   Loader2,
   DollarSign,
-  CreditCard,
   ArrowLeft,
   Receipt,
   CheckCircle,
@@ -20,7 +19,7 @@ interface Bill {
   billNumber: number;
   totalAmount: number;
   paymentStatus: "PENDING" | "PAID" | "FAILED";
-  paymentMethod?: "CASH" | "CARD" | "ONLINE";
+  paymentMethod?: "CASH" | "ONLINE";
   createdAt: string;
   order: {
     id: string;
@@ -54,6 +53,10 @@ export default function BillingPage({
   const [bill, setBill] = useState<Bill | null>(null);
   const [loading, setLoading] = useState(true);
   const [processingPayment, setProcessingPayment] = useState(false);
+  const [sendingInvoice, setSendingInvoice] = useState(false);
+  const [cashGiven, setCashGiven] = useState<string>("");
+  const changeDue =
+    bill && cashGiven ? Math.max(0, parseFloat(cashGiven) - bill.totalAmount) : 0;
 
   useEffect(() => {
     fetchBill();
@@ -62,8 +65,7 @@ export default function BillingPage({
   const fetchBill = async () => {
     try {
       const res = await axios.get(
-        `${
-          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
+        `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
         }/api/billing/${orderId}`,
         { withCredentials: true }
       );
@@ -79,21 +81,34 @@ export default function BillingPage({
     }
   };
 
-  const handlePayBill = async (paymentMethod: "CASH" | "CARD") => {
+  const handlePayBill = async (paymentMethod: "CASH" | "ONLINE") => {
     if (!bill) return;
 
     try {
       setProcessingPayment(true);
+      if (paymentMethod === "CASH") {
+        const paid = parseFloat(cashGiven || "0");
+        if (isNaN(paid) || paid < bill.totalAmount) {
+          toast.error("Enter valid cash amount (>= total due)");
+          setProcessingPayment(false);
+          return;
+        }
+      }
       const res = await axios.post(
-        `${
-          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
+        `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
         }/api/billing/pay`,
         { billId: bill.id, paymentMethod },
         { withCredentials: true }
       );
 
       if (res.data.success) {
-        toast.success("Payment successful!");
+        if (paymentMethod === "CASH") {
+          toast.success(
+            `Payment successful! Change to return: $${changeDue.toFixed(2)}`
+          );
+        } else {
+          toast.success("Payment successful!");
+        }
         fetchBill(); // Refresh data
       }
     } catch (error: any) {
@@ -265,6 +280,31 @@ export default function BillingPage({
 
               {bill.paymentStatus === "PENDING" ? (
                 <div className="space-y-3">
+                  <div className="rounded-xl border border-gray-200 p-3 bg-gray-50">
+                    <label className="text-xs font-medium text-gray-600">
+                      Cash received
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={cashGiven}
+                      onChange={(e) => setCashGiven(e.target.value)}
+                      placeholder="Enter amount"
+                      className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 focus:ring-1 focus:ring-black focus:border-black outline-none"
+                    />
+                    {bill && cashGiven && (
+                      <div className="mt-2 text-xs text-gray-600 flex justify-between">
+                        <span>Total due:</span>
+                        <span>${bill.totalAmount.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {bill && cashGiven && (
+                      <div className="mt-1 text-sm font-semibold text-gray-900 flex justify-between">
+                        <span>Change:</span>
+                        <span>${changeDue.toFixed(2)}</span>
+                      </div>
+                    )}
+                  </div>
                   <button
                     onClick={() => handlePayBill("CASH")}
                     disabled={processingPayment}
@@ -274,12 +314,11 @@ export default function BillingPage({
                     Pay with Cash
                   </button>
                   <button
-                    onClick={() => handlePayBill("CARD")}
+                    onClick={() => handlePayBill("ONLINE")}
                     disabled={processingPayment}
                     className="w-full flex items-center justify-center gap-3 p-4 rounded-xl border-2 border-indigo-50 bg-indigo-50 hover:bg-indigo-100 hover:border-indigo-200 text-indigo-700 font-semibold transition-all disabled:opacity-50"
                   >
-                    <CreditCard className="h-5 w-5" />
-                    Pay with Card
+                    Mark as Paid (Online)
                   </button>
                   {processingPayment && (
                     <div className="text-center text-xs text-gray-500 flex items-center justify-center gap-2 mt-2">
@@ -298,6 +337,38 @@ export default function BillingPage({
                   </p>
                   <div className="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-400">
                     Paid via {bill.paymentMethod}
+                  </div>
+                  <div className="mt-4">
+                    <button
+                      onClick={async () => {
+                        try {
+                          setSendingInvoice(true);
+                          const res = await axios.post(
+                            `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"}/api/billing/send-invoice`,
+                            { billId: bill.id },
+                            { withCredentials: true }
+                          );
+                          if (res.data.success) {
+                            toast.success("Invoice email sent");
+                          } else {
+                            toast.error(res.data.message || "Failed to send invoice email");
+                          }
+                        } catch (e: any) {
+                          toast.error(e.response?.data?.message || "Failed to send invoice email");
+                        } finally {
+                          setSendingInvoice(false);
+                        }
+                      }}
+                      disabled={sendingInvoice}
+                      className="w-full flex items-center justify-center gap-3 p-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 font-semibold transition-all disabled:opacity-50"
+                    >
+                      {sendingInvoice ? (
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                      ) : (
+                        <Receipt className="h-5 w-5" />
+                      )}
+                      {sendingInvoice ? "Sending..." : "Send Invoice Email"}
+                    </button>
                   </div>
                 </div>
               )}

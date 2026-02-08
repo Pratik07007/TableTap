@@ -211,6 +211,9 @@ export const getAllOrdersService = async (resturantId: string | undefined, page:
       whereClause.resturantID = resturantId;
     }
 
+    // Only show unpaid orders
+    whereClause.isPaid = false;
+
     if (email) {
       whereClause.user = {
         email: {

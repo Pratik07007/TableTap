@@ -116,7 +116,7 @@ export const generateBillSchema = z.object({
 
 export const payBillSchema = z.object({
   billId: z.string().min(1, 'Bill ID is required'),
-  paymentMethod: z.enum(['CASH', 'CARD', 'ONLINE']),
+  paymentMethod: z.enum(['CASH', 'ONLINE']),
 });
 
 export type GenerateBillInput = z.infer<typeof generateBillSchema>;

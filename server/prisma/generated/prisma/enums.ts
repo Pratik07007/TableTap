@@ -21,6 +21,7 @@ export const OrderStatus = {
   PENDING: 'PENDING',
   COOKING: 'COOKING',
   READY: 'READY',
+  COMPLETED: 'COMPLETED',
   CANCELLED: 'CANCELLED'
 } as const
 
@@ -38,7 +39,6 @@ export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
 
 export const PaymentMethod = {
   CASH: 'CASH',
-  CARD: 'CARD',
   ONLINE: 'ONLINE'
 } as const
 

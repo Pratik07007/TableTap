@@ -162,9 +162,8 @@ export default function MenuForm() {
     };
 
     const method = editId ? "PUT" : "POST";
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/menu-items${
-      editId ? `/${editId}` : ""
-    }`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/menu-items${editId ? `/${editId}` : ""
+      }`;
 
     try {
       const res = await fetch(url, {
@@ -407,11 +406,10 @@ export default function MenuForm() {
               return (
                 <div
                   key={q}
-                  className={`relative p-3 rounded-xl border transition-all ${
-                    isSelected
-                      ? "border-orange-500 bg-orange-50"
-                      : "border-gray-200 bg-white"
-                  }`}
+                  className={`relative p-3 rounded-xl border transition-all ${isSelected
+                    ? "border-orange-500 bg-orange-50"
+                    : "border-gray-200 bg-white"
+                    }`}
                 >
                   <label className="flex items-center gap-2 cursor-pointer mb-2">
                     <input
@@ -424,9 +422,8 @@ export default function MenuForm() {
                       aria-label={`Select unit ${q}`}
                     />
                     <span
-                      className={`font-medium capitalize ${
-                        isSelected ? "text-orange-900" : "text-gray-600"
-                      }`}
+                      className={`font-medium capitalize ${isSelected ? "text-orange-900" : "text-gray-600"
+                        }`}
                     >
                       {q}
                     </span>
@@ -479,11 +476,10 @@ export default function MenuForm() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full md:w-auto px-8 py-3 rounded-full font-bold shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 ${
-              loading
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed shadow-none"
-                : "bg-orange-600 text-white hover:bg-orange-700 shadow-orange-600/20"
-            }`}
+            className={`w-full md:w-auto px-8 py-3 rounded-full font-bold shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 ${loading
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed shadow-none"
+              : "bg-orange-600 text-white hover:bg-orange-700 shadow-orange-600/20"
+              }`}
           >
             {loading ? (
               <>

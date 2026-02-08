@@ -156,7 +156,10 @@ export const OrderScalarFieldEnum = {
   discount: 'discount',
   finalAmount: 'finalAmount',
   status: 'status',
+  isPaid: 'isPaid',
+  paidAt: 'paidAt',
   userId: 'userId',
+  customerEmail: 'customerEmail',
   resturantID: 'resturantID',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

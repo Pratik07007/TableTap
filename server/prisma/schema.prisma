@@ -8,13 +8,12 @@ datasource db {
 }
 
 model User {
-  id        String @id @default(uuid())
-  firstName String
-  lastName  String
-  email     String @unique
-  hash      String
-  role      Role
-
+  id              String      @id @default(uuid())
+  firstName       String
+  lastName        String
+  email           String      @unique
+  hash            String
+  role            Role
   isEmailVerified Boolean     @default(false)
   resturant       Resturants? @relation("UserOwnsRestaurant")
 
@@ -96,6 +95,8 @@ model Order {
   discount    Float       @default(0)
   finalAmount Float
   status      OrderStatus @default(PENDING)
+  isPaid      Boolean     @default(false)
+  paidAt      DateTime?
 
   userId String?
   user   User?   @relation(fields: [userId], references: [id])
@@ -133,6 +134,7 @@ enum OrderStatus {
   PENDING
   COOKING
   READY
+  COMPLETED
   CANCELLED
 }
 
@@ -159,6 +161,5 @@ enum PaymentStatus {
 
 enum PaymentMethod {
   CASH
-  CARD
   ONLINE
 }
