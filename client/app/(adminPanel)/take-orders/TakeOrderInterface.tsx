@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus, Minus, ShoppingCart, X, Check, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -31,9 +32,34 @@ export default function TakeOrderInterface({
 }) {
   const router = useRouter();
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [activeImageIndices, setActiveImageIndices] = useState<
+    Record<string, number>
+  >({});
   const [customerEmail, setCustomerEmail] = useState("");
 
   const [discount, setDiscount] = useState<number>(0);
+  const nextImage = (
+    itemId: string,
+    maxImages: number,
+    e: React.MouseEvent,
+  ) => {
+    e.stopPropagation();
+    setActiveImageIndices((prev) => ({
+      ...prev,
+      [itemId]: ((prev[itemId] || 0) + 1) % maxImages,
+    }));
+  };
+  const prevImage = (
+    itemId: string,
+    maxImages: number,
+    e: React.MouseEvent,
+  ) => {
+    e.stopPropagation();
+    setActiveImageIndices((prev) => ({
+      ...prev,
+      [itemId]: ((prev[itemId] || 0) - 1 + maxImages) % maxImages,
+    }));
+  };
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -146,6 +172,37 @@ export default function TakeOrderInterface({
               key={item.id}
               className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col justify-between"
             >
+              {item.images && item.images.length > 0 && (
+                <div className="w-full h-48 bg-gray-100 relative overflow-hidden group mb-4">
+                  <AnimatePresence initial={false}>
+                    <motion.img
+                      key={`${item.id}-${activeImageIndices[item.id] || 0}`}
+                      src={item.images[activeImageIndices[item.id] || 0].url}
+                      alt={item.name}
+                      initial={{ opacity: 0.8 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.2 }}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </AnimatePresence>
+                  <button
+                    onClick={(e) =>
+                      prevImage(item.id, item.images?.length || 1, e)
+                    }
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full p-1"
+                  >
+                    ◀
+                  </button>
+                  <button
+                    onClick={(e) =>
+                      nextImage(item.id, item.images?.length || 1, e)
+                    }
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full p-1"
+                  >
+                    ▶
+                  </button>
+                </div>
+              )}
               <div>
                 <h3 className="text-lg font-bold text-gray-900">{item.name}</h3>
                 {item.description && (
