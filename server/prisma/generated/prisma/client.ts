@@ -77,3 +77,8 @@ export type OrderItem = Prisma.OrderItemModel
  * 
  */
 export type Bill = Prisma.BillModel
+/**
+ * Model Image
+ * 
+ */
+export type Image = Prisma.ImageModel

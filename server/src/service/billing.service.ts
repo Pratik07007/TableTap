@@ -74,7 +74,7 @@ export const payBillService = async (billId: string, paymentMethod: 'CASH' | 'ON
           transactionId,
           paymentProcessedById: processedById,
         },
-        include: { order: { include: { user: true, items: { include: { menuItem: true } } } } },
+        include: { order: { include: { user: true, items: { include: { menuItem: { include: { images: true } } } } } } },
       });
 
       await tx.order.update({
@@ -150,7 +150,7 @@ export const listBillsService = async (page: number = 1, limit: number = 10, pay
           include: {
             user: true,
             items: {
-              include: { menuItem: true },
+              include: { menuItem: { include: { images: true } } },
             },
           },
         },
@@ -277,7 +277,7 @@ export const getBillService = async (orderId: string) => {
           include: {
             items: {
               include: {
-                menuItem: true,
+                menuItem: { include: { images: true } },
               },
             },
             user: true,

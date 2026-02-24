@@ -55,13 +55,24 @@ export const menuItemSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   description: z.string().optional().or(z.literal('')),
   category: z.string(),
-  units: z.array(
-    z.object({
-      unit: z.string(),
-      price: z.number().min(0, 'Price must be positive'),
-    })
+  units: z.preprocess(
+    (val) => {
+      if (typeof val === 'string') {
+        try {
+          return JSON.parse(val);
+        } catch (e) {
+          return val;
+        }
+      }
+      return val;
+    },
+    z.array(
+      z.object({
+        unit: z.string(),
+        price: z.number().min(0, 'Price must be positive'),
+      })
+    )
   ),
-  imageUrl: z.url('Invalid image URL').optional().or(z.literal('')),
   isAvailable: z.boolean().optional(),
 });
 
@@ -114,16 +125,18 @@ export const generateBillSchema = z.object({
   orderId: z.string().min(1, 'Order ID is required'),
 });
 
-export const payBillSchema = z.object({
-  billId: z.string().min(1, 'Bill ID is required'),
-  paymentMethod: z.enum(['CASH', 'ONLINE']),
-  amountTendered: z.number().nonnegative().optional(),
-}).refine((data) => {
-  if (data.paymentMethod === 'CASH') {
-    return typeof data.amountTendered === 'number';
-  }
-  return true;
-});
+export const payBillSchema = z
+  .object({
+    billId: z.string().min(1, 'Bill ID is required'),
+    paymentMethod: z.enum(['CASH', 'ONLINE']),
+    amountTendered: z.number().nonnegative().optional(),
+  })
+  .refine((data) => {
+    if (data.paymentMethod === 'CASH') {
+      return typeof data.amountTendered === 'number';
+    }
+    return true;
+  });
 
 export type GenerateBillInput = z.infer<typeof generateBillSchema>;
 export type PayBillInput = z.infer<typeof payBillSchema>;

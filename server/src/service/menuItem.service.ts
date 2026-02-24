@@ -7,6 +7,7 @@ export const getMenusService = async (resturantID: string) => {
       include: {
         menuCategory: true,
         unit: true,
+        images: true,
       },
     });
 
@@ -16,9 +17,9 @@ export const getMenusService = async (resturantID: string) => {
   }
 };
 
-export const createMenuService = async (resturantID: string, data: { name: string; description: string; category: string; imageUrl: string; isAvailable: boolean; units: { unit: string; price: number }[] }) => {
+export const createMenuService = async (resturantID: string, data: { name: string; description?: string; category: string; images: string[]; isAvailable?: boolean; units: { unit: string; price: number }[] }) => {
   try {
-    const { name, description, category, imageUrl, isAvailable, units } = data;
+    const { name, description, category, images, isAvailable, units } = data;
     const upperCategory = category.toUpperCase();
 
     let categoryRecord = await prisma.category.findFirst({
@@ -35,8 +36,7 @@ export const createMenuService = async (resturantID: string, data: { name: strin
       data: {
         name,
         description,
-        imageUrl,
-        isAvailable,
+        isAvailable: isAvailable === undefined ? true : Object.is(isAvailable, 'true') ? true : Object.is(isAvailable, 'false') ? false : Boolean(isAvailable),
         resturantID: resturantID,
         categoryId: categoryRecord.id,
       },
@@ -49,6 +49,15 @@ export const createMenuService = async (resturantID: string, data: { name: strin
         menuItemId: menu.id,
       })),
     });
+
+    if (images && images.length > 0) {
+      await prisma.image.createMany({
+        data: images.map((url) => ({
+          url,
+          menuItemId: menu.id,
+        })),
+      });
+    }
 
     return {
       success: true,
@@ -71,7 +80,7 @@ export const getPublicMenusService = async (resturantID: string) => {
         resturantID,
         isAvailable: true,
       },
-      include: { unit: true, menuCategory: true },
+      include: { unit: true, menuCategory: true, images: true },
     });
 
     return { success: true, data, code: 200 };
@@ -85,7 +94,7 @@ export const getMenuService = async (id: string, currentresturantID: string) => 
   try {
     const menuItem = await prisma.menuItem.findUnique({
       where: { id },
-      include: { unit: true, menuCategory: true },
+      include: { unit: true, menuCategory: true, images: true },
     });
 
     if (!menuItem) {
@@ -148,7 +157,6 @@ export const updateMenuService = async (id: string, userId: string, data: any) =
           name: data.name,
           description: data.description,
           categoryId: categoryRecord.id,
-          imageUrl: data.imageUrl,
         },
       });
 
@@ -156,11 +164,28 @@ export const updateMenuService = async (id: string, userId: string, data: any) =
         where: { menuItemId: id },
       });
 
-      if (data.units && data.units.length > 0) {
+      let parsedUnits = data.units;
+      if (typeof parsedUnits === 'string') {
+        try {
+          parsedUnits = JSON.parse(parsedUnits);
+        } catch (e) {
+          parsedUnits = [];
+        }
+      }
+
+      if (parsedUnits && Array.isArray(parsedUnits) && parsedUnits.length > 0) {
         await tx.unit.createMany({
-          data: data.units.map((unit: { unit: string; price: number }) => ({
+          data: parsedUnits.map((unit: { unit: string; price: number }) => ({
             unit: unit.unit,
             price: unit.price,
+            menuItemId: id,
+          })),
+        });
+      }
+      if (data.images && data.images.length > 0) {
+        await tx.image.createMany({
+          data: data.images.map((url: string) => ({
+            url,
             menuItemId: id,
           })),
         });
@@ -169,12 +194,13 @@ export const updateMenuService = async (id: string, userId: string, data: any) =
       // Return the fully updated item
       return tx.menuItem.findUnique({
         where: { id },
-        include: { unit: true, menuCategory: true },
+        include: { unit: true, menuCategory: true, images: true },
       });
     });
 
     return { success: true, data: updated, code: 200 };
   } catch (err: any) {
+    console.log(err);
     return { success: false, message: 'Menu update request failed', code: 404 };
   }
 };

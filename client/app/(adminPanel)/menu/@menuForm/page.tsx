@@ -34,8 +34,9 @@ export default function MenuForm() {
     category: "",
     units: [] as string[],
     unitPrices: {} as Record<string, string>,
-    imageUrl: "",
   });
+  const [images, setImages] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -44,7 +45,7 @@ export default function MenuForm() {
           `${process.env.NEXT_PUBLIC_API_URL}/api/menu-items/get/categories`,
           {
             credentials: "include",
-          }
+          },
         );
         const json = await res.json();
         if (res.ok && json.success) {
@@ -61,7 +62,7 @@ export default function MenuForm() {
           `${process.env.NEXT_PUBLIC_API_URL}/api/menu-items/get/units`,
           {
             credentials: "include",
-          }
+          },
         );
         const json = await res.json();
         if (res.ok && json.success) {
@@ -84,8 +85,9 @@ export default function MenuForm() {
         category: "",
         units: [],
         unitPrices: {},
-        imageUrl: "",
       });
+      setImages([]);
+      setExistingImages([]);
       return;
     }
 
@@ -96,7 +98,7 @@ export default function MenuForm() {
           `${process.env.NEXT_PUBLIC_API_URL}/api/menu-items/${editId}`,
           {
             credentials: "include",
-          }
+          },
         );
         const json = await res.json();
         if (res.ok && json.success) {
@@ -120,8 +122,10 @@ export default function MenuForm() {
               (item.menuCategory ? item.menuCategory.category : ""), // Handle both raw category string or relation
             units: units,
             unitPrices: unitPrices,
-            imageUrl: item.imageUrl || "",
           });
+          setExistingImages(
+            item.images ? item.images.map((img: any) => img.url) : [],
+          );
         } else {
           toast.error("Failed to load item details");
         }
@@ -142,7 +146,7 @@ export default function MenuForm() {
     setLoading(true);
 
     const missingPrices = formData.units.filter(
-      (u) => !formData.unitPrices[u] || formData.unitPrices[u].trim() === ""
+      (u) => !formData.unitPrices[u] || formData.unitPrices[u].trim() === "",
     );
     if (missingPrices.length > 0) {
       toast.error(`Please set a price for: ${missingPrices.join(", ")}`);
@@ -150,27 +154,34 @@ export default function MenuForm() {
       return;
     }
 
-    const payload = {
-      name: formData.name,
-      description: formData.description,
-      units: formData.units.map((unitName) => ({
-        unit: unitName,
-        price: Number(formData.unitPrices[unitName]),
-      })),
-      category: formData.category,
-      imageUrl: formData.imageUrl,
-    };
+    const formDataPayload = new FormData();
+    formDataPayload.append("name", formData.name);
+    formDataPayload.append("description", formData.description);
+    formDataPayload.append("category", formData.category);
+    formDataPayload.append(
+      "units",
+      JSON.stringify(
+        formData.units.map((unitName) => ({
+          unit: unitName,
+          price: Number(formData.unitPrices[unitName]),
+        })),
+      ),
+    );
+
+    images.forEach((file) => {
+      formDataPayload.append("images", file);
+    });
 
     const method = editId ? "PUT" : "POST";
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/menu-items${editId ? `/${editId}` : ""
-      }`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/menu-items${
+      editId ? `/${editId}` : ""
+    }`;
 
     try {
       const res = await fetch(url, {
         method,
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: formDataPayload,
       });
       const json = await res.json();
 
@@ -194,8 +205,9 @@ export default function MenuForm() {
           category: "",
           units: [],
           unitPrices: {},
-          imageUrl: "",
         });
+        setImages([]);
+        setExistingImages([]);
       }
     } catch (error) {
       toast.error("Network error");
@@ -207,7 +219,7 @@ export default function MenuForm() {
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -379,19 +391,39 @@ export default function MenuForm() {
             </div>
           </div>
 
-          {/* Image URL */}
+          {/* Images */}
           <div className="space-y-1">
             <label className="text-xs font-bold text-gray-500 uppercase tracking-wide flex items-center gap-1">
-              <ImageIcon size={14} /> Image URL
+              <ImageIcon size={14} /> Images
             </label>
             <input
-              name="imageUrl"
-              value={formData.imageUrl}
-              onChange={handleChange}
-              placeholder="https://example.com/image.jpg"
-              aria-label="Image URL"
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all placeholder:text-gray-400"
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={(e) => {
+                if (e.target.files) {
+                  setImages(Array.from(e.target.files));
+                }
+              }}
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-sans text-sm"
             />
+            {existingImages.length > 0 && (
+              <div className="flex gap-2 mt-2 overflow-x-auto">
+                {existingImages.map((url, idx) => (
+                  <img
+                    key={idx}
+                    src={url}
+                    alt="existing"
+                    className="w-16 h-16 object-cover rounded shadow border"
+                  />
+                ))}
+              </div>
+            )}
+            {images.length > 0 && (
+              <p className="text-xs text-green-600 font-bold">
+                {images.length} new file(s) selected.
+              </p>
+            )}
           </div>
         </div>
 
@@ -406,10 +438,11 @@ export default function MenuForm() {
               return (
                 <div
                   key={q}
-                  className={`relative p-3 rounded-xl border transition-all ${isSelected
-                    ? "border-orange-500 bg-orange-50"
-                    : "border-gray-200 bg-white"
-                    }`}
+                  className={`relative p-3 rounded-xl border transition-all ${
+                    isSelected
+                      ? "border-orange-500 bg-orange-50"
+                      : "border-gray-200 bg-white"
+                  }`}
                 >
                   <label className="flex items-center gap-2 cursor-pointer mb-2">
                     <input
@@ -422,8 +455,9 @@ export default function MenuForm() {
                       aria-label={`Select unit ${q}`}
                     />
                     <span
-                      className={`font-medium capitalize ${isSelected ? "text-orange-900" : "text-gray-600"
-                        }`}
+                      className={`font-medium capitalize ${
+                        isSelected ? "text-orange-900" : "text-gray-600"
+                      }`}
                     >
                       {q}
                     </span>
@@ -476,10 +510,11 @@ export default function MenuForm() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full md:w-auto px-8 py-3 rounded-full font-bold shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 ${loading
-              ? "bg-gray-300 text-gray-500 cursor-not-allowed shadow-none"
-              : "bg-orange-600 text-white hover:bg-orange-700 shadow-orange-600/20"
-              }`}
+            className={`w-full md:w-auto px-8 py-3 rounded-full font-bold shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 ${
+              loading
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed shadow-none"
+                : "bg-orange-600 text-white hover:bg-orange-700 shadow-orange-600/20"
+            }`}
           >
             {loading ? (
               <>

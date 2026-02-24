@@ -10,7 +10,8 @@ export const getMenuItems = async (req: any, res: Response) => {
   }
 };
 export const createMenuItem = async (req: any, res: Response) => {
-  const result = await createMenuService(req.user.resturant.id, req.body);
+  const images = req.files ? req.files.map((file: any) => file.path) : [];
+  const result = await createMenuService(req.user.resturant.id, { ...req.body, images });
   if (result.success) {
     res.status(result.code).json({ success: true, message: result.message });
   } else {
@@ -40,7 +41,8 @@ export const getMenuItem = async (req: any, res: Response) => {
 
 export const updateMenuItem = async (req: any, res: Response) => {
   const { id } = req.params;
-  const result = await updateMenuService(id, req.user.id, req.body);
+  const images = req.files ? req.files.map((file: any) => file.path) : [];
+  const result = await updateMenuService(id, req.user.id, { ...req.body, images });
   if (result.success) {
     res.status(result.code).json({ success: true, data: result.data });
   } else {

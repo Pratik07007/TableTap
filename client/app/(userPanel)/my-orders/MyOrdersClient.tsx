@@ -17,7 +17,7 @@ import { motion } from "framer-motion";
 
 type OrderItem = {
   id: string;
-  menuItem: { id: string; name: string; imageUrl?: string };
+  menuItem: { id: string; name: string; images?: { url: string }[] };
   unitName: string;
   quantity: number;
   price: number;
@@ -128,8 +128,8 @@ export default function MyOrdersClient({
             </div>
             <h2 className="text-xl font-bold text-gray-900">No orders yet</h2>
             <p className="text-gray-500 max-w-sm mt-2 mb-8">
-              Looks like you haven&apos;t placed any orders yet. Scan a QR code at a
-              restaurant to get started!
+              Looks like you haven&apos;t placed any orders yet. Scan a QR code
+              at a restaurant to get started!
             </p>
           </div>
         ) : (

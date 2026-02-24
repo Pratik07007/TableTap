@@ -9,7 +9,7 @@ type MenuItem = {
   id: string;
   name: string;
   description?: string;
-  imageUrl?: string;
+  images?: { url: string }[];
   isAvailable: boolean;
   unit: { unit: string; price: number }[];
   menuCategory: { category: string; id: string };

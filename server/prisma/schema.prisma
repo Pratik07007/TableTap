@@ -63,7 +63,7 @@ model MenuItem {
   name        String
   description String?
   unit        Unit[]
-  imageUrl    String?
+  images      Image[]
   isAvailable Boolean @default(true)
 
   resturantID String
@@ -169,4 +169,13 @@ enum PaymentStatus {
 enum PaymentMethod {
   CASH
   ONLINE
+}
+
+model Image {
+  id         String   @id @default(uuid())
+  url        String
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

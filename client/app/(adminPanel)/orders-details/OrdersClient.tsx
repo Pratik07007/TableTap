@@ -23,7 +23,7 @@ interface OrderItem {
   price: number;
   menuItem: {
     name: string;
-    imageUrl?: string;
+    images?: { url: string }[];
   };
 }
 
@@ -81,7 +81,8 @@ export default function OrdersClient({
     try {
       setLoadingId(orderId);
       await axios.patch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
+        `${
+          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
         }/api/orders/${orderId}/status`,
         { status: newStatus },
         { withCredentials: true },
@@ -109,7 +110,8 @@ export default function OrdersClient({
     try {
       setLoadingId(orderId);
       await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
+        `${
+          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
         }/api/billing/generate`,
         { orderId },
         { withCredentials: true },
@@ -174,16 +176,22 @@ export default function OrdersClient({
             <button
               type="button"
               onClick={() => handlePaidToggle("false")}
-              className={`px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${paidFilter === "false" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600"
-                }`}
+              className={`px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${
+                paidFilter === "false"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-600"
+              }`}
             >
               Unpaid
             </button>
             <button
               type="button"
               onClick={() => handlePaidToggle("all")}
-              className={`px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${paidFilter === "all" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600"
-                }`}
+              className={`px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${
+                paidFilter === "all"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-600"
+              }`}
             >
               All
             </button>
@@ -207,8 +215,9 @@ export default function OrdersClient({
       </div>
 
       <div
-        className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative transition-opacity duration-200 ${isPending ? "opacity-60 pointer-events-none" : ""
-          }`}
+        className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative transition-opacity duration-200 ${
+          isPending ? "opacity-60 pointer-events-none" : ""
+        }`}
       >
         {isPending && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/20 backdrop-blur-[1px]">
@@ -462,13 +471,14 @@ export default function OrdersClient({
                         <tr key={item.id}>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-3">
-                              {item.menuItem.imageUrl && (
-                                <img
-                                  src={item.menuItem.imageUrl}
-                                  alt=""
-                                  className="h-10 w-10 rounded-md object-cover bg-gray-100"
-                                />
-                              )}
+                              {item.menuItem.images &&
+                                item.menuItem.images.length > 0 && (
+                                  <img
+                                    src={item.menuItem.images[0].url}
+                                    alt=""
+                                    className="h-10 w-10 rounded-md object-cover bg-gray-100"
+                                  />
+                                )}
                               <span className="font-medium text-gray-900">
                                 {item.menuItem.name}
                               </span>
@@ -523,12 +533,16 @@ export default function OrdersClient({
                     <div className="flex justify-between text-gray-600">
                       <span>Amount Tendered</span>
                       <span>
-                        ${selectedOrder.bill.amountTendered?.toFixed(2) ?? selectedOrder.finalAmount.toFixed(2)}
+                        $
+                        {selectedOrder.bill.amountTendered?.toFixed(2) ??
+                          selectedOrder.finalAmount.toFixed(2)}
                       </span>
                     </div>
                     <div className="flex justify-between text-gray-600">
                       <span>Change Given</span>
-                      <span>${selectedOrder.bill.changeGiven?.toFixed(2) ?? "0.00"}</span>
+                      <span>
+                        ${selectedOrder.bill.changeGiven?.toFixed(2) ?? "0.00"}
+                      </span>
                     </div>
                     <div className="flex justify-between text-gray-600">
                       <span>Paid At</span>

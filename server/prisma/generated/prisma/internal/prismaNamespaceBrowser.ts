@@ -58,7 +58,8 @@ export const ModelName = {
   Category: 'Category',
   Order: 'Order',
   OrderItem: 'OrderItem',
-  Bill: 'Bill'
+  Bill: 'Bill',
+  Image: 'Image'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -121,7 +122,6 @@ export const MenuItemScalarFieldEnum = {
   id: 'id',
   name: 'name',
   description: 'description',
-  imageUrl: 'imageUrl',
   isAvailable: 'isAvailable',
   resturantID: 'resturantID',
   createdAt: 'createdAt',
@@ -199,6 +199,17 @@ export const BillScalarFieldEnum = {
 } as const
 
 export type BillScalarFieldEnum = (typeof BillScalarFieldEnum)[keyof typeof BillScalarFieldEnum]
+
+
+export const ImageScalarFieldEnum = {
+  id: 'id',
+  url: 'url',
+  menuItemId: 'menuItemId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ImageScalarFieldEnum = (typeof ImageScalarFieldEnum)[keyof typeof ImageScalarFieldEnum]
 
 
 export const SortOrder = {

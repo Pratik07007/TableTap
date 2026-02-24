@@ -35,7 +35,7 @@ interface Bill {
       unitName: string;
       menuItem: {
         name: string;
-        imageUrl?: string;
+        images?: { url: string }[];
       };
     }[];
     user?: {
@@ -60,7 +60,9 @@ export default function BillingPage({
   const [sendingInvoice, setSendingInvoice] = useState(false);
   const [cashGiven, setCashGiven] = useState<string>("");
   const changeDue =
-    bill && cashGiven ? Math.max(0, parseFloat(cashGiven) - bill.totalAmount) : 0;
+    bill && cashGiven
+      ? Math.max(0, parseFloat(cashGiven) - bill.totalAmount)
+      : 0;
 
   useEffect(() => {
     fetchBill();
@@ -69,9 +71,10 @@ export default function BillingPage({
   const fetchBill = async () => {
     try {
       const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
+        `${
+          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
         }/api/billing/${orderId}`,
-        { withCredentials: true }
+        { withCredentials: true },
       );
       if (res.data.success) {
         setBill(res.data.data);
@@ -99,20 +102,22 @@ export default function BillingPage({
         }
       }
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
+        `${
+          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
         }/api/billing/pay`,
         {
           billId: bill.id,
           paymentMethod,
-          amountTendered: paymentMethod === "CASH" ? parseFloat(cashGiven) : undefined,
+          amountTendered:
+            paymentMethod === "CASH" ? parseFloat(cashGiven) : undefined,
         },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       if (res.data.success) {
         if (paymentMethod === "CASH") {
           toast.success(
-            `Payment successful! Change to return: $${changeDue.toFixed(2)}`
+            `Payment successful! Change to return: $${changeDue.toFixed(2)}`,
           );
         } else {
           toast.success("Payment successful!");
@@ -120,8 +125,7 @@ export default function BillingPage({
         fetchBill(); // Refresh data
       }
     } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Payment failed";
+      const message = error instanceof Error ? error.message : "Payment failed";
       toast.error(message);
     } finally {
       setProcessingPayment(false);
@@ -289,7 +293,9 @@ export default function BillingPage({
                   </div>
                   <div className="text-sm text-gray-600 flex justify-between">
                     <span>Amount Tendered</span>
-                    <span>${(bill.amountTendered ?? bill.totalAmount).toFixed(2)}</span>
+                    <span>
+                      ${(bill.amountTendered ?? bill.totalAmount).toFixed(2)}
+                    </span>
                   </div>
                   <div className="text-sm text-gray-600 flex justify-between">
                     <span>Change Given</span>
@@ -297,11 +303,17 @@ export default function BillingPage({
                   </div>
                   <div className="text-sm text-gray-600 flex justify-between">
                     <span>Paid At</span>
-                    <span>{bill.paidAt ? new Date(bill.paidAt).toLocaleString() : "-"}</span>
+                    <span>
+                      {bill.paidAt
+                        ? new Date(bill.paidAt).toLocaleString()
+                        : "-"}
+                    </span>
                   </div>
                   <div className="text-sm text-gray-600 flex justify-between">
                     <span>Transaction ID</span>
-                    <span className="font-mono">{bill.transactionId || "-"}</span>
+                    <span className="font-mono">
+                      {bill.transactionId || "-"}
+                    </span>
                   </div>
                 </div>
               )}
@@ -383,16 +395,21 @@ export default function BillingPage({
                           const res = await axios.post(
                             `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"}/api/billing/send-invoice`,
                             { billId: bill.id },
-                            { withCredentials: true }
+                            { withCredentials: true },
                           );
                           if (res.data.success) {
                             toast.success("Invoice email sent");
                           } else {
-                            toast.error(res.data.message || "Failed to send invoice email");
+                            toast.error(
+                              res.data.message ||
+                                "Failed to send invoice email",
+                            );
                           }
                         } catch (e: unknown) {
                           const message =
-                            e instanceof Error ? e.message : "Failed to send invoice email";
+                            e instanceof Error
+                              ? e.message
+                              : "Failed to send invoice email";
                           toast.error(message);
                         } finally {
                           setSendingInvoice(false);
