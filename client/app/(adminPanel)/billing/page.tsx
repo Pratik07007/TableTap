@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import axios from "axios";
 import Link from "next/link";
 
@@ -18,14 +19,24 @@ type BillRow = {
   };
 };
 
-async function fetchBills(searchParams: { page?: string; limit?: string; paymentMethod?: string }) {
+async function fetchBills(searchParams: {
+  page?: string;
+  limit?: string;
+  paymentMethod?: string;
+}) {
   const page = Number(searchParams.page ?? 1);
   const limit = Number(searchParams.limit ?? 10);
   const paymentMethod = searchParams.paymentMethod;
   const base = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
+
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+
   const res = await axios.get(`${base}/api/billing`, {
     params: { page, limit, paymentMethod },
-    withCredentials: true,
+    headers: {
+      Cookie: `token=${token}`,
+    },
   });
   return res.data;
 }
@@ -33,7 +44,11 @@ async function fetchBills(searchParams: { page?: string; limit?: string; payment
 export default async function BillsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; limit?: string; paymentMethod?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    limit?: string;
+    paymentMethod?: string;
+  }>;
 }) {
   const params = await searchParams;
   const result = await fetchBills(params);
@@ -84,24 +99,42 @@ export default async function BillsPage({
           <tbody className="divide-y divide-gray-100">
             {bills.map((b: BillRow) => (
               <tr key={b.id}>
-                <td className="px-4 py-3 font-mono">#{String(b.billNumber).padStart(6, '0')}</td>
+                <td className="px-4 py-3 font-mono">
+                  #{String(b.billNumber).padStart(6, "0")}
+                </td>
                 <td className="px-4 py-3">{b.orderId.slice(0, 8)}</td>
                 <td className="px-4 py-3">
-                  {b.order?.user ? `${b.order.user.firstName} ${b.order.user.lastName}` : 'Guest'}
-                  <div className="text-xs text-gray-500">{b.order?.user?.email ?? 'N/A'}</div>
+                  {b.order?.user
+                    ? `${b.order.user.firstName} ${b.order.user.lastName}`
+                    : "Guest"}
+                  <div className="text-xs text-gray-500">
+                    {b.order?.user?.email ?? "N/A"}
+                  </div>
                 </td>
-                <td className="px-4 py-3 text-right">${Number(b.totalAmount).toFixed(2)}</td>
-                <td className="px-4 py-3">{b.paymentStatus}</td>
-                <td className="px-4 py-3">{b.paymentMethod ?? '-'}</td>
-                <td className="px-4 py-3">{new Date(b.createdAt).toLocaleDateString()}</td>
                 <td className="px-4 py-3 text-right">
-                  <Link href={`/billing/${b.orderId}`} className="text-indigo-600 hover:underline">View</Link>
+                  ${Number(b.totalAmount).toFixed(2)}
+                </td>
+                <td className="px-4 py-3">{b.paymentStatus}</td>
+                <td className="px-4 py-3">{b.paymentMethod ?? "-"}</td>
+                <td className="px-4 py-3">
+                  {new Date(b.createdAt).toLocaleDateString()}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <Link
+                    href={`/billing/${b.orderId}`}
+                    className="text-indigo-600 hover:underline"
+                  >
+                    View
+                  </Link>
                 </td>
               </tr>
             ))}
             {bills.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-12 text-center text-gray-500">
+                <td
+                  colSpan={8}
+                  className="px-4 py-12 text-center text-gray-500"
+                >
                   No bills found.
                 </td>
               </tr>
@@ -110,16 +143,18 @@ export default async function BillsPage({
         </table>
       </div>
       <div className="flex items-center justify-between mt-4">
-        <span className="text-sm text-gray-500">Page {pagination.currentPage} of {pagination.totalPages}</span>
+        <span className="text-sm text-gray-500">
+          Page {pagination.currentPage} of {pagination.totalPages}
+        </span>
         <div className="flex gap-2">
           <Link
-            href={`/billing?page=${Math.max(1, pagination.currentPage - 1)}&limit=${pagination.limit}${params.paymentMethod ? `&paymentMethod=${params.paymentMethod}` : ''}`}
+            href={`/billing?page=${Math.max(1, pagination.currentPage - 1)}&limit=${pagination.limit}${params.paymentMethod ? `&paymentMethod=${params.paymentMethod}` : ""}`}
             className="px-3 py-2 rounded border border-gray-200 hover:bg-gray-50 text-sm"
           >
             Prev
           </Link>
           <Link
-            href={`/billing?page=${Math.min(pagination.totalPages, pagination.currentPage + 1)}&limit=${pagination.limit}${params.paymentMethod ? `&paymentMethod=${params.paymentMethod}` : ''}`}
+            href={`/billing?page=${Math.min(pagination.totalPages, pagination.currentPage + 1)}&limit=${pagination.limit}${params.paymentMethod ? `&paymentMethod=${params.paymentMethod}` : ""}`}
             className="px-3 py-2 rounded border border-gray-200 hover:bg-gray-50 text-sm"
           >
             Next
