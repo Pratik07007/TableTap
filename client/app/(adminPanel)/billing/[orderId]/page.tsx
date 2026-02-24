@@ -20,6 +20,10 @@ interface Bill {
   totalAmount: number;
   paymentStatus: "PENDING" | "PAID" | "FAILED";
   paymentMethod?: "CASH" | "ONLINE";
+  amountTendered?: number;
+  changeGiven?: number;
+  paidAt?: string;
+  transactionId?: string;
   createdAt: string;
   order: {
     id: string;
@@ -72,10 +76,10 @@ export default function BillingPage({
       if (res.data.success) {
         setBill(res.data.data);
       }
-    } catch (error: any) {
-      toast.error(
-        error.response?.data?.message || "Failed to fetch bill details"
-      );
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to fetch bill details";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -97,7 +101,11 @@ export default function BillingPage({
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
         }/api/billing/pay`,
-        { billId: bill.id, paymentMethod },
+        {
+          billId: bill.id,
+          paymentMethod,
+          amountTendered: paymentMethod === "CASH" ? parseFloat(cashGiven) : undefined,
+        },
         { withCredentials: true }
       );
 
@@ -111,8 +119,10 @@ export default function BillingPage({
         }
         fetchBill(); // Refresh data
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Payment failed");
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Payment failed";
+      toast.error(message);
     } finally {
       setProcessingPayment(false);
     }
@@ -268,6 +278,33 @@ export default function BillingPage({
                   <span>${bill.totalAmount.toFixed(2)}</span>
                 </div>
               </div>
+              {bill.paymentStatus === "PAID" && (
+                <div className="mt-6 bg-white rounded-xl border border-gray-200 p-4">
+                  <div className="text-sm font-semibold text-gray-900 mb-2">
+                    Payment Details
+                  </div>
+                  <div className="text-sm text-gray-600 flex justify-between">
+                    <span>Method</span>
+                    <span>{bill.paymentMethod}</span>
+                  </div>
+                  <div className="text-sm text-gray-600 flex justify-between">
+                    <span>Amount Tendered</span>
+                    <span>${(bill.amountTendered ?? bill.totalAmount).toFixed(2)}</span>
+                  </div>
+                  <div className="text-sm text-gray-600 flex justify-between">
+                    <span>Change Given</span>
+                    <span>${(bill.changeGiven ?? 0).toFixed(2)}</span>
+                  </div>
+                  <div className="text-sm text-gray-600 flex justify-between">
+                    <span>Paid At</span>
+                    <span>{bill.paidAt ? new Date(bill.paidAt).toLocaleString() : "-"}</span>
+                  </div>
+                  <div className="text-sm text-gray-600 flex justify-between">
+                    <span>Transaction ID</span>
+                    <span className="font-mono">{bill.transactionId || "-"}</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -353,8 +390,10 @@ export default function BillingPage({
                           } else {
                             toast.error(res.data.message || "Failed to send invoice email");
                           }
-                        } catch (e: any) {
-                          toast.error(e.response?.data?.message || "Failed to send invoice email");
+                        } catch (e: unknown) {
+                          const message =
+                            e instanceof Error ? e.message : "Failed to send invoice email";
+                          toast.error(message);
                         } finally {
                           setSendingInvoice(false);
                         }

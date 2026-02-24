@@ -12,12 +12,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useState } from "react";
-// Removed broken import of UpdateResturantModal
 
 export const AdminNavbar = () => {
   const router = useRouter();
-
-  const [restaurantData, setRestaurantData] = useState<any>(null); // Using any for simplicity here, ideally strict type
 
   const onLogout = async () => {
     const confirmed = window.confirm("Are you sure you want to log out?");

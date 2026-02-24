@@ -103,9 +103,9 @@ export default function TakeOrderInterface({
           menuItemId: item.menuItemId,
           unitName: item.unitName,
           quantity: item.quantity,
-          customerEmail, //the one who is ordering so thta they can see the orders in their panel
         })),
         discount: Number(discount),
+        customerEmail: customerEmail || undefined,
       };
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders`, {
@@ -126,8 +126,10 @@ export default function TakeOrderInterface({
       setDiscount(0);
       setShowConfirmation(false);
       router.refresh();
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to place order";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -253,6 +255,18 @@ export default function TakeOrderInterface({
         {cart.length > 0 && (
           <div className="mt-4 pt-4 border-t border-gray-100 space-y-4">
             <div className="space-y-2">
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-600">
+                  Customer Email (optional)
+                </label>
+                <input
+                  type="email"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  placeholder="customer@example.com"
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none"
+                />
+              </div>
               <div className="flex justify-between text-gray-600">
                 <span>Subtotal</span>
                 <span>${subtotal.toFixed(2)}</span>

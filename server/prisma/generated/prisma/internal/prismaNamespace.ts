@@ -1154,6 +1154,11 @@ export const BillScalarFieldEnum = {
   totalAmount: 'totalAmount',
   paymentStatus: 'paymentStatus',
   paymentMethod: 'paymentMethod',
+  amountTendered: 'amountTendered',
+  changeGiven: 'changeGiven',
+  paidAt: 'paidAt',
+  transactionId: 'transactionId',
+  paymentProcessedById: 'paymentProcessedById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

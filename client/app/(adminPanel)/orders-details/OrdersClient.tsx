@@ -47,6 +47,9 @@ interface Order {
     totalAmount: number;
     paymentStatus: "PENDING" | "PAID" | "FAILED";
     paymentMethod?: "CASH" | "ONLINE";
+    amountTendered?: number;
+    changeGiven?: number;
+    paidAt?: string;
   };
 }
 
@@ -60,11 +63,13 @@ interface Pagination {
 interface OrdersClientProps {
   initialOrders: Order[];
   pagination: Pagination;
+  paidFilter: string;
 }
 
 export default function OrdersClient({
   initialOrders,
   pagination,
+  paidFilter,
 }: OrdersClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -76,8 +81,7 @@ export default function OrdersClient({
     try {
       setLoadingId(orderId);
       await axios.patch(
-        `${
-          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
+        `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
         }/api/orders/${orderId}/status`,
         { status: newStatus },
         { withCredentials: true },
@@ -89,11 +93,13 @@ export default function OrdersClient({
       // Update selected order if it's open
       if (selectedOrder && selectedOrder.id === orderId) {
         setSelectedOrder((prev) =>
-          prev ? { ...prev, status: newStatus as any } : null,
+          prev ? { ...prev, status: newStatus as Order["status"] } : null,
         );
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to update status");
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to update status";
+      toast.error(message);
     } finally {
       setLoadingId(null);
     }
@@ -103,16 +109,17 @@ export default function OrdersClient({
     try {
       setLoadingId(orderId);
       await axios.post(
-        `${
-          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
+        `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
         }/api/billing/generate`,
         { orderId },
         { withCredentials: true },
       );
       toast.success("Bill generated successfully");
       router.push(`/billing/${orderId}`);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to generate bill");
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to generate bill";
+      toast.error(message);
     } finally {
       setLoadingId(null);
     }
@@ -136,6 +143,15 @@ export default function OrdersClient({
     });
   };
 
+  const handlePaidToggle = (nextValue: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("paid", nextValue);
+    params.set("page", "1");
+    startTransition(() => {
+      router.push(`?${params.toString()}`);
+    });
+  };
+
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > pagination.totalPages) return;
     const params = new URLSearchParams(searchParams.toString());
@@ -153,27 +169,46 @@ export default function OrdersClient({
           Order Details
         </h1>
 
-        <form onSubmit={handleSearch} className="relative w-full md:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 h-4 w-4" />
-          <input
-            name="email"
-            defaultValue={searchParams.get("email")?.toString()}
-            placeholder="Filter by user email..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-black focus:ring-1 focus:ring-black outline-none transition-all disabled:opacity-50"
-            disabled={isPending}
-          />
-          {isPending && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
-            </div>
-          )}
-        </form>
+        <div className="flex flex-col md:flex-row gap-3 items-center w-full md:w-auto">
+          <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+            <button
+              type="button"
+              onClick={() => handlePaidToggle("false")}
+              className={`px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${paidFilter === "false" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600"
+                }`}
+            >
+              Unpaid
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePaidToggle("all")}
+              className={`px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${paidFilter === "all" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600"
+                }`}
+            >
+              All
+            </button>
+          </div>
+          <form onSubmit={handleSearch} className="relative w-full md:w-96">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 h-4 w-4" />
+            <input
+              name="email"
+              defaultValue={searchParams.get("email")?.toString()}
+              placeholder="Filter by user email..."
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-black focus:ring-1 focus:ring-black outline-none transition-all disabled:opacity-50"
+              disabled={isPending}
+            />
+            {isPending && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+              </div>
+            )}
+          </form>
+        </div>
       </div>
 
       <div
-        className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative transition-opacity duration-200 ${
-          isPending ? "opacity-60 pointer-events-none" : ""
-        }`}
+        className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative transition-opacity duration-200 ${isPending ? "opacity-60 pointer-events-none" : ""
+          }`}
       >
         {isPending && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/20 backdrop-blur-[1px]">
@@ -190,6 +225,7 @@ export default function OrdersClient({
                 <th className="px-6 py-4">Items Summary</th>
                 <th className="px-6 py-4">Total</th>
                 <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4">Change Given</th>
                 <th className="px-6 py-4">Date</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
@@ -227,6 +263,11 @@ export default function OrdersClient({
                   </td>
                   <td className="px-6 py-4">
                     <StatusBadge status={order.status} />
+                  </td>
+                  <td className="px-6 py-4 text-gray-600">
+                    {typeof order.bill?.changeGiven === "number"
+                      ? `$${order.bill.changeGiven.toFixed(2)}`
+                      : "-"}
                   </td>
                   <td className="px-6 py-4 text-gray-500 whitespace-nowrap">
                     {new Date(order.createdAt).toLocaleDateString()}
@@ -471,6 +512,35 @@ export default function OrdersClient({
                   </div>
                 </div>
               </div>
+
+              {selectedOrder.bill?.paymentStatus === "PAID" && (
+                <div className="flex justify-end">
+                  <div className="w-full md:w-1/3 bg-white border border-gray-200 p-6 rounded-xl space-y-2">
+                    <div className="flex justify-between text-gray-600">
+                      <span>Method</span>
+                      <span>{selectedOrder.bill.paymentMethod}</span>
+                    </div>
+                    <div className="flex justify-between text-gray-600">
+                      <span>Amount Tendered</span>
+                      <span>
+                        ${selectedOrder.bill.amountTendered?.toFixed(2) ?? selectedOrder.finalAmount.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-gray-600">
+                      <span>Change Given</span>
+                      <span>${selectedOrder.bill.changeGiven?.toFixed(2) ?? "0.00"}</span>
+                    </div>
+                    <div className="flex justify-between text-gray-600">
+                      <span>Paid At</span>
+                      <span>
+                        {selectedOrder.bill.paidAt
+                          ? new Date(selectedOrder.bill.paidAt).toLocaleString()
+                          : "-"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Billing Section */}
               <div className="flex justify-end pt-4">

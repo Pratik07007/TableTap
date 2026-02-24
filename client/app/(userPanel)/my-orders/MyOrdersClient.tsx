@@ -128,7 +128,7 @@ export default function MyOrdersClient({
             </div>
             <h2 className="text-xl font-bold text-gray-900">No orders yet</h2>
             <p className="text-gray-500 max-w-sm mt-2 mb-8">
-              Looks like you haven't placed any orders yet. Scan a QR code at a
+              Looks like you haven&apos;t placed any orders yet. Scan a QR code at a
               restaurant to get started!
             </p>
           </div>

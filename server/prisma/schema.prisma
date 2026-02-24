@@ -23,9 +23,10 @@ model User {
   resetPasswordToken   String?
   resetPasswordExpires DateTime?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  orders    Order[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  orders         Order[]
+  processedBills Bill[]   @relation("UserProcessedBills")
 }
 
 model Resturants {
@@ -145,9 +146,15 @@ model Bill {
   orderId String @unique
   order   Order  @relation(fields: [orderId], references: [id])
 
-  totalAmount   Float
-  paymentStatus PaymentStatus  @default(PENDING)
-  paymentMethod PaymentMethod?
+  totalAmount          Float
+  paymentStatus        PaymentStatus  @default(PENDING)
+  paymentMethod        PaymentMethod?
+  amountTendered       Float?
+  changeGiven          Float?
+  paidAt               DateTime?
+  transactionId        String?
+  paymentProcessedById String?
+  paymentProcessedBy   User?          @relation("UserProcessedBills", fields: [paymentProcessedById], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

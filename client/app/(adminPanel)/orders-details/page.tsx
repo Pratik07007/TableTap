@@ -2,7 +2,7 @@
 import { cookies } from "next/headers";
 import OrdersClient from "./OrdersClient";
 
-async function getOrders(page: string, email: string | undefined) {
+async function getOrders(page: string, email: string | undefined, paid: string | undefined) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
@@ -10,6 +10,7 @@ async function getOrders(page: string, email: string | undefined) {
     const queryParams = new URLSearchParams();
     queryParams.set("page", page);
     if (email) queryParams.set("email", email);
+    if (paid) queryParams.set("paid", paid);
     queryParams.set("limit", "10");
 
     const apiUrl = `${process.env.BACKEND_URL || "http://localhost:8080"}/api/orders?${queryParams.toString()}`;
@@ -47,19 +48,21 @@ async function getOrders(page: string, email: string | undefined) {
 export default async function OrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; email?: string }>;
+  searchParams: Promise<{ page?: string; email?: string; paid?: string }>;
 }) {
   const params = await searchParams;
   const page = params.page || "1";
   const email = params.email;
+  const paid = params.paid || "false";
 
-  const response = await getOrders(page, email);
+  const response = await getOrders(page, email, paid);
 
   return (
     <div className="min-h-screen bg-gray-50/50">
       <OrdersClient 
         initialOrders={response.data || []} 
         pagination={response.pagination || { totalOrders: 0, totalPages: 1, currentPage: 1, limit: 10 }} 
+        paidFilter={paid}
       />
     </div>
   );

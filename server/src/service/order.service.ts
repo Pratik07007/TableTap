@@ -1,6 +1,7 @@
 import { prisma } from '../../prisma/client';
+import { sendCustomerOrderEmail, sendAdminPlacedOrderEmail } from '../utils/orderEmail';
 
-export const createOrderService = async (userId: string, resturantId: string, resturantOwnerId: string, data: { items: any[]; discount?: number }) => {
+export const createOrderService = async (userId: string, resturantId: string, resturantOwnerId: string, data: { items: any[]; discount?: number; customerEmail?: string }) => {
   try {
     const { items, discount } = data;
 
@@ -57,6 +58,7 @@ export const createOrderService = async (userId: string, resturantId: string, re
           status: 'PENDING',
           userId: userId,
           resturantID: resturantId,
+          customerEmail: data.customerEmail || null,
           items: {
             create: orderItemsData,
           },
@@ -66,6 +68,35 @@ export const createOrderService = async (userId: string, resturantId: string, re
 
       return newOrder;
     });
+
+    if (data.customerEmail) {
+      const orderWithItems = await prisma.order.findUnique({
+        where: { id: order.id },
+        include: { items: { include: { menuItem: true } } },
+      });
+      if (orderWithItems) {
+        try {
+          const restaurant = await prisma.resturants.findUnique({
+            where: { id: resturantId },
+          });
+          await sendAdminPlacedOrderEmail(data.customerEmail, {
+            orderId: order.id,
+            items: orderWithItems.items.map((i) => ({
+              name: i.menuItem.name,
+              unitName: i.unitName,
+              quantity: i.quantity,
+              price: i.price,
+            })),
+            totalAmount: order.finalAmount,
+            estimatedTime: '30-45 minutes',
+            supportEmail: restaurant?.email || process.env.EMAIL_USER || '',
+            supportPhone: restaurant?.phone,
+          });
+        } catch (e) {
+          console.error('Failed to send admin placed order email', e);
+        }
+      }
+    }
 
     return { success: true, data: order, code: 201 };
   } catch (error: any) {
@@ -77,6 +108,7 @@ export const createOrderService = async (userId: string, resturantId: string, re
 export const createCustomerOrderService = async (userId: string, data: { items: any[]; resturantID: string }) => {
   try {
     const { items, resturantID } = data;
+    const user = await prisma.user.findUnique({ where: { id: userId } });
 
     if (!items || items.length === 0) {
       return { success: false, message: 'No items in order', code: 400 };
@@ -135,6 +167,7 @@ export const createCustomerOrderService = async (userId: string, data: { items: 
           status: 'PENDING',
           userId: userId,
           resturantID: resturantID,
+          customerEmail: user?.email || null,
           items: {
             create: orderItemsData,
           },
@@ -144,6 +177,30 @@ export const createCustomerOrderService = async (userId: string, data: { items: 
 
       return newOrder;
     });
+
+    const orderWithItems = await prisma.order.findUnique({
+      where: { id: order.id },
+      include: { items: { include: { menuItem: true } }, user: true },
+    });
+    if (orderWithItems?.user?.email) {
+      try {
+        await sendCustomerOrderEmail(orderWithItems.user.email, {
+          firstName: orderWithItems.user.firstName,
+          orderId: order.id,
+          items: orderWithItems.items.map((i) => ({
+            name: i.menuItem.name,
+            unitName: i.unitName,
+            quantity: i.quantity,
+            price: i.price,
+          })),
+          totalAmount: order.finalAmount,
+          paymentLink: `${process.env.FRONTEND_URL}/payment/${order.id}`,
+          estimatedTime: '30-45 minutes',
+        });
+      } catch (e) {
+        console.error('Failed to send customer order email', e);
+      }
+    }
 
     return { success: true, data: order, code: 201 };
   } catch (error: any) {
@@ -201,7 +258,13 @@ export const getMyOrdersService = async (userId: string, page: number = 1, limit
   }
 };
 
-export const getAllOrdersService = async (resturantId: string | undefined, page: number = 1, limit: number = 10, email?: string) => {
+export const getAllOrdersService = async (
+  resturantId: string | undefined,
+  page: number = 1,
+  limit: number = 10,
+  email?: string,
+  paid?: 'true' | 'false' | 'all'
+) => {
   try {
     const skip = (page - 1) * limit;
 
@@ -211,8 +274,11 @@ export const getAllOrdersService = async (resturantId: string | undefined, page:
       whereClause.resturantID = resturantId;
     }
 
-    // Only show unpaid orders
-    whereClause.isPaid = false;
+    if (paid === 'true') {
+      whereClause.isPaid = true;
+    } else if (paid === 'false' || !paid) {
+      whereClause.isPaid = false;
+    }
 
     if (email) {
       whereClause.user = {

@@ -117,6 +117,12 @@ export const generateBillSchema = z.object({
 export const payBillSchema = z.object({
   billId: z.string().min(1, 'Bill ID is required'),
   paymentMethod: z.enum(['CASH', 'ONLINE']),
+  amountTendered: z.number().nonnegative().optional(),
+}).refine((data) => {
+  if (data.paymentMethod === 'CASH') {
+    return typeof data.amountTendered === 'number';
+  }
+  return true;
 });
 
 export type GenerateBillInput = z.infer<typeof generateBillSchema>;
