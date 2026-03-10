@@ -31,6 +31,10 @@ app.use('/api/menu-items', menuItemRouter); // ✅ done
 app.use('/api/orders', orderRouter);
 app.use('/api/billing', billingRouter);
 
+app.get("/health", (req, res) => {
+  res.json({ message: "OK" })
+})
+
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
