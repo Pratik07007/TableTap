@@ -12,12 +12,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useState } from "react";
-import { UpdateRestaurantModal } from "./UpdateResturantModal";
 
 export const AdminNavbar = () => {
   const router = useRouter();
-
-  const [restaurantData, setRestaurantData] = useState<any>(null); // Using any for simplicity here, ideally strict type
 
   const onLogout = async () => {
     const confirmed = window.confirm("Are you sure you want to log out?");
@@ -78,6 +75,12 @@ export const AdminNavbar = () => {
                   className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2"
                 >
                   <ClipboardList size={18} /> Orders
+                </Link>
+                <Link
+                  href="/billing"
+                  className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2"
+                >
+                  <Store size={18} /> Bills
                 </Link>
               </div>
             </div>

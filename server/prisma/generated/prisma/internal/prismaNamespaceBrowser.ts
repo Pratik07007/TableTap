@@ -57,7 +57,9 @@ export const ModelName = {
   Unit: 'Unit',
   Category: 'Category',
   Order: 'Order',
-  OrderItem: 'OrderItem'
+  OrderItem: 'OrderItem',
+  Bill: 'Bill',
+  Image: 'Image'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -66,12 +68,12 @@ export type ModelName = (typeof ModelName)[keyof typeof ModelName]
  * Enums
  */
 
-export const TransactionIsolationLevel = {
+export const TransactionIsolationLevel = runtime.makeStrictEnum({
   ReadUncommitted: 'ReadUncommitted',
   ReadCommitted: 'ReadCommitted',
   RepeatableRead: 'RepeatableRead',
   Serializable: 'Serializable'
-} as const
+} as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
@@ -120,7 +122,6 @@ export const MenuItemScalarFieldEnum = {
   id: 'id',
   name: 'name',
   description: 'description',
-  imageUrl: 'imageUrl',
   isAvailable: 'isAvailable',
   resturantID: 'resturantID',
   createdAt: 'createdAt',
@@ -155,7 +156,10 @@ export const OrderScalarFieldEnum = {
   discount: 'discount',
   finalAmount: 'finalAmount',
   status: 'status',
+  isPaid: 'isPaid',
+  paidAt: 'paidAt',
   userId: 'userId',
+  customerEmail: 'customerEmail',
   resturantID: 'resturantID',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -176,6 +180,36 @@ export const OrderItemScalarFieldEnum = {
 } as const
 
 export type OrderItemScalarFieldEnum = (typeof OrderItemScalarFieldEnum)[keyof typeof OrderItemScalarFieldEnum]
+
+
+export const BillScalarFieldEnum = {
+  id: 'id',
+  billNumber: 'billNumber',
+  orderId: 'orderId',
+  totalAmount: 'totalAmount',
+  paymentStatus: 'paymentStatus',
+  paymentMethod: 'paymentMethod',
+  amountTendered: 'amountTendered',
+  changeGiven: 'changeGiven',
+  paidAt: 'paidAt',
+  transactionId: 'transactionId',
+  paymentProcessedById: 'paymentProcessedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BillScalarFieldEnum = (typeof BillScalarFieldEnum)[keyof typeof BillScalarFieldEnum]
+
+
+export const ImageScalarFieldEnum = {
+  id: 'id',
+  url: 'url',
+  menuItemId: 'menuItemId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ImageScalarFieldEnum = (typeof ImageScalarFieldEnum)[keyof typeof ImageScalarFieldEnum]
 
 
 export const SortOrder = {

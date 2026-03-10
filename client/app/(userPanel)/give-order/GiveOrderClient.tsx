@@ -17,12 +17,13 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 type MenuItem = {
   id: string;
   name: string;
   description?: string;
-  imageUrl?: string;
+  images?: { url: string }[];
   isAvailable: boolean;
   unit: { unit: string; price: number }[];
   menuCategory: { category: string; id: string };
@@ -49,15 +50,21 @@ export default function GiveOrderClient({
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>("");
+  const [activeImageIndices, setActiveImageIndices] = useState<
+    Record<string, number>
+  >({});
 
   // Group items by category
   const groupedItems = useMemo(() => {
-    return menuItems.reduce((acc, item) => {
-      const category = item.menuCategory?.category || "Other";
-      if (!acc[category]) acc[category] = [];
-      acc[category].push(item);
-      return acc;
-    }, {} as Record<string, MenuItem[]>);
+    return menuItems.reduce(
+      (acc, item) => {
+        const category = item.menuCategory?.category || "Other";
+        if (!acc[category]) acc[category] = [];
+        acc[category].push(item);
+        return acc;
+      },
+      {} as Record<string, MenuItem[]>,
+    );
   }, [menuItems]);
 
   const categories = Object.keys(groupedItems);
@@ -86,13 +93,13 @@ export default function GiveOrderClient({
     const uniqueId = `${item.id}-${unit.unit}`;
     setCart((prevCart) => {
       const existingItem = prevCart.find(
-        (cartItem) => cartItem.uniqueId === uniqueId
+        (cartItem) => cartItem.uniqueId === uniqueId,
       );
       if (existingItem) {
         return prevCart.map((cartItem) =>
           cartItem.uniqueId === uniqueId
             ? { ...cartItem, quantity: cartItem.quantity + 1 }
-            : cartItem
+            : cartItem,
         );
       } else {
         return [
@@ -114,13 +121,13 @@ export default function GiveOrderClient({
   const removeFromCart = (uniqueId: string) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find(
-        (cartItem) => cartItem.uniqueId === uniqueId
+        (cartItem) => cartItem.uniqueId === uniqueId,
       );
       if (existingItem && existingItem.quantity > 1) {
         return prevCart.map((cartItem) =>
           cartItem.uniqueId === uniqueId
             ? { ...cartItem, quantity: cartItem.quantity - 1 }
-            : cartItem
+            : cartItem,
         );
       } else {
         return prevCart.filter((cartItem) => cartItem.uniqueId !== uniqueId);
@@ -130,19 +137,43 @@ export default function GiveOrderClient({
 
   const deleteFromCart = (uniqueId: string) => {
     setCart((prevCart) =>
-      prevCart.filter((cartItem) => cartItem.uniqueId !== uniqueId)
+      prevCart.filter((cartItem) => cartItem.uniqueId !== uniqueId),
     );
   };
 
   const subtotal = cart.reduce(
     (acc, item) => acc + item.price * item.quantity,
-    0
+    0,
   );
 
   const getItemQuantityInCart = (itemId: string) => {
     return cart
       .filter((c) => c.menuItemId === itemId)
       .reduce((acc, curr) => acc + curr.quantity, 0);
+  };
+
+  const nextImage = (
+    itemId: string,
+    maxImages: number,
+    e: React.MouseEvent,
+  ) => {
+    e.stopPropagation();
+    setActiveImageIndices((prev) => ({
+      ...prev,
+      [itemId]: ((prev[itemId] || 0) + 1) % maxImages,
+    }));
+  };
+
+  const prevImage = (
+    itemId: string,
+    maxImages: number,
+    e: React.MouseEvent,
+  ) => {
+    e.stopPropagation();
+    setActiveImageIndices((prev) => ({
+      ...prev,
+      [itemId]: ((prev[itemId] || 0) - 1 + maxImages) % maxImages,
+    }));
   };
 
   const handlePlaceOrder = async () => {
@@ -164,7 +195,7 @@ export default function GiveOrderClient({
           headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify(payload),
-        }
+        },
       );
 
       const json = await res.json();
@@ -264,54 +295,113 @@ export default function GiveOrderClient({
                         viewport={{ once: true }}
                         transition={{ duration: 0.3 }}
                         key={item.id}
-                        className={`bg-white rounded-2xl p-4 flex flex-col justify-between border transition-all hover:shadow-lg ${
+                        className={`bg-white rounded-2xl overflow-hidden flex flex-col justify-between border transition-all hover:shadow-lg ${
                           qtyInCart > 0
                             ? "border-orange-200 shadow-md ring-1 ring-orange-100"
                             : "border-gray-100 shadow-sm"
                         }`}
                       >
-                        <div className="flex gap-4 mb-4">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="text-lg font-bold text-gray-900 line-clamp-1">
-                              {item.name}
-                            </h3>
-                            {item.description && (
-                              <p className="text-sm text-gray-500 mt-1 line-clamp-2 leading-relaxed">
-                                {item.description}
-                              </p>
+                        {item.images && item.images.length > 0 && (
+                          <div className="w-full h-48 bg-gray-100 relative overflow-hidden group">
+                            <AnimatePresence initial={false}>
+                              <motion.img
+                                key={`${item.id}-${activeImageIndices[item.id] || 0}`}
+                                src={
+                                  item.images[activeImageIndices[item.id] || 0]
+                                    .url
+                                }
+                                alt={item.name}
+                                initial={{ opacity: 0.8 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.2 }}
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              />
+                            </AnimatePresence>
+                            {qtyInCart > 0 && (
+                              <div className="absolute top-3 right-3 bg-orange-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md z-10">
+                                {qtyInCart} in cart
+                              </div>
+                            )}
+
+                            {item.images.length > 1 && (
+                              <>
+                                <button
+                                  onClick={(e) =>
+                                    prevImage(item.id, item.images!.length, e)
+                                  }
+                                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-1.5 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                >
+                                  <ChevronLeft size={16} />
+                                </button>
+                                <button
+                                  onClick={(e) =>
+                                    nextImage(item.id, item.images!.length, e)
+                                  }
+                                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-1.5 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                >
+                                  <ChevronRight size={16} />
+                                </button>
+                                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+                                  {item.images.map((_, idx) => (
+                                    <div
+                                      key={idx}
+                                      className={`h-1.5 rounded-full transition-all ${
+                                        idx ===
+                                        (activeImageIndices[item.id] || 0)
+                                          ? "w-4 bg-white"
+                                          : "w-1.5 bg-white/50"
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
+                              </>
                             )}
                           </div>
-                        </div>
+                        )}
+                        <div className="p-5 flex flex-col flex-1">
+                          <div className="flex gap-4 mb-4">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-lg font-bold text-gray-900 line-clamp-1">
+                                {item.name}
+                              </h3>
+                              {item.description && (
+                                <p className="text-sm text-gray-500 mt-1 line-clamp-2 leading-relaxed">
+                                  {item.description}
+                                </p>
+                              )}
+                            </div>
+                          </div>
 
-                        <div className="mt-auto">
-                          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                            Select Size
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {item.unit && item.unit.length > 0 ? (
-                              item.unit.map((u) => (
-                                <button
-                                  key={u.unit}
-                                  onClick={() => addToCart(item, u)}
-                                  className="group flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-orange-600 hover:text-white border border-gray-200 hover:border-orange-600 rounded-xl transition-all active:scale-95"
-                                >
-                                  <span className="text-sm font-medium">
-                                    {u.unit}
-                                  </span>
-                                  <span className="text-xs font-bold bg-white text-gray-900 group-hover:text-orange-600 px-1.5 py-0.5 rounded-md shadow-sm">
-                                    ${u.price}
-                                  </span>
-                                  <Plus
-                                    size={14}
-                                    className="opacity-0 group-hover:opacity-100 -ml-1 transition-opacity"
-                                  />
-                                </button>
-                              ))
-                            ) : (
-                              <p className="text-sm text-red-400 italic">
-                                Unavailable
-                              </p>
-                            )}
+                          <div className="mt-auto">
+                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                              Select Size
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {item.unit && item.unit.length > 0 ? (
+                                item.unit.map((u) => (
+                                  <button
+                                    key={u.unit}
+                                    onClick={() => addToCart(item, u)}
+                                    className="group flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-orange-600 hover:text-white border border-gray-200 hover:border-orange-600 rounded-xl transition-all active:scale-95"
+                                  >
+                                    <span className="text-sm font-medium">
+                                      {u.unit}
+                                    </span>
+                                    <span className="text-xs font-bold bg-white text-gray-900 group-hover:text-orange-600 px-1.5 py-0.5 rounded-md shadow-sm">
+                                      ${u.price}
+                                    </span>
+                                    <Plus
+                                      size={14}
+                                      className="opacity-0 group-hover:opacity-100 -ml-1 transition-opacity"
+                                    />
+                                  </button>
+                                ))
+                              ) : (
+                                <p className="text-sm text-red-400 italic">
+                                  Unavailable
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </motion.div>
@@ -393,10 +483,10 @@ export default function GiveOrderClient({
                         <button
                           onClick={() => {
                             const menuItem = menuItems.find(
-                              (mi) => mi.id === item.menuItemId
+                              (mi) => mi.id === item.menuItemId,
                             );
                             const unit = menuItem?.unit.find(
-                              (u) => u.unit === item.unitName
+                              (u) => u.unit === item.unitName,
                             );
                             if (menuItem && unit) addToCart(menuItem, unit);
                           }}
@@ -520,10 +610,10 @@ export default function GiveOrderClient({
                         <button
                           onClick={() => {
                             const menuItem = menuItems.find(
-                              (mi) => mi.id === item.menuItemId
+                              (mi) => mi.id === item.menuItemId,
                             );
                             const unit = menuItem?.unit.find(
-                              (u) => u.unit === item.unitName
+                              (u) => u.unit === item.unitName,
                             );
                             if (menuItem && unit) addToCart(menuItem, unit);
                           }}

@@ -4,7 +4,6 @@ import { prisma } from '../../prisma/client';
 
 export const protect = (...roles: string[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    // console.log(' Protect called');
     const token = req.cookies.token;
     if (!token) {
       return res.status(401).json({

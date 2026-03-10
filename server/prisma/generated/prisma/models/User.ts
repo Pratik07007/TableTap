@@ -248,6 +248,7 @@ export type UserWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   resturant?: Prisma.XOR<Prisma.ResturantsNullableScalarRelationFilter, Prisma.ResturantsWhereInput> | null
   orders?: Prisma.OrderListRelationFilter
+  processedBills?: Prisma.BillListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -266,6 +267,7 @@ export type UserOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   resturant?: Prisma.ResturantsOrderByWithRelationInput
   orders?: Prisma.OrderOrderByRelationAggregateInput
+  processedBills?: Prisma.BillOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -287,6 +289,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   resturant?: Prisma.XOR<Prisma.ResturantsNullableScalarRelationFilter, Prisma.ResturantsWhereInput> | null
   orders?: Prisma.OrderListRelationFilter
+  processedBills?: Prisma.BillListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -343,6 +346,7 @@ export type UserCreateInput = {
   updatedAt?: Date | string
   resturant?: Prisma.ResturantsCreateNestedOneWithoutOwnerInput
   orders?: Prisma.OrderCreateNestedManyWithoutUserInput
+  processedBills?: Prisma.BillCreateNestedManyWithoutPaymentProcessedByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -361,6 +365,7 @@ export type UserUncheckedCreateInput = {
   updatedAt?: Date | string
   resturant?: Prisma.ResturantsUncheckedCreateNestedOneWithoutOwnerInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
+  processedBills?: Prisma.BillUncheckedCreateNestedManyWithoutPaymentProcessedByInput
 }
 
 export type UserUpdateInput = {
@@ -379,6 +384,7 @@ export type UserUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   resturant?: Prisma.ResturantsUpdateOneWithoutOwnerNestedInput
   orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
+  processedBills?: Prisma.BillUpdateManyWithoutPaymentProcessedByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -397,6 +403,7 @@ export type UserUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   resturant?: Prisma.ResturantsUncheckedUpdateOneWithoutOwnerNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
+  processedBills?: Prisma.BillUncheckedUpdateManyWithoutPaymentProcessedByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -559,6 +566,22 @@ export type UserUpdateOneWithoutOrdersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutOrdersInput, Prisma.UserUpdateWithoutOrdersInput>, Prisma.UserUncheckedUpdateWithoutOrdersInput>
 }
 
+export type UserCreateNestedOneWithoutProcessedBillsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutProcessedBillsInput, Prisma.UserUncheckedCreateWithoutProcessedBillsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutProcessedBillsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutProcessedBillsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutProcessedBillsInput, Prisma.UserUncheckedCreateWithoutProcessedBillsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutProcessedBillsInput
+  upsert?: Prisma.UserUpsertWithoutProcessedBillsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutProcessedBillsInput, Prisma.UserUpdateWithoutProcessedBillsInput>, Prisma.UserUncheckedUpdateWithoutProcessedBillsInput>
+}
+
 export type UserCreateWithoutResturantInput = {
   id?: string
   firstName: string
@@ -574,6 +597,7 @@ export type UserCreateWithoutResturantInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   orders?: Prisma.OrderCreateNestedManyWithoutUserInput
+  processedBills?: Prisma.BillCreateNestedManyWithoutPaymentProcessedByInput
 }
 
 export type UserUncheckedCreateWithoutResturantInput = {
@@ -591,6 +615,7 @@ export type UserUncheckedCreateWithoutResturantInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
+  processedBills?: Prisma.BillUncheckedCreateNestedManyWithoutPaymentProcessedByInput
 }
 
 export type UserCreateOrConnectWithoutResturantInput = {
@@ -624,6 +649,7 @@ export type UserUpdateWithoutResturantInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
+  processedBills?: Prisma.BillUpdateManyWithoutPaymentProcessedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutResturantInput = {
@@ -641,6 +667,7 @@ export type UserUncheckedUpdateWithoutResturantInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
+  processedBills?: Prisma.BillUncheckedUpdateManyWithoutPaymentProcessedByNestedInput
 }
 
 export type UserCreateWithoutOrdersInput = {
@@ -658,6 +685,7 @@ export type UserCreateWithoutOrdersInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   resturant?: Prisma.ResturantsCreateNestedOneWithoutOwnerInput
+  processedBills?: Prisma.BillCreateNestedManyWithoutPaymentProcessedByInput
 }
 
 export type UserUncheckedCreateWithoutOrdersInput = {
@@ -675,6 +703,7 @@ export type UserUncheckedCreateWithoutOrdersInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   resturant?: Prisma.ResturantsUncheckedCreateNestedOneWithoutOwnerInput
+  processedBills?: Prisma.BillUncheckedCreateNestedManyWithoutPaymentProcessedByInput
 }
 
 export type UserCreateOrConnectWithoutOrdersInput = {
@@ -708,6 +737,7 @@ export type UserUpdateWithoutOrdersInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   resturant?: Prisma.ResturantsUpdateOneWithoutOwnerNestedInput
+  processedBills?: Prisma.BillUpdateManyWithoutPaymentProcessedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOrdersInput = {
@@ -725,6 +755,95 @@ export type UserUncheckedUpdateWithoutOrdersInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   resturant?: Prisma.ResturantsUncheckedUpdateOneWithoutOwnerNestedInput
+  processedBills?: Prisma.BillUncheckedUpdateManyWithoutPaymentProcessedByNestedInput
+}
+
+export type UserCreateWithoutProcessedBillsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  hash: string
+  role: $Enums.Role
+  isEmailVerified?: boolean
+  emailVerificationToken?: string | null
+  emailVerificationExpires?: Date | string | null
+  resetPasswordToken?: string | null
+  resetPasswordExpires?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  resturant?: Prisma.ResturantsCreateNestedOneWithoutOwnerInput
+  orders?: Prisma.OrderCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutProcessedBillsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  hash: string
+  role: $Enums.Role
+  isEmailVerified?: boolean
+  emailVerificationToken?: string | null
+  emailVerificationExpires?: Date | string | null
+  resetPasswordToken?: string | null
+  resetPasswordExpires?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  resturant?: Prisma.ResturantsUncheckedCreateNestedOneWithoutOwnerInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutProcessedBillsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutProcessedBillsInput, Prisma.UserUncheckedCreateWithoutProcessedBillsInput>
+}
+
+export type UserUpsertWithoutProcessedBillsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutProcessedBillsInput, Prisma.UserUncheckedUpdateWithoutProcessedBillsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutProcessedBillsInput, Prisma.UserUncheckedCreateWithoutProcessedBillsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutProcessedBillsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutProcessedBillsInput, Prisma.UserUncheckedUpdateWithoutProcessedBillsInput>
+}
+
+export type UserUpdateWithoutProcessedBillsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  hash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerificationExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resetPasswordToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetPasswordExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  resturant?: Prisma.ResturantsUpdateOneWithoutOwnerNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutProcessedBillsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  hash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerificationExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resetPasswordToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetPasswordExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  resturant?: Prisma.ResturantsUncheckedUpdateOneWithoutOwnerNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -734,10 +853,12 @@ export type UserUncheckedUpdateWithoutOrdersInput = {
 
 export type UserCountOutputType = {
   orders: number
+  processedBills: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   orders?: boolean | UserCountOutputTypeCountOrdersArgs
+  processedBills?: boolean | UserCountOutputTypeCountProcessedBillsArgs
 }
 
 /**
@@ -757,6 +878,13 @@ export type UserCountOutputTypeCountOrdersArgs<ExtArgs extends runtime.Types.Ext
   where?: Prisma.OrderWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountProcessedBillsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BillWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -774,6 +902,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   updatedAt?: boolean
   resturant?: boolean | Prisma.User$resturantArgs<ExtArgs>
   orders?: boolean | Prisma.User$ordersArgs<ExtArgs>
+  processedBills?: boolean | Prisma.User$processedBillsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -829,6 +958,7 @@ export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   resturant?: boolean | Prisma.User$resturantArgs<ExtArgs>
   orders?: boolean | Prisma.User$ordersArgs<ExtArgs>
+  processedBills?: boolean | Prisma.User$processedBillsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -839,6 +969,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     resturant: Prisma.$ResturantsPayload<ExtArgs> | null
     orders: Prisma.$OrderPayload<ExtArgs>[]
+    processedBills: Prisma.$BillPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1250,6 +1381,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   resturant<T extends Prisma.User$resturantArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$resturantArgs<ExtArgs>>): Prisma.Prisma__ResturantsClient<runtime.Types.Result.GetResult<Prisma.$ResturantsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   orders<T extends Prisma.User$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  processedBills<T extends Prisma.User$processedBillsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$processedBillsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BillPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1720,6 +1852,30 @@ export type User$ordersArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   distinct?: Prisma.OrderScalarFieldEnum | Prisma.OrderScalarFieldEnum[]
+}
+
+/**
+ * User.processedBills
+ */
+export type User$processedBillsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Bill
+   */
+  select?: Prisma.BillSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Bill
+   */
+  omit?: Prisma.BillOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BillInclude<ExtArgs> | null
+  where?: Prisma.BillWhereInput
+  orderBy?: Prisma.BillOrderByWithRelationInput | Prisma.BillOrderByWithRelationInput[]
+  cursor?: Prisma.BillWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BillScalarFieldEnum | Prisma.BillScalarFieldEnum[]
 }
 
 /**

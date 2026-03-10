@@ -1,16 +1,18 @@
 import express from 'express';
-import { createOrder, getAllOrders, updateOrderStatus, createCustomerOrder, getMyOrders } from '../controller/order.controller';
+import { createOrder, getAllOrders, updateOrderStatus, createCustomerOrder, getMyOrders, cancelOrder, updateOrder } from '../controller/order.controller';
 import { protect } from '../middleware/protect';
 
 const orderRouter = express.Router();
 
-// Admin routes
+//Order Creation from ADMIN side
 orderRouter.post('/', protect('ADMIN'), createOrder);
 orderRouter.get('/', protect('ADMIN'), getAllOrders);
 orderRouter.patch('/:id/status', protect('ADMIN'), updateOrderStatus);
 
-// Customer routes
-orderRouter.post('/customer/create', protect(), createCustomerOrder);
-orderRouter.get('/my-orders', protect(), getMyOrders);
+//Order Creation from USER side
+orderRouter.post('/customer/create', protect('USER'), createCustomerOrder);
+orderRouter.get('/my-orders', protect('USER'), getMyOrders);
+orderRouter.patch('/:id/cancel', protect('USER'), cancelOrder);
+orderRouter.put('/:id/update', protect('USER'), updateOrder);
 
 export default orderRouter;

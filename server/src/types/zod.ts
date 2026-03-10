@@ -55,15 +55,28 @@ export const menuItemSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   description: z.string().optional().or(z.literal('')),
   category: z.string(),
-  units: z.array(
-    z.object({
-      unit: z.string(),
-      price: z.number().min(0, 'Price must be positive'),
-    })
+  units: z.preprocess(
+    (val) => {
+      if (typeof val === 'string') {
+        try {
+          return JSON.parse(val);
+        } catch (e) {
+          return val;
+        }
+      }
+      return val;
+    },
+    z.array(
+      z.object({
+        unit: z.string(),
+        price: z.number().min(0, 'Price must be positive'),
+      })
+    )
   ),
-  imageUrl: z.url('Invalid image URL').optional().or(z.literal('')),
   isAvailable: z.boolean().optional(),
 });
+
+export const updateMenuItemSchema = menuItemSchema.partial();
 
 export const forgotPasswordSchema = z.object({
   email: z.email('Invalid email address'),
@@ -97,3 +110,33 @@ export const verifyEmailSchema = z.object({
 });
 
 export const updateResturantSchema = resturantSchema.partial();
+
+export type RegisterInput = z.infer<typeof registerSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;
+export type ResturantInput = z.infer<typeof resturantSchema>;
+export type MenuItemInput = z.infer<typeof menuItemSchema>;
+export type UpdateMenuItemInput = z.infer<typeof updateMenuItemSchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
+export type UpdateResturantInput = z.infer<typeof updateResturantSchema>;
+
+export const generateBillSchema = z.object({
+  orderId: z.string().min(1, 'Order ID is required'),
+});
+
+export const payBillSchema = z
+  .object({
+    billId: z.string().min(1, 'Bill ID is required'),
+    paymentMethod: z.enum(['CASH', 'ONLINE']),
+    amountTendered: z.number().nonnegative().optional(),
+  })
+  .refine((data) => {
+    if (data.paymentMethod === 'CASH') {
+      return typeof data.amountTendered === 'number';
+    }
+    return true;
+  });
+
+export type GenerateBillInput = z.infer<typeof generateBillSchema>;
+export type PayBillInput = z.infer<typeof payBillSchema>;

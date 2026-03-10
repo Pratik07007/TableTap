@@ -8,13 +8,12 @@ datasource db {
 }
 
 model User {
-  id        String @id @default(uuid())
-  firstName String
-  lastName  String
-  email     String @unique
-  hash      String
-  role      Role
-
+  id              String      @id @default(uuid())
+  firstName       String
+  lastName        String
+  email           String      @unique
+  hash            String
+  role            Role
   isEmailVerified Boolean     @default(false)
   resturant       Resturants? @relation("UserOwnsRestaurant")
 
@@ -24,9 +23,10 @@ model User {
   resetPasswordToken   String?
   resetPasswordExpires DateTime?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  orders    Order[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  orders         Order[]
+  processedBills Bill[]   @relation("UserProcessedBills")
 }
 
 model Resturants {
@@ -63,7 +63,7 @@ model MenuItem {
   name        String
   description String?
   unit        Unit[]
-  imageUrl    String?
+  images      Image[]
   isAvailable Boolean @default(true)
 
   resturantID String
@@ -96,14 +96,20 @@ model Order {
   discount    Float       @default(0)
   finalAmount Float
   status      OrderStatus @default(PENDING)
+  isPaid      Boolean     @default(false)
+  paidAt      DateTime?
 
   userId String?
   user   User?   @relation(fields: [userId], references: [id])
+
+  customerEmail String?
 
   resturantID String?
   restaurant  Resturants? @relation(fields: [resturantID], references: [id])
 
   items OrderItem[]
+
+  bill Bill?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -127,6 +133,49 @@ model OrderItem {
 
 enum OrderStatus {
   PENDING
+  COOKING
+  READY
   COMPLETED
   CANCELLED
+}
+
+model Bill {
+  id         String @id @default(uuid())
+  billNumber Int    @unique @default(autoincrement())
+
+  orderId String @unique
+  order   Order  @relation(fields: [orderId], references: [id])
+
+  totalAmount          Float
+  paymentStatus        PaymentStatus  @default(PENDING)
+  paymentMethod        PaymentMethod?
+  amountTendered       Float?
+  changeGiven          Float?
+  paidAt               DateTime?
+  transactionId        String?
+  paymentProcessedById String?
+  paymentProcessedBy   User?          @relation("UserProcessedBills", fields: [paymentProcessedById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+enum PaymentMethod {
+  CASH
+  ONLINE
+}
+
+model Image {
+  id         String   @id @default(uuid())
+  url        String
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
