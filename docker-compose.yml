@@ -1,11 +1,10 @@
-version: '5.0'
 services:
   postgres:
     image: postgres:15
     container_name: postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: posgres
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
     ports:
       - "5433:5432"
