@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useState } from "react";
 
-export const AdminNavbar = () => {
+export const AdminNavbar = ({ hasRestaurant = true }: { hasRestaurant?: boolean }) => {
   const router = useRouter();
 
   const onLogout = async () => {
@@ -58,30 +58,35 @@ export const AdminNavbar = () => {
                 >
                   <Home size={18} /> Dashboard
                 </Link>
-                <Link
-                  href="/menu"
-                  className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2"
-                >
-                  <Utensils size={18} /> Menu
-                </Link>
-                <Link
-                  href="/take-orders"
-                  className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2"
-                >
-                  <ShoppingBag size={18} /> Take Orders
-                </Link>
-                <Link
-                  href="/orders-details"
-                  className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2"
-                >
-                  <ClipboardList size={18} /> Orders
-                </Link>
-                <Link
-                  href="/billing"
-                  className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2"
-                >
-                  <Store size={18} /> Bills
-                </Link>
+                
+                {hasRestaurant && (
+                  <>
+                    <Link
+                      href="/menu"
+                      className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2"
+                    >
+                      <Utensils size={18} /> Menu
+                    </Link>
+                    <Link
+                      href="/take-orders"
+                      className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2"
+                    >
+                      <ShoppingBag size={18} /> Take Orders
+                    </Link>
+                    <Link
+                      href="/orders-details"
+                      className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2"
+                    >
+                      <ClipboardList size={18} /> Orders
+                    </Link>
+                    <Link
+                      href="/billing"
+                      className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2"
+                    >
+                      <Store size={18} /> Bills
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
 

@@ -3,7 +3,15 @@ import { sendCustomerOrderEmail, sendAdminPlacedOrderEmail } from '../utils/orde
 
 export const createOrderService = async (userId: string, resturantId: string, resturantOwnerId: string, data: { items: any[]; discount?: number; customerEmail?: string }) => {
   try {
-    const { items, discount } = data;
+    const { items, discount, customerEmail } = data;
+    let orderUserId = userId;
+    if (customerEmail) {
+      const customer = await prisma.user.findUnique({ where: { email: customerEmail } });
+      if (!customer) {
+        return { success: false, message: 'No account found for the provided customer email', code: 404 };
+      }
+      orderUserId = customer.id;
+    }
 
     if (userId !== resturantOwnerId) {
       return { success: false, message: 'You are not the owner of the resturant', code: 400 };
@@ -56,9 +64,9 @@ export const createOrderService = async (userId: string, resturantId: string, re
           discount: discount || 0,
           finalAmount,
           status: 'PENDING',
-          userId: userId,
+          userId: orderUserId,
           resturantID: resturantId,
-          customerEmail: data.customerEmail || null,
+          customerEmail: customerEmail || null,
           items: {
             create: orderItemsData,
           },

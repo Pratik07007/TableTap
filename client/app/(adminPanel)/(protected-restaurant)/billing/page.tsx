@@ -23,17 +23,21 @@ async function fetchBills(searchParams: {
   page?: string;
   limit?: string;
   paymentMethod?: string;
+  email?: string;
+  paymentStatus?: string;
 }) {
   const page = Number(searchParams.page ?? 1);
   const limit = Number(searchParams.limit ?? 10);
   const paymentMethod = searchParams.paymentMethod;
+  const email = searchParams.email;
+  const paymentStatus = searchParams.paymentStatus;
   const base = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
 
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
 
   const res = await axios.get(`${base}/api/billing`, {
-    params: { page, limit, paymentMethod },
+    params: { page, limit, paymentMethod, email, paymentStatus },
     headers: {
       Cookie: `token=${token}`,
     },
@@ -48,6 +52,8 @@ export default async function BillsPage({
     page?: string;
     limit?: string;
     paymentMethod?: string;
+    email?: string;
+    paymentStatus?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -64,19 +70,37 @@ export default async function BillsPage({
     <div className="p-8 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">All Bills</h1>
-        <form className="flex items-center gap-2">
+        <form className="flex xl:items-center xl:flex-row flex-col gap-3">
+          <input
+            type="email"
+            name="email"
+            placeholder="Search by customer email"
+            defaultValue={params.email ?? ""}
+            className="border border-gray-200 rounded-lg px-3 py-2 text-sm max-w-xs w-full lg:w-64 focus:ring-1 focus:ring-indigo-500 outline-none"
+          />
+          <select
+            name="paymentStatus"
+            defaultValue={params.paymentStatus ?? ""}
+            className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-indigo-500 outline-none"
+          >
+            <option value="">All Statuses</option>
+            <option value="PAID">Paid</option>
+            <option value="PENDING">Pending</option>
+            <option value="FAILED">Failed</option>
+          </select>
           <select
             name="paymentMethod"
             defaultValue={params.paymentMethod ?? ""}
-            className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+            className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-indigo-500 outline-none"
           >
             <option value="">All Methods</option>
             <option value="CASH">Cash</option>
-            <option value="ONLINE">Online</option>
+            <option value="KHALTI">Khalti</option>
+            <option value="SPLIT">Split (Cash+Khalti)</option>
           </select>
           <button
             type="submit"
-            className="px-3 py-2 rounded-lg bg-gray-900 text-white text-sm"
+            className="px-4 py-2 rounded-lg bg-gray-900 text-white text-sm hover:bg-black transition-colors"
           >
             Filter
           </button>
@@ -148,13 +172,13 @@ export default async function BillsPage({
         </span>
         <div className="flex gap-2">
           <Link
-            href={`/billing?page=${Math.max(1, pagination.currentPage - 1)}&limit=${pagination.limit}${params.paymentMethod ? `&paymentMethod=${params.paymentMethod}` : ""}`}
+            href={`/billing?page=${Math.max(1, pagination.currentPage - 1)}&limit=${pagination.limit}${params.paymentMethod ? `&paymentMethod=${params.paymentMethod}` : ""}${params.email ? `&email=${encodeURIComponent(params.email)}` : ""}${params.paymentStatus ? `&paymentStatus=${params.paymentStatus}` : ""}`}
             className="px-3 py-2 rounded border border-gray-200 hover:bg-gray-50 text-sm"
           >
             Prev
           </Link>
           <Link
-            href={`/billing?page=${Math.min(pagination.totalPages, pagination.currentPage + 1)}&limit=${pagination.limit}${params.paymentMethod ? `&paymentMethod=${params.paymentMethod}` : ""}`}
+            href={`/billing?page=${Math.min(pagination.totalPages, pagination.currentPage + 1)}&limit=${pagination.limit}${params.paymentMethod ? `&paymentMethod=${params.paymentMethod}` : ""}${params.email ? `&email=${encodeURIComponent(params.email)}` : ""}${params.paymentStatus ? `&paymentStatus=${params.paymentStatus}` : ""}`}
             className="px-3 py-2 rounded border border-gray-200 hover:bg-gray-50 text-sm"
           >
             Next

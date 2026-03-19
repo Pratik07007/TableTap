@@ -67,3 +67,21 @@ export const updateResturantService = async (userId: string, resturantData: TRes
     };
   }
 };
+
+export const getAllResturantsService = async () => {
+  try {
+    const resturants = await prisma.resturants.findMany({
+      select: {
+        id: true,
+        name: true,
+        streetAddress: true,
+        city: true,
+        state: true,
+      },
+      orderBy: { name: 'asc' },
+    });
+    return { code: 200, success: true, data: resturants };
+  } catch {
+    return { code: 500, success: false, data: [] };
+  }
+};

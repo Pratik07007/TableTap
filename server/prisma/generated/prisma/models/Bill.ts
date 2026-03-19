@@ -29,6 +29,8 @@ export type AggregateBill = {
 export type BillAvgAggregateOutputType = {
   billNumber: number | null
   totalAmount: number | null
+  cashAmount: number | null
+  khaltiAmount: number | null
   amountTendered: number | null
   changeGiven: number | null
 }
@@ -36,6 +38,8 @@ export type BillAvgAggregateOutputType = {
 export type BillSumAggregateOutputType = {
   billNumber: number | null
   totalAmount: number | null
+  cashAmount: number | null
+  khaltiAmount: number | null
   amountTendered: number | null
   changeGiven: number | null
 }
@@ -47,6 +51,8 @@ export type BillMinAggregateOutputType = {
   totalAmount: number | null
   paymentStatus: $Enums.PaymentStatus | null
   paymentMethod: $Enums.PaymentMethod | null
+  cashAmount: number | null
+  khaltiAmount: number | null
   amountTendered: number | null
   changeGiven: number | null
   paidAt: Date | null
@@ -63,6 +69,8 @@ export type BillMaxAggregateOutputType = {
   totalAmount: number | null
   paymentStatus: $Enums.PaymentStatus | null
   paymentMethod: $Enums.PaymentMethod | null
+  cashAmount: number | null
+  khaltiAmount: number | null
   amountTendered: number | null
   changeGiven: number | null
   paidAt: Date | null
@@ -79,6 +87,8 @@ export type BillCountAggregateOutputType = {
   totalAmount: number
   paymentStatus: number
   paymentMethod: number
+  cashAmount: number
+  khaltiAmount: number
   amountTendered: number
   changeGiven: number
   paidAt: number
@@ -93,6 +103,8 @@ export type BillCountAggregateOutputType = {
 export type BillAvgAggregateInputType = {
   billNumber?: true
   totalAmount?: true
+  cashAmount?: true
+  khaltiAmount?: true
   amountTendered?: true
   changeGiven?: true
 }
@@ -100,6 +112,8 @@ export type BillAvgAggregateInputType = {
 export type BillSumAggregateInputType = {
   billNumber?: true
   totalAmount?: true
+  cashAmount?: true
+  khaltiAmount?: true
   amountTendered?: true
   changeGiven?: true
 }
@@ -111,6 +125,8 @@ export type BillMinAggregateInputType = {
   totalAmount?: true
   paymentStatus?: true
   paymentMethod?: true
+  cashAmount?: true
+  khaltiAmount?: true
   amountTendered?: true
   changeGiven?: true
   paidAt?: true
@@ -127,6 +143,8 @@ export type BillMaxAggregateInputType = {
   totalAmount?: true
   paymentStatus?: true
   paymentMethod?: true
+  cashAmount?: true
+  khaltiAmount?: true
   amountTendered?: true
   changeGiven?: true
   paidAt?: true
@@ -143,6 +161,8 @@ export type BillCountAggregateInputType = {
   totalAmount?: true
   paymentStatus?: true
   paymentMethod?: true
+  cashAmount?: true
+  khaltiAmount?: true
   amountTendered?: true
   changeGiven?: true
   paidAt?: true
@@ -246,6 +266,8 @@ export type BillGroupByOutputType = {
   totalAmount: number
   paymentStatus: $Enums.PaymentStatus
   paymentMethod: $Enums.PaymentMethod | null
+  cashAmount: number | null
+  khaltiAmount: number | null
   amountTendered: number | null
   changeGiven: number | null
   paidAt: Date | null
@@ -285,6 +307,8 @@ export type BillWhereInput = {
   totalAmount?: Prisma.FloatFilter<"Bill"> | number
   paymentStatus?: Prisma.EnumPaymentStatusFilter<"Bill"> | $Enums.PaymentStatus
   paymentMethod?: Prisma.EnumPaymentMethodNullableFilter<"Bill"> | $Enums.PaymentMethod | null
+  cashAmount?: Prisma.FloatNullableFilter<"Bill"> | number | null
+  khaltiAmount?: Prisma.FloatNullableFilter<"Bill"> | number | null
   amountTendered?: Prisma.FloatNullableFilter<"Bill"> | number | null
   changeGiven?: Prisma.FloatNullableFilter<"Bill"> | number | null
   paidAt?: Prisma.DateTimeNullableFilter<"Bill"> | Date | string | null
@@ -303,6 +327,8 @@ export type BillOrderByWithRelationInput = {
   totalAmount?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   paymentMethod?: Prisma.SortOrderInput | Prisma.SortOrder
+  cashAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  khaltiAmount?: Prisma.SortOrderInput | Prisma.SortOrder
   amountTendered?: Prisma.SortOrderInput | Prisma.SortOrder
   changeGiven?: Prisma.SortOrderInput | Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -324,6 +350,8 @@ export type BillWhereUniqueInput = Prisma.AtLeast<{
   totalAmount?: Prisma.FloatFilter<"Bill"> | number
   paymentStatus?: Prisma.EnumPaymentStatusFilter<"Bill"> | $Enums.PaymentStatus
   paymentMethod?: Prisma.EnumPaymentMethodNullableFilter<"Bill"> | $Enums.PaymentMethod | null
+  cashAmount?: Prisma.FloatNullableFilter<"Bill"> | number | null
+  khaltiAmount?: Prisma.FloatNullableFilter<"Bill"> | number | null
   amountTendered?: Prisma.FloatNullableFilter<"Bill"> | number | null
   changeGiven?: Prisma.FloatNullableFilter<"Bill"> | number | null
   paidAt?: Prisma.DateTimeNullableFilter<"Bill"> | Date | string | null
@@ -342,6 +370,8 @@ export type BillOrderByWithAggregationInput = {
   totalAmount?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   paymentMethod?: Prisma.SortOrderInput | Prisma.SortOrder
+  cashAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  khaltiAmount?: Prisma.SortOrderInput | Prisma.SortOrder
   amountTendered?: Prisma.SortOrderInput | Prisma.SortOrder
   changeGiven?: Prisma.SortOrderInput | Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -366,6 +396,8 @@ export type BillScalarWhereWithAggregatesInput = {
   totalAmount?: Prisma.FloatWithAggregatesFilter<"Bill"> | number
   paymentStatus?: Prisma.EnumPaymentStatusWithAggregatesFilter<"Bill"> | $Enums.PaymentStatus
   paymentMethod?: Prisma.EnumPaymentMethodNullableWithAggregatesFilter<"Bill"> | $Enums.PaymentMethod | null
+  cashAmount?: Prisma.FloatNullableWithAggregatesFilter<"Bill"> | number | null
+  khaltiAmount?: Prisma.FloatNullableWithAggregatesFilter<"Bill"> | number | null
   amountTendered?: Prisma.FloatNullableWithAggregatesFilter<"Bill"> | number | null
   changeGiven?: Prisma.FloatNullableWithAggregatesFilter<"Bill"> | number | null
   paidAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Bill"> | Date | string | null
@@ -381,6 +413,8 @@ export type BillCreateInput = {
   totalAmount: number
   paymentStatus?: $Enums.PaymentStatus
   paymentMethod?: $Enums.PaymentMethod | null
+  cashAmount?: number | null
+  khaltiAmount?: number | null
   amountTendered?: number | null
   changeGiven?: number | null
   paidAt?: Date | string | null
@@ -398,6 +432,8 @@ export type BillUncheckedCreateInput = {
   totalAmount: number
   paymentStatus?: $Enums.PaymentStatus
   paymentMethod?: $Enums.PaymentMethod | null
+  cashAmount?: number | null
+  khaltiAmount?: number | null
   amountTendered?: number | null
   changeGiven?: number | null
   paidAt?: Date | string | null
@@ -412,6 +448,8 @@ export type BillUpdateInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   paymentMethod?: Prisma.NullableEnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod | null
+  cashAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  khaltiAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   amountTendered?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   changeGiven?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -429,6 +467,8 @@ export type BillUncheckedUpdateInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   paymentMethod?: Prisma.NullableEnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod | null
+  cashAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  khaltiAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   amountTendered?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   changeGiven?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -445,6 +485,8 @@ export type BillCreateManyInput = {
   totalAmount: number
   paymentStatus?: $Enums.PaymentStatus
   paymentMethod?: $Enums.PaymentMethod | null
+  cashAmount?: number | null
+  khaltiAmount?: number | null
   amountTendered?: number | null
   changeGiven?: number | null
   paidAt?: Date | string | null
@@ -459,6 +501,8 @@ export type BillUpdateManyMutationInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   paymentMethod?: Prisma.NullableEnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod | null
+  cashAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  khaltiAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   amountTendered?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   changeGiven?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -474,6 +518,8 @@ export type BillUncheckedUpdateManyInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   paymentMethod?: Prisma.NullableEnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod | null
+  cashAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  khaltiAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   amountTendered?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   changeGiven?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -505,6 +551,8 @@ export type BillCountOrderByAggregateInput = {
   totalAmount?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   paymentMethod?: Prisma.SortOrder
+  cashAmount?: Prisma.SortOrder
+  khaltiAmount?: Prisma.SortOrder
   amountTendered?: Prisma.SortOrder
   changeGiven?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
@@ -517,6 +565,8 @@ export type BillCountOrderByAggregateInput = {
 export type BillAvgOrderByAggregateInput = {
   billNumber?: Prisma.SortOrder
   totalAmount?: Prisma.SortOrder
+  cashAmount?: Prisma.SortOrder
+  khaltiAmount?: Prisma.SortOrder
   amountTendered?: Prisma.SortOrder
   changeGiven?: Prisma.SortOrder
 }
@@ -528,6 +578,8 @@ export type BillMaxOrderByAggregateInput = {
   totalAmount?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   paymentMethod?: Prisma.SortOrder
+  cashAmount?: Prisma.SortOrder
+  khaltiAmount?: Prisma.SortOrder
   amountTendered?: Prisma.SortOrder
   changeGiven?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
@@ -544,6 +596,8 @@ export type BillMinOrderByAggregateInput = {
   totalAmount?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   paymentMethod?: Prisma.SortOrder
+  cashAmount?: Prisma.SortOrder
+  khaltiAmount?: Prisma.SortOrder
   amountTendered?: Prisma.SortOrder
   changeGiven?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
@@ -556,6 +610,8 @@ export type BillMinOrderByAggregateInput = {
 export type BillSumOrderByAggregateInput = {
   billNumber?: Prisma.SortOrder
   totalAmount?: Prisma.SortOrder
+  cashAmount?: Prisma.SortOrder
+  khaltiAmount?: Prisma.SortOrder
   amountTendered?: Prisma.SortOrder
   changeGiven?: Prisma.SortOrder
 }
@@ -656,6 +712,8 @@ export type BillCreateWithoutPaymentProcessedByInput = {
   totalAmount: number
   paymentStatus?: $Enums.PaymentStatus
   paymentMethod?: $Enums.PaymentMethod | null
+  cashAmount?: number | null
+  khaltiAmount?: number | null
   amountTendered?: number | null
   changeGiven?: number | null
   paidAt?: Date | string | null
@@ -672,6 +730,8 @@ export type BillUncheckedCreateWithoutPaymentProcessedByInput = {
   totalAmount: number
   paymentStatus?: $Enums.PaymentStatus
   paymentMethod?: $Enums.PaymentMethod | null
+  cashAmount?: number | null
+  khaltiAmount?: number | null
   amountTendered?: number | null
   changeGiven?: number | null
   paidAt?: Date | string | null
@@ -716,6 +776,8 @@ export type BillScalarWhereInput = {
   totalAmount?: Prisma.FloatFilter<"Bill"> | number
   paymentStatus?: Prisma.EnumPaymentStatusFilter<"Bill"> | $Enums.PaymentStatus
   paymentMethod?: Prisma.EnumPaymentMethodNullableFilter<"Bill"> | $Enums.PaymentMethod | null
+  cashAmount?: Prisma.FloatNullableFilter<"Bill"> | number | null
+  khaltiAmount?: Prisma.FloatNullableFilter<"Bill"> | number | null
   amountTendered?: Prisma.FloatNullableFilter<"Bill"> | number | null
   changeGiven?: Prisma.FloatNullableFilter<"Bill"> | number | null
   paidAt?: Prisma.DateTimeNullableFilter<"Bill"> | Date | string | null
@@ -731,6 +793,8 @@ export type BillCreateWithoutOrderInput = {
   totalAmount: number
   paymentStatus?: $Enums.PaymentStatus
   paymentMethod?: $Enums.PaymentMethod | null
+  cashAmount?: number | null
+  khaltiAmount?: number | null
   amountTendered?: number | null
   changeGiven?: number | null
   paidAt?: Date | string | null
@@ -746,6 +810,8 @@ export type BillUncheckedCreateWithoutOrderInput = {
   totalAmount: number
   paymentStatus?: $Enums.PaymentStatus
   paymentMethod?: $Enums.PaymentMethod | null
+  cashAmount?: number | null
+  khaltiAmount?: number | null
   amountTendered?: number | null
   changeGiven?: number | null
   paidAt?: Date | string | null
@@ -776,6 +842,8 @@ export type BillUpdateWithoutOrderInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   paymentMethod?: Prisma.NullableEnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod | null
+  cashAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  khaltiAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   amountTendered?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   changeGiven?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -791,6 +859,8 @@ export type BillUncheckedUpdateWithoutOrderInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   paymentMethod?: Prisma.NullableEnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod | null
+  cashAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  khaltiAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   amountTendered?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   changeGiven?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -807,6 +877,8 @@ export type BillCreateManyPaymentProcessedByInput = {
   totalAmount: number
   paymentStatus?: $Enums.PaymentStatus
   paymentMethod?: $Enums.PaymentMethod | null
+  cashAmount?: number | null
+  khaltiAmount?: number | null
   amountTendered?: number | null
   changeGiven?: number | null
   paidAt?: Date | string | null
@@ -820,6 +892,8 @@ export type BillUpdateWithoutPaymentProcessedByInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   paymentMethod?: Prisma.NullableEnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod | null
+  cashAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  khaltiAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   amountTendered?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   changeGiven?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -836,6 +910,8 @@ export type BillUncheckedUpdateWithoutPaymentProcessedByInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   paymentMethod?: Prisma.NullableEnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod | null
+  cashAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  khaltiAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   amountTendered?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   changeGiven?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -851,6 +927,8 @@ export type BillUncheckedUpdateManyWithoutPaymentProcessedByInput = {
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   paymentMethod?: Prisma.NullableEnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod | null
+  cashAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  khaltiAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   amountTendered?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   changeGiven?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -868,6 +946,8 @@ export type BillSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   totalAmount?: boolean
   paymentStatus?: boolean
   paymentMethod?: boolean
+  cashAmount?: boolean
+  khaltiAmount?: boolean
   amountTendered?: boolean
   changeGiven?: boolean
   paidAt?: boolean
@@ -886,6 +966,8 @@ export type BillSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   totalAmount?: boolean
   paymentStatus?: boolean
   paymentMethod?: boolean
+  cashAmount?: boolean
+  khaltiAmount?: boolean
   amountTendered?: boolean
   changeGiven?: boolean
   paidAt?: boolean
@@ -904,6 +986,8 @@ export type BillSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   totalAmount?: boolean
   paymentStatus?: boolean
   paymentMethod?: boolean
+  cashAmount?: boolean
+  khaltiAmount?: boolean
   amountTendered?: boolean
   changeGiven?: boolean
   paidAt?: boolean
@@ -922,6 +1006,8 @@ export type BillSelectScalar = {
   totalAmount?: boolean
   paymentStatus?: boolean
   paymentMethod?: boolean
+  cashAmount?: boolean
+  khaltiAmount?: boolean
   amountTendered?: boolean
   changeGiven?: boolean
   paidAt?: boolean
@@ -931,7 +1017,7 @@ export type BillSelectScalar = {
   updatedAt?: boolean
 }
 
-export type BillOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "billNumber" | "orderId" | "totalAmount" | "paymentStatus" | "paymentMethod" | "amountTendered" | "changeGiven" | "paidAt" | "transactionId" | "paymentProcessedById" | "createdAt" | "updatedAt", ExtArgs["result"]["bill"]>
+export type BillOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "billNumber" | "orderId" | "totalAmount" | "paymentStatus" | "paymentMethod" | "cashAmount" | "khaltiAmount" | "amountTendered" | "changeGiven" | "paidAt" | "transactionId" | "paymentProcessedById" | "createdAt" | "updatedAt", ExtArgs["result"]["bill"]>
 export type BillInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
   paymentProcessedBy?: boolean | Prisma.Bill$paymentProcessedByArgs<ExtArgs>
@@ -958,6 +1044,8 @@ export type $BillPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     totalAmount: number
     paymentStatus: $Enums.PaymentStatus
     paymentMethod: $Enums.PaymentMethod | null
+    cashAmount: number | null
+    khaltiAmount: number | null
     amountTendered: number | null
     changeGiven: number | null
     paidAt: Date | null
@@ -1396,6 +1484,8 @@ export interface BillFieldRefs {
   readonly totalAmount: Prisma.FieldRef<"Bill", 'Float'>
   readonly paymentStatus: Prisma.FieldRef<"Bill", 'PaymentStatus'>
   readonly paymentMethod: Prisma.FieldRef<"Bill", 'PaymentMethod'>
+  readonly cashAmount: Prisma.FieldRef<"Bill", 'Float'>
+  readonly khaltiAmount: Prisma.FieldRef<"Bill", 'Float'>
   readonly amountTendered: Prisma.FieldRef<"Bill", 'Float'>
   readonly changeGiven: Prisma.FieldRef<"Bill", 'Float'>
   readonly paidAt: Prisma.FieldRef<"Bill", 'DateTime'>

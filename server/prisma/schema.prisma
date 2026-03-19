@@ -149,6 +149,8 @@ model Bill {
   totalAmount          Float
   paymentStatus        PaymentStatus  @default(PENDING)
   paymentMethod        PaymentMethod?
+  cashAmount           Float?
+  khaltiAmount         Float?
   amountTendered       Float?
   changeGiven          Float?
   paidAt               DateTime?
@@ -168,7 +170,8 @@ enum PaymentStatus {
 
 enum PaymentMethod {
   CASH
-  ONLINE
+  KHALTI
+  SPLIT
 }
 
 model Image {
