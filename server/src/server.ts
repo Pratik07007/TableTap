@@ -8,6 +8,7 @@ import menuItemRouter from './routes/menu.routes';
 import orderRouter from './routes/order.routes';
 import billingRouter from './routes/billing.routes';
 import khaltiRouter from './routes/khalti.routes';
+import analyticsRouter from './routes/analytics.routes';
 dotenv.config();
 
 const app = express();
@@ -32,6 +33,7 @@ app.use('/api/menu-items', menuItemRouter); // ✅ done
 app.use('/api/orders', orderRouter);
 app.use('/api/billing', billingRouter);
 app.use('/api/khalti', khaltiRouter);
+app.use('/api/analytics', analyticsRouter);
 
 app.get("/health", (req, res) => {
   res.json({ message: "OK" })
