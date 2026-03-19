@@ -5,16 +5,11 @@ services:
     container_name: postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: posgres
       POSTGRES_DB: postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - postgres
 volumes:
   postgres_data:
-networks:
-  postgres:
-    driver: bridge

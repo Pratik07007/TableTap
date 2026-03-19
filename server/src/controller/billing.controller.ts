@@ -10,13 +10,14 @@ export const generateBillController = async (req: Request, res: Response) => {
 };
 
 export const payBillController = async (req: Request, res: Response) => {
-  const { billId, paymentMethod, amountTendered } = req.body;
-  const response = await payBillService(billId, paymentMethod, amountTendered, (req as any).user?.id);
+  const { billId, paymentMethod, amountTendered, cashAmount, khaltiAmount } = req.body;
+  const processedById = (req as any).user?.id || '';
+  const response = await payBillService(billId, paymentMethod, cashAmount, khaltiAmount, amountTendered, processedById);
   return res.status(response.code).json({ ...response });
 };
 
 export const getBillController = async (req: Request, res: Response) => {
-  const { orderId } = req.params;
+  const orderId = String(req.params.orderId);
   const response = await getBillService(orderId);
   return res.status(response.code).json({ ...response });
 };
@@ -24,8 +25,11 @@ export const getBillController = async (req: Request, res: Response) => {
 export const listBillsController = async (req: Request, res: Response) => {
   const page = Number(req.query.page ?? 1);
   const limit = Number(req.query.limit ?? 10);
-  const paymentMethod = req.query.paymentMethod as 'CASH' | 'ONLINE' | undefined;
-  const response = await listBillsService(page, limit, paymentMethod);
+  const paymentMethod = req.query.paymentMethod as string | undefined;
+  const email = req.query.email as string | undefined;
+  const paymentStatus = req.query.paymentStatus as string | undefined;
+  
+  const response = await listBillsService(page, limit, paymentMethod, email, paymentStatus);
   return res.status(response.code).json({ ...response });
 };
 

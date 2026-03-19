@@ -36,40 +36,68 @@ export const generateBillService = async (orderId: string) => {
   }
 };
 
-export const payBillService = async (billId: string, paymentMethod: 'CASH' | 'ONLINE', amountTendered: number | undefined, processedById: string) => {
+export const payBillService = async (
+  billId: string,
+  paymentMethod: string, // CASH, KHALTI, SPLIT
+  cashAmount: number | undefined,
+  khaltiAmount: number | undefined,
+  amountTendered: number | undefined,
+  processedById: string,
+  transactionIdParam?: string // for khalti Pidx
+) => {
   try {
     const bill = await prisma.bill.findUnique({
       where: { id: billId },
       include: { order: { include: { user: true } } },
     });
 
-    if (!bill) {
-      return { success: false, code: 404, message: 'Bill not found' };
-    }
+    if (!bill) return { success: false, code: 404, message: 'Bill not found' };
+    if (bill.paymentStatus === 'PAID') return { success: false, code: 400, message: 'Bill already paid' };
 
-    if (bill.paymentStatus === 'PAID') {
-      return { success: false, code: 400, message: 'Bill already paid' };
-    }
+    let finalAmountTendered = 0;
+    let changeGiven = 0;
+    let actualCashAmount = 0;
+    let actualKhaltiAmount = 0;
 
     if (paymentMethod === 'CASH') {
       if (typeof amountTendered !== 'number' || amountTendered < bill.totalAmount) {
-        return { success: false, code: 400, message: 'Amount tendered must be greater than or equal to total amount' };
+        return { success: false, code: 400, message: 'Amount tendered must be >= total amount' };
       }
+      finalAmountTendered = amountTendered;
+      changeGiven = Number((amountTendered - bill.totalAmount).toFixed(2));
+      actualCashAmount = bill.totalAmount;
+    } else if (paymentMethod === 'KHALTI') {
+      actualKhaltiAmount = bill.totalAmount;
+    } else if (paymentMethod === 'SPLIT') {
+      const cAmt = typeof cashAmount === 'number' ? cashAmount : 0;
+      const kAmt = typeof khaltiAmount === 'number' ? khaltiAmount : 0;
+      if (Math.abs(cAmt + kAmt - bill.totalAmount) > 0.01) {
+        return { success: false, code: 400, message: 'Split amounts must sum exactly to total bill amount' };
+      }
+      if (typeof amountTendered !== 'number' || amountTendered < cAmt) {
+        return { success: false, code: 400, message: 'Amount tendered must be >= cash portion' };
+      }
+      actualCashAmount = cAmt;
+      actualKhaltiAmount = kAmt;
+      finalAmountTendered = amountTendered;
+      changeGiven = Number((amountTendered - cAmt).toFixed(2));
+    } else {
+      return { success: false, code: 400, message: 'Invalid payment method' };
     }
 
-    const finalAmountTendered = paymentMethod === 'CASH' ? amountTendered || 0 : bill.totalAmount;
-    const changeGiven = paymentMethod === 'CASH' ? Number((finalAmountTendered - bill.totalAmount).toFixed(2)) : 0;
     const paidAt = new Date();
-    const transactionId = randomUUID();
+    const transactionId = transactionIdParam || randomUUID();
 
     const updatedBill = await prisma.$transaction(async (tx) => {
       const updated = await tx.bill.update({
         where: { id: billId },
         data: {
           paymentStatus: 'PAID',
-          paymentMethod: paymentMethod,
-          amountTendered: finalAmountTendered,
-          changeGiven: changeGiven,
+          paymentMethod: paymentMethod as any,
+          cashAmount: actualCashAmount > 0 ? actualCashAmount : null,
+          khaltiAmount: actualKhaltiAmount > 0 ? actualKhaltiAmount : null,
+          amountTendered: finalAmountTendered > 0 ? finalAmountTendered : null,
+          changeGiven: changeGiven > 0 ? changeGiven : null,
           paidAt,
           transactionId,
           paymentProcessedById: processedById,
@@ -86,17 +114,6 @@ export const payBillService = async (billId: string, paymentMethod: 'CASH' | 'ON
       });
 
       return updated;
-    });
-
-    console.log('Payment Recorded', {
-      billId: updatedBill.id,
-      orderId: updatedBill.orderId,
-      paymentMethod: updatedBill.paymentMethod,
-      amountTendered: updatedBill.amountTendered,
-      changeGiven: updatedBill.changeGiven,
-      processedById,
-      transactionId: updatedBill.transactionId,
-      paidAt: updatedBill.paidAt,
     });
 
     // Auto-send detailed invoice email to user after payment
@@ -133,12 +150,22 @@ export const payBillService = async (billId: string, paymentMethod: 'CASH' | 'ON
   }
 };
 
-export const listBillsService = async (page: number = 1, limit: number = 10, paymentMethod?: 'CASH' | 'ONLINE') => {
+export const listBillsService = async (page: number = 1, limit: number = 10, paymentMethod?: string, email?: string, paymentStatus?: string) => {
   try {
     const skip = (page - 1) * limit;
     const whereClause: any = {};
     if (paymentMethod) {
-      whereClause.paymentMethod = paymentMethod;
+      whereClause.paymentMethod = paymentMethod as any;
+    }
+    if (paymentStatus) {
+      whereClause.paymentStatus = paymentStatus as any;
+    }
+    if (email) {
+      whereClause.order = {
+        user: {
+          email: { contains: email, mode: 'insensitive' }
+        }
+      };
     }
     const totalBills = await prisma.bill.count({ where: whereClause });
     const bills = await prisma.bill.findMany({
