@@ -45,7 +45,7 @@ export const initiateKhaltiPayment = async (req: Request, res: Response) => {
     // Call Khalti initiate
     const WEBSITE_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
     const khaltiPayload = {
-      return_url: `${WEBSITE_URL}/billing/${bill.orderId}?khalti=callback`,
+      return_url: `${WEBSITE_URL}/payment/${bill.orderId}?khalti=callback`,
       website_url: WEBSITE_URL,
       amount: Math.round(actualKhaltiAmount * 100), // Khalti expects paisa (amount * 100)
       purchase_order_id: bill.id,

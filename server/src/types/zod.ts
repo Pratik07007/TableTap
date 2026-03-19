@@ -128,8 +128,11 @@ export const generateBillSchema = z.object({
 export const payBillSchema = z
   .object({
     billId: z.string().min(1, 'Bill ID is required'),
-    paymentMethod: z.enum(['CASH', 'ONLINE']),
+    paymentMethod: z.enum(['CASH', 'KHALTI', 'SPLIT']),
     amountTendered: z.number().nonnegative().optional(),
+    cashAmount: z.number().nonnegative().optional(),
+    khaltiAmount: z.number().nonnegative().optional(),
+    transactionId: z.string().optional(),
   })
   .refine((data) => {
     if (data.paymentMethod === 'CASH') {

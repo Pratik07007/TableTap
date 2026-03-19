@@ -4,8 +4,8 @@ import { protect } from '../middleware/protect';
 
 const khaltiRouter = express.Router();
 
-// Both require admin protected auth, assuming bill payment is initiated by admin
-khaltiRouter.post('/initiate', protect('ADMIN'), initiateKhaltiPayment);
-khaltiRouter.post('/verify', protect('ADMIN'), verifyKhaltiPayment);
+// Users can initiate and verify their own payments
+khaltiRouter.post('/initiate', protect(), initiateKhaltiPayment);
+khaltiRouter.post('/verify', protect(), verifyKhaltiPayment);
 
 export default khaltiRouter;

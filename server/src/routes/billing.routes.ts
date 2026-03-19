@@ -11,7 +11,7 @@ billingRouter.post('/pay', protect('ADMIN'), validate(payBillSchema), payBillCon
 billingRouter.post('/send-invoice', protect('ADMIN'), sendInvoiceController);
 billingRouter.get('/summary/daily-cash', protect('ADMIN'), dailyCashSummaryController);
 billingRouter.get('/summary/sales', protect('ADMIN'), salesSummaryController);
-billingRouter.get('/:orderId', protect('ADMIN'), getBillController);
+billingRouter.get('/:orderId', protect(), getBillController);
 billingRouter.get('/', protect('ADMIN'), listBillsController);
 
 export default billingRouter;
