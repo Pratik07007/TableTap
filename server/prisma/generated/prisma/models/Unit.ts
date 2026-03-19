@@ -1139,6 +1139,11 @@ export type UnitFindManyArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
    * Skip the first `n` Units.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of Units.
+   */
   distinct?: Prisma.UnitScalarFieldEnum | Prisma.UnitScalarFieldEnum[]
 }
 

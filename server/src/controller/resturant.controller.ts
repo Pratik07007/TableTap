@@ -1,6 +1,6 @@
 import { Response } from 'express';
 
-import { createResturantService, updateResturantService } from '../service/resturant.service';
+import { createResturantService, updateResturantService, getAllResturantsService } from '../service/resturant.service';
 
 export const createResturantController = async (req: any, res: Response) => {
   const requestedAdmin = req.user;
@@ -46,4 +46,9 @@ export const updateMyResturantController = async (req: any, res: Response) => {
     message: 'Resturant updated successfully',
     data: resp.data,
   });
+};
+
+export const getAllResturantsController = async (_req: any, res: Response) => {
+  const result = await getAllResturantsService();
+  return res.status(result.code).json({ success: result.success, data: result.data });
 };

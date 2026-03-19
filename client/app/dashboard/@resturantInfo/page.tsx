@@ -2,22 +2,7 @@ import { Store, MapPin, Phone, Mail, Clock, Settings } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
 
-async function getRestaurantData() {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/resturant/me`,
-    {
-      headers: {
-        Cookie: (await cookies()).toString(),
-      },
-      cache: "no-cache",
-    }
-  );
-
-  if (!response.ok) return null;
-  const result = await response.json();
-  return result.success ? result.data : null;
-}
-
+import { getRestaurantData } from "@/utils/getRestaurantData";
 export default async function Page() {
   const restaurant = await getRestaurantData();
 

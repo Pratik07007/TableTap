@@ -1,14 +1,18 @@
 import { AdminNavbar } from "../_components/adminPanel/AdminNavbar";
 import { AdminFooter } from "../_components/adminPanel/AdminFooter";
+import { getRestaurantData } from "@/utils/getRestaurantData";
 
-export default function AdminLayout({
+export default async function AdminLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const restaurant = await getRestaurantData();
+    const hasRestaurant = !!restaurant;
+
     return (
         <div className="min-h-screen flex flex-col bg-gray-50">
-            <AdminNavbar />
+            <AdminNavbar hasRestaurant={hasRestaurant} />
             <main className="flex-1">
                 {children}
             </main>

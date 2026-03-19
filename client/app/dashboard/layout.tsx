@@ -2,6 +2,7 @@ import React from 'react';
 import { AdminNavbar } from "../_components/adminPanel/AdminNavbar";
 import { AdminFooter } from "../_components/adminPanel/AdminFooter";
 import { getUserIDandRoleFromToken } from "@/utils/getUserIdandRoleFromToken";
+import { getRestaurantData } from "@/utils/getRestaurantData";
 
 export default async function Layout({
     children,
@@ -20,9 +21,12 @@ export default async function Layout({
         return <>{children}</>;
     }
 
+    const restaurant = await getRestaurantData();
+    const hasRestaurant = !!restaurant;
+
     return (
         <div className="min-h-screen flex flex-col bg-gray-50">
-            <AdminNavbar />
+            <AdminNavbar hasRestaurant={hasRestaurant} />
             <div className="flex-1 p-6 md:p-8">
                 <div className="max-w-7xl mx-auto space-y-8">
                     <div className="w-full">
