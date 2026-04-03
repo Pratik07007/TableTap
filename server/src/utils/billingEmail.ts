@@ -60,11 +60,11 @@ const buildInvoicePdf = async (params: { orderId: string; billNumber: number; cr
   });
 
   doc.fontSize(20).text('TableTap Invoice', { align: 'left' });
-  doc.moveDown(0.5);
+
   doc.fontSize(10).text(`Bill #${String(params.billNumber).padStart(6, '0')}`);
   doc.text(`Order ID: ${params.orderId}`);
   doc.text(`Date: ${new Date(params.createdAt).toLocaleString()}`);
-  doc.moveDown(1);
+  doc.moveDown(1); doc.moveDown(0.5);
 
   doc.fontSize(12).text('Items');
   doc.moveDown(0.5);

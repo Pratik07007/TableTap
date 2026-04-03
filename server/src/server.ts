@@ -24,11 +24,11 @@ app.use(cookieParser());
 
 app.use(express.json());
 
-app.use('/api/auth', authRouter); // ✅ done
+app.use('/api/auth', authRouter);
 
-app.use('/api/resturant', resturantRouter); // ✅ done
+app.use('/api/resturant', resturantRouter);
 
-app.use('/api/menu-items', menuItemRouter); // ✅ done
+app.use('/api/menu-items', menuItemRouter);
 
 app.use('/api/orders', orderRouter);
 app.use('/api/billing', billingRouter);
