@@ -2,18 +2,24 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { DollarSign, Receipt, TrendingUp, CreditCard, Loader2 } from "lucide-react";
+import { DollarSign, Receipt, TrendingUp, CreditCard, Loader2, Download } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import Papa from 'papaparse';
 
 export const AdminAnalytics = () => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [exportLoading, setExportLoading] = useState(false);
 
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"}/api/analytics`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/analytics`,
           { withCredentials: true }
         );
         if (res.data.success) {
@@ -27,6 +33,98 @@ export const AdminAnalytics = () => {
     };
     fetchAnalytics();
   }, []);
+
+  const exportOrders = async () => {
+    setExportLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (startDate) params.append('dateFrom', startDate.toISOString().split('T')[0]);
+      if (endDate) params.append('dateTo', endDate.toISOString().split('T')[0]);
+      params.append('limit', '10000'); // Large limit to get all
+
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/orders?${params.toString()}`,
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        const orders = res.data.data;
+        const csvData = orders.flatMap((order: any) => 
+          order.items.map((item: any) => ({
+            OrderID: order.id,
+            UserName: order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Guest',
+            UserEmail: order.user?.email || 'No email',
+            ItemName: item.menuItem.name,
+            UnitName: item.unitName,
+            Quantity: item.quantity,
+            Price: item.price,
+            TotalAmount: order.totalAmount,
+            FinalAmount: order.finalAmount,
+            Status: order.status,
+            PaymentStatus: order.bill?.paymentStatus || 'PENDING',
+            CreatedAt: new Date(order.createdAt).toLocaleDateString(),
+          }))
+        );
+
+        const csv = Papa.unparse(csvData);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `orders_${startDate ? startDate.toISOString().split('T')[0] : 'all'}_to_${endDate ? endDate.toISOString().split('T')[0] : 'all'}.csv`;
+        link.click();
+      }
+    } catch (e) {
+      console.error("Failed to export orders", e);
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const exportBills = async () => {
+    setExportLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (startDate) params.append('dateFrom', startDate.toISOString().split('T')[0]);
+      if (endDate) params.append('dateTo', endDate.toISOString().split('T')[0]);
+      params.append('limit', '10000');
+
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/billing?${params.toString()}`,
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        const bills = res.data.data;
+        const csvData = bills.flatMap((bill: any) => 
+          bill.order.items.map((item: any) => ({
+            BillID: bill.id,
+            OrderID: bill.orderId,
+            UserName: bill.order.user ? `${bill.order.user.firstName} ${bill.order.user.lastName}` : 'Guest',
+            UserEmail: bill.order.user?.email || 'No email',
+            ItemName: item.menuItem.name,
+            UnitName: item.unitName,
+            Quantity: item.quantity,
+            Price: item.price,
+            TotalAmount: bill.totalAmount,
+            PaymentMethod: bill.paymentMethod,
+            PaymentStatus: bill.paymentStatus,
+            CreatedAt: new Date(bill.createdAt).toLocaleDateString(),
+          }))
+        );
+
+        const csv = Papa.unparse(csvData);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `bills_${startDate ? startDate.toISOString().split('T')[0] : 'all'}_to_${endDate ? endDate.toISOString().split('T')[0] : 'all'}.csv`;
+        link.click();
+      }
+    } catch (e) {
+      console.error("Failed to export bills", e);
+    } finally {
+      setExportLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -224,6 +322,47 @@ export const AdminAnalytics = () => {
               )}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Export Section */}
+      <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+        <h3 className="font-semibold text-gray-900 mb-4">Export Data</h3>
+        <div className="flex flex-wrap gap-4 items-end">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+            <DatePicker
+              selected={startDate}
+              onChange={(date: Date | null) => setStartDate(date)}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholderText="Select start date"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+            <DatePicker
+              selected={endDate}
+              onChange={(date: Date | null) => setEndDate(date)}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholderText="Select end date"
+            />
+          </div>
+          <button
+            onClick={() => exportOrders()}
+            disabled={exportLoading}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+          >
+            {exportLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            Export Orders
+          </button>
+          <button
+            onClick={() => exportBills()}
+            disabled={exportLoading}
+            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
+          >
+            {exportLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            Export Bills
+          </button>
         </div>
       </div>
     </div>
