@@ -271,7 +271,9 @@ export const getAllOrdersService = async (
   page: number = 1,
   limit: number = 10,
   email?: string,
-  paid?: 'true' | 'false' | 'all'
+  paid?: 'true' | 'false' | 'all',
+  dateFrom?: string,
+  dateTo?: string
 ) => {
   try {
     const skip = (page - 1) * limit;
@@ -295,6 +297,16 @@ export const getAllOrdersService = async (
           mode: 'insensitive',
         },
       };
+    }
+
+    if (dateFrom || dateTo) {
+      whereClause.createdAt = {};
+      if (dateFrom) {
+        whereClause.createdAt.gte = new Date(dateFrom);
+      }
+      if (dateTo) {
+        whereClause.createdAt.lte = new Date(dateTo);
+      }
     }
 
     const totalOrders = await prisma.order.count({

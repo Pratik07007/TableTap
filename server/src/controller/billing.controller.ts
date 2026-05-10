@@ -28,8 +28,10 @@ export const listBillsController = async (req: Request, res: Response) => {
   const paymentMethod = req.query.paymentMethod as string | undefined;
   const email = req.query.email as string | undefined;
   const paymentStatus = req.query.paymentStatus as string | undefined;
+  const dateFrom = req.query.dateFrom as string | undefined;
+  const dateTo = req.query.dateTo as string | undefined;
   
-  const response = await listBillsService(page, limit, paymentMethod, email, paymentStatus);
+  const response = await listBillsService(page, limit, paymentMethod, email, paymentStatus, dateFrom, dateTo);
   return res.status(response.code).json({ ...response });
 };
 

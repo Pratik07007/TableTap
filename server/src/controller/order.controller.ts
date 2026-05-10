@@ -36,8 +36,8 @@ export const getMyOrders = async (req: any, res: Response) => {
 };
 
 export const getAllOrders = async (req: any, res: Response) => {
-  const { page = 1, limit = 10, email, paid } = req.query;
-  const result = await getAllOrdersService(req.user.resturant?.id, Number(page), Number(limit), email as string, paid as any);
+  const { page = 1, limit = 10, email, paid, dateFrom, dateTo } = req.query;
+  const result = await getAllOrdersService(req.user.resturant?.id, Number(page), Number(limit), email as string, paid as any, dateFrom as string, dateTo as string);
 
   if (result.success) {
     res.status(result.code).json({

@@ -6,6 +6,7 @@ export const registerSchema = z
     lName: z.string().min(1, 'Last name is required'),
     email: z.email({ message: 'Invalid email address' }),
     password: z
+  
       .string()
       .min(6, 'Password must be at least 6 characters long')
       .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
@@ -128,8 +129,11 @@ export const generateBillSchema = z.object({
 export const payBillSchema = z
   .object({
     billId: z.string().min(1, 'Bill ID is required'),
-    paymentMethod: z.enum(['CASH', 'ONLINE']),
+    paymentMethod: z.enum(['CASH', 'KHALTI', 'SPLIT']),
     amountTendered: z.number().nonnegative().optional(),
+    cashAmount: z.number().nonnegative().optional(),
+    khaltiAmount: z.number().nonnegative().optional(),
+    transactionId: z.string().optional(),
   })
   .refine((data) => {
     if (data.paymentMethod === 'CASH') {

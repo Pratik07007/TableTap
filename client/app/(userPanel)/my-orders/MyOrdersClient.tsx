@@ -16,6 +16,7 @@ import {
   ChefHat,
   Package,
   AlertCircle,
+  CreditCard,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -36,6 +37,8 @@ type Order = {
   totalAmount: number;
   finalAmount?: number;
   createdAt: string;
+  isPaid: boolean;
+  paidAt?: string;
   items: OrderItem[];
   restaurant: { name: string };
 };
@@ -321,18 +324,37 @@ export default function MyOrdersClient({
                     </div>
                   </div>
 
-                  {/* Actions for PENDING */}
-                  {order.status === "PENDING" && (
-                    <div className="mt-4 pt-4 border-t border-gray-50 flex gap-3">
-                      <EditOrderButton order={order} onRefresh={handleRefresh} />
-                      <button
-                        onClick={() => handleCancel(order.id)}
-                        className="flex-1 py-2.5 text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors border border-red-100"
+                  {/* Actions */}
+                  <div className="mt-4 pt-4 border-t border-gray-50 flex gap-3">
+                    {!order.isPaid && order.status !== "CANCELLED" && (
+                      <Link
+                        href={`/payment/${order.id}`}
+                        className="flex-1 py-2.5 text-sm font-semibold text-white bg-orange-600 hover:bg-orange-700 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm shadow-orange-100"
                       >
-                        Cancel
-                      </button>
-                    </div>
-                  )}
+                        <CreditCard size={16} />
+                        Pay Now
+                      </Link>
+                    )}
+                    
+                    {order.status === "PENDING" && (
+                      <>
+                        <EditOrderButton order={order} onRefresh={handleRefresh} />
+                        <button
+                          onClick={() => handleCancel(order.id)}
+                          className={`${!order.isPaid ? 'px-4' : 'flex-1'} py-2.5 text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors border border-red-100`}
+                        >
+                          {order.isPaid ? 'Cancel' : <X size={18} className="mx-auto" />}
+                        </button>
+                      </>
+                    )}
+
+                    {order.isPaid && (
+                      <div className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-green-50 text-green-700 rounded-xl border border-green-100 text-sm font-bold">
+                        <CheckCircle2 size={16} />
+                        Paid
+                      </div>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             );

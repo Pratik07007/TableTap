@@ -65,7 +65,7 @@ export default function BillingPage({
   const [processingPayment, setProcessingPayment] = useState(false);
   const [sendingInvoice, setSendingInvoice] = useState(false);
 
-  // Form States
+  // Form States - Standardized with User Side
   const [paymentType, setPaymentType] = useState<"CASH" | "KHALTI" | "SPLIT">("CASH");
   const [cashGiven, setCashGiven] = useState<string>("");
   const [splitCash, setSplitCash] = useState<string>("");
@@ -78,7 +78,6 @@ export default function BillingPage({
     } else {
       fetchBill();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId, searchParams]);
 
   const verifyKhaltiPayment = async (pidx: string) => {
@@ -117,53 +116,33 @@ export default function BillingPage({
     }
   };
 
-  const handlePayCash = async () => {
+  const handleManualMarkReceived = async () => {
     if (!bill) return;
     try {
       setProcessingPayment(true);
-      const paid = parseFloat(cashGiven || "0");
-      if (isNaN(paid) || paid < bill.totalAmount) {
-        toast.error("Enter valid cash amount (>= total due)");
-        setProcessingPayment(false);
-        return;
-      }
-
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"}/api/billing/pay`,
-        {
+      
+      let payload = {};
+      if (paymentType === "CASH") {
+        const paid = parseFloat(cashGiven || "0");
+        if (isNaN(paid) || paid < bill.totalAmount) {
+          toast.error("Enter valid cash amount (>= total due)");
+          setProcessingPayment(false);
+          return;
+        }
+        payload = {
           billId: bill.id,
           paymentMethod: "CASH",
           amountTendered: paid,
           cashAmount: bill.totalAmount,
           khaltiAmount: 0,
-        },
-        { withCredentials: true }
-      );
-
-      if (res.data.success) {
-        toast.success(`Payment successful! Change: $${(paid - bill.totalAmount).toFixed(2)}`);
-        fetchBill();
-      }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Payment failed");
-    } finally {
-      setProcessingPayment(false);
-    }
-  };
-
-  const handleInitiateKhalti = async () => {
-    if (!bill) return;
-    try {
-      setProcessingPayment(true);
-      let payload = {};
-
-      if (paymentType === "KHALTI") {
+        };
+      } else if (paymentType === "KHALTI") {
         payload = {
           billId: bill.id,
           paymentMethod: "KHALTI",
           khaltiAmount: bill.totalAmount,
           cashAmount: 0,
-          amountTendered: 0,
+          amountTendered: bill.totalAmount,
         };
       } else if (paymentType === "SPLIT") {
         const cAmt = parseFloat(splitCash || "0");
@@ -191,17 +170,18 @@ export default function BillingPage({
       }
 
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"}/api/khalti/initiate`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"}/api/billing/pay`,
         payload,
         { withCredentials: true }
       );
 
-      if (res.data.success && res.data.payment_url) {
-        // Redirect to Khalti
-        window.location.href = res.data.payment_url;
+      if (res.data.success) {
+        toast.success("Payment marked as received successfully!");
+        fetchBill();
       }
-    } catch (e: any) {
-      toast.error(e.response?.data?.message || "Failed to initiate Khalti");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to mark payment");
+    } finally {
       setProcessingPayment(false);
     }
   };
@@ -264,7 +244,7 @@ export default function BillingPage({
                 <div className="text-right">
                   <StatusBadge status={bill.paymentStatus} />
                   {bill.paymentMethod && (
-                    <div className="text-xs text-gray-500 mt-1 font-medium">
+                    <div className="text-xs text-gray-500 mt-1 font-medium italic">
                       {bill.paymentMethod}
                     </div>
                   )}
@@ -272,139 +252,96 @@ export default function BillingPage({
               </div>
 
               {/* Customer & Order Info */}
-              <div className="grid grid-cols-2 gap-8 mb-8">
+              <div className="grid grid-cols-2 gap-8 mb-8 text-sm">
                 <div>
-                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                    Billed To
-                  </h3>
-                  <div className="font-medium text-gray-900 text-sm">
-                    {bill.order.user
-                      ? `${bill.order.user.firstName} ${bill.order.user.lastName}`
-                      : "Guest"}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {bill.order.user?.email || "N/A"}
-                  </div>
+                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Billed To</h3>
+                  <div className="font-bold text-gray-900">{bill.order.user ? `${bill.order.user.firstName} ${bill.order.user.lastName}` : "Guest"}</div>
+                  <div className="text-gray-500">{bill.order.user?.email || "N/A"}</div>
                 </div>
                 <div className="text-right">
-                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                    Order Info
-                  </h3>
-                  <div className="text-sm text-gray-600">
-                    Order ID: <span className="font-mono">{bill.order.id.slice(0, 8)}</span>
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    Date: {new Date(bill.createdAt).toLocaleDateString()}
-                  </div>
+                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Order Details</h3>
+                  <div className="text-gray-600 font-mono text-[10px]">{bill.order.id}</div>
+                  <div className="text-gray-600 mt-1">{new Date(bill.createdAt).toLocaleDateString()}</div>
                 </div>
               </div>
 
-              {/* Items */}
-              <div className="mb-8">
+              {/* Items Table */}
+              <div className="mb-8 overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="text-gray-500 font-medium border-b border-gray-100">
+                  <thead className="bg-gray-50 text-gray-500 font-bold uppercase text-[10px]">
                     <tr>
-                      <th className="py-3 text-left">Item Description</th>
-                      <th className="py-3 text-center">Qty</th>
-                      <th className="py-3 text-right">Price</th>
-                      <th className="py-3 text-right">Amount</th>
+                      <th className="py-3 px-4 text-left">Item</th>
+                      <th className="py-3 px-4 text-center">Qty</th>
+                      <th className="py-3 px-4 text-right">Price</th>
+                      <th className="py-3 px-4 text-right">Total</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {bill.order.items.map((item) => (
                       <tr key={item.id}>
-                        <td className="py-4 text-gray-900">
-                          <div className="font-medium">{item.menuItem.name}</div>
-                          <div className="text-xs text-gray-500">{item.unitName}</div>
+                        <td className="py-4 px-4 text-gray-900 font-medium">
+                          {item.menuItem.name}
+                          <span className="block text-[10px] text-gray-400 normal-case">{item.unitName}</span>
                         </td>
-                        <td className="py-4 text-center text-gray-600">{item.quantity}</td>
-                        <td className="py-4 text-right text-gray-600">${item.price.toFixed(2)}</td>
-                        <td className="py-4 text-right text-gray-900 font-medium">
-                          ${(item.price * item.quantity).toFixed(2)}
-                        </td>
+                        <td className="py-4 px-4 text-center text-gray-600">{item.quantity}</td>
+                        <td className="py-4 px-4 text-right text-gray-600">${item.price.toFixed(2)}</td>
+                        <td className="py-4 px-4 text-right text-gray-900 font-bold">${(item.price * item.quantity).toFixed(2)}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
 
-              {/* Total */}
-              <div className="bg-gray-50 rounded-xl p-6">
-                <div className="flex justify-between items-center text-gray-600 mb-2">
+              {/* Totals Section */}
+              <div className="bg-gray-900 rounded-2xl p-6 text-white ml-auto max-w-[300px]">
+                <div className="flex justify-between items-center text-xs opacity-60 mb-2">
                   <span>Subtotal</span>
                   <span>${bill.totalAmount.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between items-center text-gray-600 mb-4 pb-4 border-b border-gray-200">
-                  <span>Tax (0%)</span>
-                  <span>$0.00</span>
-                </div>
-                <div className="flex justify-between items-center text-xl font-bold text-gray-900">
+                <div className="flex justify-between items-center font-black text-xl pt-3 border-t border-white/10">
                   <span>Total Due</span>
                   <span>${bill.totalAmount.toFixed(2)}</span>
                 </div>
               </div>
 
-              {/* Paid Details */}
+              {/* Payment Details Overlay (If Paid) */}
               {bill.paymentStatus === "PAID" && (
-                <div className="mt-6 bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                  <div className="text-sm font-semibold text-gray-900 mb-4 border-b pb-2">
-                    Payment Details
-                  </div>
-                  <div className="space-y-3">
-                    <div className="text-sm text-gray-600 flex justify-between">
-                      <span className="font-medium">Method</span>
-                      <span className="font-semibold text-indigo-700">{bill.paymentMethod}</span>
-                    </div>
-                    
-                    {bill.paymentMethod === "SPLIT" && (
-                      <div className="pl-4 border-l-2 border-gray-200 space-y-2 py-1">
-                        <div className="text-xs text-gray-500 flex justify-between">
-                          <span>Khalti Portion</span>
-                          <span>${(bill.khaltiAmount || 0).toFixed(2)}</span>
-                        </div>
-                        <div className="text-xs text-gray-500 flex justify-between">
-                          <span>Cash Portion</span>
-                          <span>${(bill.cashAmount || 0).toFixed(2)}</span>
-                        </div>
+                <div className="mt-8 pt-8 border-t border-dashed border-gray-200 grid grid-cols-2 gap-6">
+                   <div className="space-y-4">
+                      <p className="text-xs font-bold text-gray-400 uppercase">Payment Summary</p>
+                      <div className="space-y-2">
+                         <div className="flex justify-between text-sm">
+                            <span className="text-gray-500">Method</span>
+                            <span className="font-bold text-indigo-600">{bill.paymentMethod}</span>
+                         </div>
+                         <div className="flex justify-between text-sm">
+                            <span className="text-gray-500">Date</span>
+                            <span className="font-medium text-gray-900">{bill.paidAt ? new Date(bill.paidAt).toLocaleString() : "-"}</span>
+                         </div>
                       </div>
-                    )}
-
-                    {(bill.paymentMethod === "CASH" || bill.paymentMethod === "SPLIT") && (
-                      <>
-                        <div className="text-sm text-gray-600 flex justify-between">
-                          <span>Amount Tendered (Cash)</span>
-                          <span>${(bill.amountTendered || 0).toFixed(2)}</span>
-                        </div>
-                        <div className="text-sm text-gray-600 flex justify-between">
-                          <span>Change Given</span>
-                          <span>${(bill.changeGiven || 0).toFixed(2)}</span>
-                        </div>
-                      </>
-                    )}
-
-                    <div className="text-sm text-gray-600 flex justify-between pt-2 border-t border-gray-50">
-                      <span>Paid At</span>
-                      <span>{bill.paidAt ? new Date(bill.paidAt).toLocaleString() : "-"}</span>
-                    </div>
-                    {bill.transactionId && (
-                      <div className="text-sm text-gray-600 flex justify-between">
-                        <span>Transaction ID</span>
-                        <span className="font-mono text-xs max-w-[150px] truncate">{bill.transactionId}</span>
+                   </div>
+                   <div className="bg-gray-50 rounded-xl p-4 space-y-2">
+                      <div className="flex justify-between text-xs">
+                         <span className="text-gray-500">Tendered</span>
+                         <span className="font-bold text-gray-900">${(bill.amountTendered || 0).toFixed(2)}</span>
                       </div>
-                    )}
-                  </div>
+                      <div className="flex justify-between text-xs pt-2 border-t border-gray-200">
+                         <span className="text-gray-500">Change Given</span>
+                         <span className="font-bold text-green-600">${(bill.changeGiven || 0).toFixed(2)}</span>
+                      </div>
+                   </div>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Payment Actions */}
+          {/* Action Panel (Standardized) */}
           <div className="w-full md:w-[380px] shrink-0 sticky top-6">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="p-6 border-b border-gray-100 bg-gray-50/50">
                 <h2 className="font-bold text-gray-900 flex items-center gap-2">
                   <CreditCard className="w-5 h-5 text-indigo-500" />
-                  Payment Actions
+                  Payment Processing
                 </h2>
               </div>
 
@@ -413,59 +350,47 @@ export default function BillingPage({
                   <div className="space-y-6">
                     {/* Tabs */}
                     <div className="flex p-1 bg-gray-100 rounded-lg">
-                      <button
-                        onClick={() => setPaymentType("CASH")}
-                        className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
-                          paymentType === "CASH" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
-                        }`}
-                      >
-                        Cash
-                      </button>
-                      <button
-                        onClick={() => setPaymentType("KHALTI")}
-                        className={`flex-1 flex items-center justify-center gap-1 py-2 text-sm font-medium rounded-md transition-all ${
-                          paymentType === "KHALTI" ? "bg-purple-600 text-white shadow-sm" : "text-gray-500 hover:text-gray-700"
-                        }`}
-                      >
-                        Khalti
-                      </button>
-                      <button
-                        onClick={() => setPaymentType("SPLIT")}
-                        className={`flex-1 flex items-center justify-center gap-1 py-2 text-sm font-medium rounded-md transition-all ${
-                          paymentType === "SPLIT" ? "bg-indigo-600 text-white shadow-sm" : "text-gray-500 hover:text-gray-700"
-                        }`}
-                      >
-                        Split
-                      </button>
+                       {["CASH", "KHALTI", "SPLIT"].map((type) => (
+                          <button
+                            key={type}
+                            onClick={() => setPaymentType(type as any)}
+                            className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${
+                              paymentType === type 
+                                ? "bg-white text-gray-900 shadow-sm" 
+                                : "text-gray-400 hover:text-gray-600"
+                            }`}
+                          >
+                            {type}
+                          </button>
+                       ))}
                     </div>
 
-                    {/* Form: CASH */}
+                    {/* CASH Form */}
                     {paymentType === "CASH" && (
                       <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-200">
                         <div className="space-y-1.5">
-                          <label className="text-sm font-medium text-gray-700">Cash Received</label>
+                          <label className="text-[10px] font-bold text-gray-400 uppercase">Cash Received</label>
                           <div className="relative">
                             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                             <input
                               type="number"
-                              step="0.01"
                               value={cashGiven}
                               onChange={(e) => setCashGiven(e.target.value)}
                               placeholder="0.00"
-                              className="w-full pl-9 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                              className="w-full pl-9 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none font-bold"
                             />
                           </div>
                         </div>
 
                         {cashGiven && (
-                          <div className="bg-gray-50 rounded-xl p-4 space-y-2 border border-gray-100">
-                            <div className="flex justify-between text-sm text-gray-600">
-                              <span>Total Due</span>
-                              <span className="font-medium">${bill.totalAmount.toFixed(2)}</span>
+                          <div className="bg-gray-900 rounded-xl p-4 space-y-2 text-white/80 text-xs">
+                            <div className="flex justify-between">
+                              <span>Subtotal</span>
+                              <span>${bill.totalAmount.toFixed(2)}</span>
                             </div>
-                            <div className="flex justify-between font-semibold text-gray-900 pt-2 border-t border-gray-200">
+                            <div className="flex justify-between font-black text-white text-sm pt-2 border-t border-white/10">
                               <span>Change To Return</span>
-                              <span className={changeDueCash >= 0 ? "text-green-600" : "text-red-500"}>
+                              <span className={changeDueCash >= 0 ? "text-green-400" : "text-red-400"}>
                                 ${changeDueCash.toFixed(2)}
                               </span>
                             </div>
@@ -473,138 +398,132 @@ export default function BillingPage({
                         )}
 
                         <button
-                          onClick={handlePayCash}
+                          onClick={handleManualMarkReceived}
                           disabled={processingPayment}
-                          className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gray-900 hover:bg-black text-white font-semibold transition-all disabled:opacity-70 shadow-sm"
+                          className="w-full py-4 bg-gray-900 hover:bg-black text-white rounded-xl font-bold transition-all shadow-lg flex items-center justify-center gap-2"
                         >
-                          {processingPayment ? <Loader2 className="w-5 h-5 animate-spin" /> : <DollarSign className="w-5 h-5" />}
-                          Complete Cash Payment
+                          {processingPayment ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle size={18} />}
+                          Confirm Payment
                         </button>
                       </div>
                     )}
 
-                    {/* Form: KHALTI */}
+                    {/* KHALTI Form */}
                     {paymentType === "KHALTI" && (
                       <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-200">
-                        <div className="bg-purple-50 border border-purple-100 rounded-xl p-4 text-center space-y-2">
-                          <div className="text-purple-700 font-semibold">Total to Pay Online</div>
-                          <div className="text-3xl font-bold text-purple-900">${bill.totalAmount.toFixed(2)}</div>
-                          <p className="text-xs text-purple-600/80 mt-2">
-                            You will be redirected to Khalti to securely process the payment.
-                          </p>
+                        <div className="bg-purple-50 border border-purple-100 rounded-2xl p-6 text-center space-y-4">
+                          <p className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">Online Khalti QR</p>
+                          <div className="bg-white p-4 rounded-xl inline-block shadow-sm">
+                            <img 
+                              src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=TableTap-Khalti-Full-${bill.billNumber}`} 
+                              alt="Khalti QR"
+                              className="w-28 h-28"
+                            />
+                          </div>
+                          <h3 className="text-2xl font-black text-purple-900">${bill.totalAmount.toFixed(2)}</h3>
                         </div>
                         
                         <button
-                          onClick={handleInitiateKhalti}
+                          onClick={handleManualMarkReceived}
                           disabled={processingPayment}
-                          className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold transition-all disabled:opacity-70 shadow-sm shadow-purple-200"
+                          className="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold transition-all shadow-lg flex items-center justify-center gap-2"
                         >
-                          {processingPayment ? <Loader2 className="w-5 h-5 animate-spin" /> : <CreditCard className="w-5 h-5" />}
-                          Pay with Khalti
+                          {processingPayment ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle size={18} />}
+                          Mark as Paid
                         </button>
                       </div>
                     )}
 
-                    {/* Form: SPLIT */}
+                    {/* SPLIT Form */}
                     {paymentType === "SPLIT" && (
                       <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-200">
-                        <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between">
-                          <div>
-                            <div className="text-xs font-semibold text-indigo-500 uppercase">Total Due</div>
-                            <div className="text-xl font-bold text-indigo-900">${bill.totalAmount.toFixed(2)}</div>
-                          </div>
-                          <SplitSquareHorizontal className="w-6 h-6 text-indigo-300" />
-                        </div>
-
-                        <div className="space-y-4">
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Khalti Amount</label>
-                            <div className="relative">
-                              <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400 w-4 h-4" />
-                              <input
-                                type="number"
-                                step="0.01"
-                                value={splitKhalti}
-                                onChange={(e) => setSplitKhalti(e.target.value)}
-                                placeholder="0.00"
-                                className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 outline-none transition-all font-medium"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Cash Amount</label>
-                            <div className="relative">
-                              <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-green-500 w-4 h-4" />
-                              <input
-                                type="number"
-                                step="0.01"
-                                value={splitCash}
-                                onChange={(e) => setSplitCash(e.target.value)}
-                                placeholder="0.00"
-                                className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-green-500 outline-none transition-all font-medium"
-                              />
-                            </div>
-                          </div>
-                        </div>
-
-                        {splitCash && splitKhalti && (
-                          <div className="bg-gray-50 rounded-xl p-4 space-y-3 border border-gray-200">
-                            <div className="flex justify-between text-sm text-gray-600">
-                              <span>Sum of Split</span>
-                              <span className={
-                                Math.abs(parseFloat(splitCash||"0") + parseFloat(splitKhalti||"0") - bill.totalAmount) > 0.01 
-                                ? "text-red-500 font-bold" : "text-green-600 font-bold"
-                              }>
-                                ${(parseFloat(splitCash||"0") + parseFloat(splitKhalti||"0")).toFixed(2)}
-                              </span>
-                            </div>
-
-                            <div className="pt-3 border-t border-gray-200 space-y-1.5">
-                              <label className="text-xs font-semibold text-gray-600">Actual Cash Received from Customer</label>
+                        <div className="grid grid-cols-2 gap-4">
+                           <div className="space-y-1.5">
+                              <label className="text-[10px] font-bold text-gray-400 uppercase">Khalti Portion</label>
                               <div className="relative">
-                                <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-3 h-3" />
+                                <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 text-purple-400 w-3 h-3" />
                                 <input
                                   type="number"
-                                  step="0.01"
-                                  value={cashGiven}
-                                  onChange={(e) => setCashGiven(e.target.value)}
+                                  value={splitKhalti}
+                                  onChange={(e) => setSplitKhalti(e.target.value)}
                                   placeholder="0.00"
-                                  className="w-full pl-7 pr-3 py-2 text-sm rounded bg-white border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                                  className="w-full pl-7 pr-2 py-2.5 rounded-lg border border-gray-200 text-xs font-bold"
                                 />
                               </div>
-                            </div>
-                            {cashGiven && (
-                              <div className="flex justify-between font-semibold text-sm text-gray-900 pt-1">
-                                <span>Change to return</span>
-                                <span className={changeDueSplit >= 0 ? "text-green-600" : "text-red-500"}>
-                                  ${changeDueSplit.toFixed(2)}
-                                </span>
+                           </div>
+                           <div className="space-y-1.5">
+                              <label className="text-[10px] font-bold text-gray-400 uppercase">Cash Portion</label>
+                              <div className="relative">
+                                <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 text-green-400 w-3 h-3" />
+                                <input
+                                  type="number"
+                                  value={splitCash}
+                                  onChange={(e) => setSplitCash(e.target.value)}
+                                  placeholder="0.00"
+                                  className="w-full pl-7 pr-2 py-2.5 rounded-lg border border-gray-200 text-xs font-bold"
+                                />
                               </div>
-                            )}
+                           </div>
+                        </div>
+
+                        <div className="bg-gray-50 rounded-xl p-4 space-y-4">
+                           <div className="flex justify-between text-[10px] font-black">
+                              <span className="text-gray-400 uppercase">Total Sum</span>
+                              <span className={Math.abs(parseFloat(splitKhalti||"0")+parseFloat(splitCash||"0") - bill.totalAmount) > 0.01 ? "text-red-500" : "text-indigo-600"}>
+                                ${(parseFloat(splitKhalti||"0")+parseFloat(splitCash||"0")).toFixed(2)}
+                              </span>
+                           </div>
+                           
+                           <div className="pt-4 border-t border-gray-200 text-center">
+                              <p className="text-[10px] font-bold text-gray-400 uppercase mb-3">Counter Cash Calculator</p>
+                              <div className="relative max-w-[120px] mx-auto mb-2">
+                                <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 w-3 h-3" />
+                                <input
+                                  type="number"
+                                  value={cashGiven}
+                                  onChange={(e) => setCashGiven(e.target.value)}
+                                  placeholder="Tendered"
+                                  className="w-full pl-6 pr-2 py-1.5 bg-white border border-gray-200 rounded text-xs font-bold"
+                                />
+                              </div>
+                              {cashGiven && splitCash && (
+                                <p className="text-xs font-black text-green-600">Change: ${(parseFloat(cashGiven) - parseFloat(splitCash)).toFixed(2)}</p>
+                              )}
+                           </div>
+                        </div>
+
+                        {splitKhalti && parseFloat(splitKhalti) > 0 && (
+                          <div className="bg-purple-50 p-4 rounded-xl border border-dashed border-purple-200 flex flex-col items-center gap-3">
+                            <p className="text-[10px] font-black text-purple-400 uppercase">Khalti Split QR</p>
+                            <img 
+                              src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=Split-Khalti-${bill.billNumber}`} 
+                              alt="Split QR"
+                              className="w-24 h-24"
+                            />
+                            <p className="text-xs font-bold text-purple-900">${parseFloat(splitKhalti).toFixed(2)}</p>
                           </div>
                         )}
 
                         <button
-                          onClick={handleInitiateKhalti}
+                          onClick={handleManualMarkReceived}
                           disabled={processingPayment}
-                          className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition-all disabled:opacity-70 shadow-sm shadow-indigo-200"
+                          className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-all shadow-lg flex items-center justify-center gap-2"
                         >
-                          {processingPayment ? <Loader2 className="w-5 h-5 animate-spin" /> : <SplitSquareHorizontal className="w-5 h-5" />}
-                          Process Split Payment
+                          {processingPayment ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle size={18} />}
+                          Mark Full Shared Paid
                         </button>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="text-center py-6">
-                    <div className="h-16 w-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <CheckCircle className="h-8 w-8" />
+                  <div className="text-center py-10 space-y-6">
+                    <div className="h-20 w-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                      <CheckCircle size={40} />
                     </div>
-                    <h3 className="font-bold text-gray-900 mb-1">Bill Paid</h3>
-                    <p className="text-sm text-gray-500 mb-5">
-                      This bill has been successfully settled.
-                    </p>
+                    <div>
+                      <h3 className="font-black text-gray-900 text-xl">Order Settled</h3>
+                      <p className="text-xs text-gray-500 mt-1">Status: Fully Paid</p>
+                    </div>
                     <button
                       onClick={async () => {
                         try {
@@ -614,22 +533,18 @@ export default function BillingPage({
                             { billId: bill.id },
                             { withCredentials: true }
                           );
-                          if (res.data.success) {
-                            toast.success("Invoice email sent!");
-                          } else {
-                            toast.error(res.data.message || "Failed to send invoice");
-                          }
+                          if (res.data.success) toast.success("Invoice sent!");
                         } catch (e: any) {
-                          toast.error(e.message || "Failed to send invoice");
+                          toast.error("Failed to send invoice");
                         } finally {
                           setSendingInvoice(false);
                         }
                       }}
                       disabled={sendingInvoice}
-                      className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-800 font-semibold transition-colors disabled:opacity-50"
+                      className="w-full py-3.5 rounded-xl border-2 border-gray-100 font-bold text-gray-700 hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
                     >
-                      {sendingInvoice ? <Loader2 className="w-4 h-4 animate-spin" /> : <Receipt className="w-4 h-4" />}
-                      Send Invoice Email
+                      {sendingInvoice ? <Loader2 size={16} className="animate-spin" /> : <Receipt size={16} />}
+                      Email Invoice
                     </button>
                   </div>
                 )}
@@ -645,13 +560,13 @@ export default function BillingPage({
 function StatusBadge({ status }: { status: string }) {
   if (status === "PAID") {
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200">
+      <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-black bg-green-500 text-white shadow-sm shadow-green-100">
         <CheckCircle className="h-3 w-3" /> PAID
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200">
+    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-black bg-orange-500 text-white shadow-sm shadow-orange-100">
       <Clock className="h-3 w-3" /> PENDING
     </span>
   );

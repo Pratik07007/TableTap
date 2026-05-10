@@ -150,7 +150,7 @@ export const payBillService = async (
   }
 };
 
-export const listBillsService = async (page: number = 1, limit: number = 10, paymentMethod?: string, email?: string, paymentStatus?: string) => {
+export const listBillsService = async (page: number = 1, limit: number = 10, paymentMethod?: string, email?: string, paymentStatus?: string, dateFrom?: string, dateTo?: string) => {
   try {
     const skip = (page - 1) * limit;
     const whereClause: any = {};
@@ -166,6 +166,15 @@ export const listBillsService = async (page: number = 1, limit: number = 10, pay
           email: { contains: email, mode: 'insensitive' }
         }
       };
+    }
+    if (dateFrom || dateTo) {
+      whereClause.createdAt = {};
+      if (dateFrom) {
+        whereClause.createdAt.gte = new Date(dateFrom);
+      }
+      if (dateTo) {
+        whereClause.createdAt.lte = new Date(dateTo);
+      }
     }
     const totalBills = await prisma.bill.count({ where: whereClause });
     const bills = await prisma.bill.findMany({
