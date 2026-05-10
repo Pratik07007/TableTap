@@ -1,4 +1,5 @@
 import { AdminNavbar } from "../_components/adminPanel/AdminNavbar";
+export const dynamic = "force-dynamic";
 import { AdminFooter } from "../_components/adminPanel/AdminFooter";
 import { getRestaurantData } from "@/utils/getRestaurantData";
 

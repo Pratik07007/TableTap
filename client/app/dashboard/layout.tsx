@@ -1,4 +1,5 @@
 import React from 'react';
+export const dynamic = "force-dynamic";
 import { AdminNavbar } from "../_components/adminPanel/AdminNavbar";
 import { AdminFooter } from "../_components/adminPanel/AdminFooter";
 import { getUserIDandRoleFromToken } from "@/utils/getUserIdandRoleFromToken";

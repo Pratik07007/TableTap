@@ -1,4 +1,5 @@
 import GiveOrderClient from "./GiveOrderClient";
+export const dynamic = "force-dynamic";
 
 async function getPublicMenu(resturantID: string | undefined) {
   if (!resturantID) return { success: false, data: [] };

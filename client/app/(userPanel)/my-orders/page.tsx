@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+export const dynamic = "force-dynamic";
 import MyOrdersClient from "./MyOrdersClient";
 
 async function getMyOrders() {
