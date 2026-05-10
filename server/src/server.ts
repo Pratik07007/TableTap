@@ -15,10 +15,10 @@ const app = express();
 const PORT = process.env.SERVER_PORT || 8080;
 
 app.use(
-  cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
-    credentials: true,
-  })
+    cors({
+        origin: process.env.FRONTEND_URL || "http://localhost:3000" || "https://tabletap.pratikdhimal.com.np",
+        credentials: true,
+    })
 );
 app.use(cookieParser());
 
@@ -36,9 +36,9 @@ app.use('/api/khalti', khaltiRouter);
 app.use('/api/analytics', analyticsRouter);
 
 app.get("/health", (req, res) => {
-  res.json({ message: "OK" })
+    res.json({ message: "OK" })
 })
 
 app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+    console.log(`Server listening on port ${PORT}`);
 });
