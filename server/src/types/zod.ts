@@ -6,6 +6,7 @@ export const registerSchema = z
     lName: z.string().min(1, 'Last name is required'),
     email: z.email({ message: 'Invalid email address' }),
     password: z
+  
       .string()
       .min(6, 'Password must be at least 6 characters long')
       .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
