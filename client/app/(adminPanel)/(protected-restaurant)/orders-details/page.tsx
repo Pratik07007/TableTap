@@ -3,10 +3,10 @@ import { cookies } from "next/headers";
 import OrdersClient from "./OrdersClient";
 
 async function getOrders(page: string, email: string | undefined, paid: string | undefined) {
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
 
+  try {
     const queryParams = new URLSearchParams();
     queryParams.set("page", page);
     if (email) queryParams.set("email", email);

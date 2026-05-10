@@ -3,12 +3,12 @@ import { sendWithRetry } from './emailRetry';
 import PDFDocument from 'pdfkit';
 
 export const sendBillPaymentEmail = async (email: string, userParams: { firstName: string; lastName: string }, orderId: string, amount: number, date: Date) => {
-  const info = await sendWithRetry(() =>
-    transporter.sendMail({
-      from: `"TableTap" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: 'Payment Receipt - TableTap',
-      html: `
+    const info = await sendWithRetry(() =>
+        transporter.sendMail({
+            from: `"TableTap" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: 'Payment Receipt - TableTap',
+            html: `
       <div style="max-width: 600px; margin: 0 auto; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; text-align: center; border-radius: 8px 8px 0 0;">
           <h1 style="color: #fff; margin: 0; font-size: 28px;">Payment Successful!</h1>
@@ -44,71 +44,71 @@ export const sendBillPaymentEmail = async (email: string, userParams: { firstNam
         </div>
       </div>
     `,
-    })
-  );
+        })
+    );
 
-  console.log('Billing Email sent:', info.messageId);
+    console.log('Billing Email sent:', info.messageId);
 };
 
 const buildInvoicePdf = async (params: { orderId: string; billNumber: number; createdAt: Date; items: Array<{ name: string; unitName: string; quantity: number; price: number }>; totalAmount: number; paymentMethod: string; amountTendered: number; changeGiven: number; paidAt: Date; transactionId: string }) => {
-  const doc = new PDFDocument({ size: 'A4', margin: 40 });
-  const chunks: Buffer[] = [];
-  doc.on('data', (d: Buffer) => chunks.push(d));
-  const done = new Promise<Buffer>((resolve, reject) => {
-    doc.on('end', () => resolve(Buffer.concat(chunks)));
-    doc.on('error', reject);
-  });
+    const doc = new PDFDocument({ size: 'A4', margin: 40 });
+    const chunks: Buffer[] = [];
+    doc.on('data', (d: Buffer) => chunks.push(d));
+    const done = new Promise<Buffer>((resolve, reject) => {
+        doc.on('end', () => resolve(Buffer.concat(chunks)));
+        doc.on('error', reject);
+    });
 
-  doc.fontSize(20).text('TableTap Invoice', { align: 'left' });
+    doc.fontSize(20).text('TableTap Invoice', { align: 'left' });
 
-  doc.fontSize(10).text(`Bill #${String(params.billNumber).padStart(6, '0')}`);
-  doc.text(`Order ID: ${params.orderId}`);
-  doc.text(`Date: ${new Date(params.createdAt).toLocaleString()}`);
-  doc.moveDown(1); doc.moveDown(0.5);
+    doc.fontSize(10).text(`Bill #${String(params.billNumber).padStart(6, '0')}`);
+    doc.text(`Order ID: ${params.orderId}`);
+    doc.text(`Date: ${new Date(params.createdAt).toLocaleString()}`);
+    doc.moveDown(1); doc.moveDown(0.5);
 
-  doc.fontSize(12).text('Items');
-  doc.moveDown(0.5);
-  doc.fontSize(10);
-  params.items.forEach((i) => {
-    const lineTotal = i.price * i.quantity;
-    doc.text(`${i.name} (${i.unitName}) x${i.quantity} - $${lineTotal.toFixed(2)}`);
-  });
-  doc.moveDown(1);
+    doc.fontSize(12).text('Items');
+    doc.moveDown(0.5);
+    doc.fontSize(10);
+    params.items.forEach((i) => {
+        const lineTotal = i.price * i.quantity;
+        doc.text(`${i.name} (${i.unitName}) x${i.quantity} - $${lineTotal.toFixed(2)}`);
+    });
+    doc.moveDown(1);
 
-  doc.fontSize(12).text(`Total: $${params.totalAmount.toFixed(2)}`);
-  doc.moveDown(0.5);
-  doc.fontSize(10).text(`Payment Method: ${params.paymentMethod}`);
-  doc.text(`Amount Tendered: $${params.amountTendered.toFixed(2)}`);
-  doc.text(`Change Given: $${params.changeGiven.toFixed(2)}`);
-  doc.text(`Paid At: ${new Date(params.paidAt).toLocaleString()}`);
-  doc.text(`Transaction ID: ${params.transactionId}`);
-  doc.moveDown(1);
-  doc.text('Payment Received - Thank You');
+    doc.fontSize(12).text(`Total: $${params.totalAmount.toFixed(2)}`);
+    doc.moveDown(0.5);
+    doc.fontSize(10).text(`Payment Method: ${params.paymentMethod}`);
+    doc.text(`Amount Tendered: $${params.amountTendered.toFixed(2)}`);
+    doc.text(`Change Given: $${params.changeGiven.toFixed(2)}`);
+    doc.text(`Paid At: ${new Date(params.paidAt).toLocaleString()}`);
+    doc.text(`Transaction ID: ${params.transactionId}`);
+    doc.moveDown(1);
+    doc.text('Payment Received - Thank You');
 
-  doc.end();
-  return done;
+    doc.end();
+    return done;
 };
 
 export const sendInvoiceEmail = async (
-  email: string,
-  params: {
-    firstName?: string;
-    lastName?: string;
-    orderId: string;
-    billNumber: number;
-    createdAt: Date;
-    items: Array<{ name: string; unitName: string; quantity: number; price: number }>;
-    totalAmount: number;
-    paymentMethod: string;
-    amountTendered: number;
-    changeGiven: number;
-    paidAt: Date;
-    transactionId: string;
-  }
+    email: string,
+    params: {
+        firstName?: string;
+        lastName?: string;
+        orderId: string;
+        billNumber: number;
+        createdAt: Date;
+        items: Array<{ name: string; unitName: string; quantity: number; price: number }>;
+        totalAmount: number;
+        paymentMethod: string;
+        amountTendered: number;
+        changeGiven: number;
+        paidAt: Date;
+        transactionId: string;
+    }
 ) => {
-  const rows = params.items
-    .map(
-      (i) => `
+    const rows = params.items
+        .map(
+            (i) => `
       <tr>
         <td style="padding:8px;border-bottom:1px solid #eee;">
           <div style="font-weight:600;color:#111;">${i.name}</div>
@@ -119,10 +119,10 @@ export const sendInvoiceEmail = async (
         <td style="padding:8px;border-bottom:1px solid #eee;text-align:right;font-weight:600;color:#111;">$${(i.price * i.quantity).toFixed(2)}</td>
       </tr>
     `
-    )
-    .join('');
+        )
+        .join('');
 
-  const html = `
+    const html = `
     <div style="max-width:680px;margin:0 auto;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,'Apple Color Emoji','Segoe UI Emoji';color:#111;">
       <div style="background:#111;color:#fff;padding:24px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center">
         <div>
@@ -166,33 +166,33 @@ export const sendInvoiceEmail = async (
     </div>
   `;
 
-  const pdf = await buildInvoicePdf({
-    orderId: params.orderId,
-    billNumber: params.billNumber,
-    createdAt: params.createdAt,
-    items: params.items,
-    totalAmount: params.totalAmount,
-    paymentMethod: params.paymentMethod,
-    amountTendered: params.amountTendered,
-    changeGiven: params.changeGiven,
-    paidAt: params.paidAt,
-    transactionId: params.transactionId,
-  });
+    const pdf = await buildInvoicePdf({
+        orderId: params.orderId,
+        billNumber: params.billNumber,
+        createdAt: params.createdAt,
+        items: params.items,
+        totalAmount: params.totalAmount,
+        paymentMethod: params.paymentMethod,
+        amountTendered: params.amountTendered,
+        changeGiven: params.changeGiven,
+        paidAt: params.paidAt,
+        transactionId: params.transactionId,
+    });
 
-  const info = await sendWithRetry(() =>
-    transporter.sendMail({
-      from: `"TableTap" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: 'Payment Received - Thank You',
-      html,
-      attachments: [
-        {
-          filename: `invoice-${params.billNumber}.pdf`,
-          content: pdf,
-          contentType: 'application/pdf',
-        },
-      ],
-    })
-  );
-  console.log('Invoice Email sent:', info.messageId);
+    const info = await sendWithRetry(() =>
+        transporter.sendMail({
+            from: `"TableTap" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: 'Payment Received - Thank You',
+            html,
+            attachments: [
+                {
+                    filename: `invoice-${params.billNumber}.pdf`,
+                    content: pdf,
+                    contentType: 'application/pdf',
+                },
+            ],
+        })
+    );
+    console.log('Invoice Email sent:', info.messageId);
 };

@@ -2,8 +2,8 @@ import { cookies } from "next/headers";
 import MenuList from "./MenuList";
 
 async function getMenuItems() {
+  const cookieStore = await cookies();
   try {
-    const cookieStore = await cookies();
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/menu-items`,
       {

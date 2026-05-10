@@ -19,12 +19,13 @@ type Restaurant = {
 };
 
 async function getAllRestaurants(): Promise<Restaurant[]> {
+  const cookieStore = await cookies();
+  const cookieString = cookieStore.toString();
   try {
-    const cookieStore = await cookies();
     const res = await fetch(
       `${process.env.BACKEND_URL || "http://localhost:8080"}/api/resturant/all`,
       {
-        headers: { Cookie: cookieStore.toString() },
+        headers: { Cookie: cookieString },
         cache: "no-store",
       }
     );

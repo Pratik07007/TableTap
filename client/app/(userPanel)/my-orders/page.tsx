@@ -2,10 +2,10 @@ import { cookies } from "next/headers";
 import MyOrdersClient from "./MyOrdersClient";
 
 async function getMyOrders() {
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
 
+  try {
     const apiUrl = `${
       process.env.BACKEND_URL || "http://localhost:8080"
     }/api/orders/my-orders?limit=20`;
