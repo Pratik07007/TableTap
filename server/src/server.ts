@@ -2,6 +2,7 @@ import cors from 'cors';
 import express from 'express';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
+import { globalRateLimiter } from './middleware/rateLimiter';
 import authRouter from './routes/auth.routes';
 import { resturantRouter } from './routes/resturant.routes';
 import menuItemRouter from './routes/menu.routes';
@@ -14,6 +15,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.SERVER_PORT || 8080;
 
+app.use(globalRateLimiter);
 app.use(
     cors({
         origin: process.env.FRONTEND_URL || "http://localhost:3000" || "https://tabletap.pratikdhimal.com.np",
