@@ -49,7 +49,7 @@ export const AdminAnalytics = () => {
 
       if (res.data.success) {
         const orders = res.data.data;
-        const csvData = orders.flatMap((order: any) => 
+        const csvData = orders.flatMap((order: any) =>
           order.items.map((item: any) => ({
             OrderID: order.id,
             UserName: order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Guest',
@@ -95,7 +95,7 @@ export const AdminAnalytics = () => {
 
       if (res.data.success) {
         const bills = res.data.data;
-        const csvData = bills.flatMap((bill: any) => 
+        const csvData = bills.flatMap((bill: any) =>
           bill.order.items.map((item: any) => ({
             BillID: bill.id,
             OrderID: bill.orderId,
@@ -129,7 +129,7 @@ export const AdminAnalytics = () => {
   if (loading) {
     return (
       <div className="h-64 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <Loader2 className="w-8 h-8 animate-spsin text-gray-400" />
       </div>
     );
   }
@@ -137,7 +137,7 @@ export const AdminAnalytics = () => {
   if (!data) {
     return (
       <div className="h-64 flex items-center justify-center text-gray-500">
-        Failed to load analytics data.
+       No Data to Show right now please crete some orders and bills to see analytics here.
       </div>
     );
   }
@@ -208,7 +208,7 @@ export const AdminAnalytics = () => {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
                 <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#888' }} dy={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#888' }} tickFormatter={(val) => `$${val}`} />
-                <Tooltip 
+                <Tooltip
                   cursor={{ stroke: '#f3f4f6', strokeWidth: 2 }}
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                   formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Revenue']}
@@ -248,7 +248,7 @@ export const AdminAnalytics = () => {
             ) : (
               <div className="text-gray-400 text-sm">No payment data yet</div>
             )}
-            
+
             <div className="w-full mt-auto pt-6 border-t border-gray-100 grid grid-cols-3 gap-2 text-center">
                 <div>
                   <div className="text-2xl font-bold text-amber-500">{pendingOrders}</div>

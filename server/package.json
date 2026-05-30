@@ -10,7 +10,8 @@
     "test": "vitest run",
     "db:migrate": "prisma db push",
     "db:generate": "prisma generate",
-    "db:all": "prisma db push && prisma generate",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:all": "prisma db push && prisma generate && npm run db:seed",
     "db:studio": "prisma studio"
   },
   "keywords": [],
@@ -55,5 +56,8 @@
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
     "vitest": "^4.1.7"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }

@@ -6,8 +6,6 @@ import { Footer } from './_components/landingPage/Footer';
 import { Hero } from './_components/landingPage/HeroSection';
 import { Navbar } from './_components/landingPage/NavBar';
 
-
-
 export const dynamic = 'force-dynamic';
 
 export default async function Page() {

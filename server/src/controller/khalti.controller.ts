@@ -1,6 +1,6 @@
+import axios from 'axios';
 import { Request, Response } from 'express';
 import { prisma } from '../../prisma/client';
-import axios from 'axios';
 import { sendInvoiceEmail } from '../utils/billingEmail';
 
 const KHALTI_API = 'https://a.khalti.com/api/v2/epayment';
@@ -125,7 +125,7 @@ export const verifyKhaltiPayment = async (req: Request, res: Response) => {
           paymentProcessedById: processedById,
           // transactionId remains as `pidx` which acts as the official transaction ID
         },
-        include: { order: { include: { user: true, items: { include: { menuItem: { include: { images: true } } } } } } },
+        include: { order: { include: { user: true, restaurant: true, items: { include: { menuItem: { include: { images: true } } } } } } },
       });
 
       await tx.order.update({
@@ -142,6 +142,9 @@ export const verifyKhaltiPayment = async (req: Request, res: Response) => {
         await sendInvoiceEmail(updatedBill.order.user.email, {
           firstName: updatedBill.order.user.firstName,
           lastName: updatedBill.order.user.lastName,
+          restaurantName: updatedBill.order.restaurant?.name,
+          restaurantAddress: updatedBill.order.restaurant ? `${updatedBill.order.restaurant.streetAddress}, ${updatedBill.order.restaurant.city}, ${updatedBill.order.restaurant.state} ${updatedBill.order.restaurant.zip}` : undefined,
+          restaurantPhone: updatedBill.order.restaurant?.phone,
           orderId: updatedBill.orderId,
           billNumber: updatedBill.billNumber,
           createdAt: updatedBill.createdAt,

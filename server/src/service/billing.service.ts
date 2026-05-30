@@ -1,6 +1,6 @@
+import { randomUUID } from 'crypto';
 import { prisma } from '../../prisma/client';
 import { sendInvoiceEmail } from '../utils/billingEmail';
-import { randomUUID } from 'crypto';
 
 export const generateBillService = async (orderId: string) => {
   try {
@@ -102,7 +102,7 @@ export const payBillService = async (
           transactionId,
           paymentProcessedById: processedById,
         },
-        include: { order: { include: { user: true, items: { include: { menuItem: { include: { images: true } } } } } } },
+        include: { order: { include: { user: true, restaurant: true, items: { include: { menuItem: { include: { images: true } } } } } } },
       });
 
       await tx.order.update({
@@ -122,6 +122,9 @@ export const payBillService = async (
         await sendInvoiceEmail(updatedBill.order.user.email, {
           firstName: updatedBill.order.user.firstName,
           lastName: updatedBill.order.user.lastName,
+          restaurantName: updatedBill.order.restaurant?.name,
+          restaurantAddress: updatedBill.order.restaurant ? `${updatedBill.order.restaurant.streetAddress}, ${updatedBill.order.restaurant.city}, ${updatedBill.order.restaurant.state} ${updatedBill.order.restaurant.zip}` : undefined,
+          restaurantPhone: updatedBill.order.restaurant?.phone,
           orderId: updatedBill.orderId,
           billNumber: updatedBill.billNumber,
           createdAt: updatedBill.createdAt,

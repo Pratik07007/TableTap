@@ -1,6 +1,6 @@
-import UserSide from "../_components/dashboard/UserSide";
 import { getUserIDandRoleFromToken } from "@/utils/getUserIdandRoleFromToken";
 import { AdminAnalytics } from "../_components/dashboard/AdminAnalytics";
+import UserSide from "../_components/dashboard/UserSide";
 
 export default async function Page() {
     const { role, name } = await getUserIDandRoleFromToken();
@@ -12,8 +12,7 @@ export default async function Page() {
                     <h1 className="text-2xl font-bold text-gray-900">Welcome back, {name || 'Admin'}</h1>
                     <p className="text-gray-500">Here's your restaurant's live pulse and analytics overview.</p>
                 </div>
-                
-                {/* Mount the Analytics Dashboard component */}
+
                 <AdminAnalytics />
             </div>
         );

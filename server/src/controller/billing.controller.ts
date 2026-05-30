@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { generateBillService, payBillService, getBillService, listBillsService, getDailyCashSummaryService, getSalesSummaryService } from '../service/billing.service';
 import { prisma } from '../../prisma/client';
+import { generateBillService, getBillService, getDailyCashSummaryService, getSalesSummaryService, listBillsService, payBillService } from '../service/billing.service';
 import { sendInvoiceEmail } from '../utils/billingEmail';
 
 export const generateBillController = async (req: Request, res: Response) => {
@@ -30,7 +30,7 @@ export const listBillsController = async (req: Request, res: Response) => {
   const paymentStatus = req.query.paymentStatus as string | undefined;
   const dateFrom = req.query.dateFrom as string | undefined;
   const dateTo = req.query.dateTo as string | undefined;
-  
+
   const response = await listBillsService(page, limit, paymentMethod, email, paymentStatus, dateFrom, dateTo);
   return res.status(response.code).json({ ...response });
 };
@@ -45,6 +45,7 @@ export const sendInvoiceController = async (req: Request, res: Response) => {
           include: {
             items: { include: { menuItem: true } },
             user: true,
+            restaurant: true,
           },
         },
       },
@@ -61,6 +62,9 @@ export const sendInvoiceController = async (req: Request, res: Response) => {
     await sendInvoiceEmail(bill.order.user.email, {
       firstName: bill.order.user?.firstName,
       lastName: bill.order.user?.lastName,
+      restaurantName: bill.order.restaurant?.name,
+      restaurantAddress: bill.order.restaurant ? `${bill.order.restaurant.streetAddress}, ${bill.order.restaurant.city}, ${bill.order.restaurant.state} ${bill.order.restaurant.zip}` : undefined,
+      restaurantPhone: bill.order.restaurant?.phone,
       orderId: bill.orderId,
       billNumber: bill.billNumber,
       createdAt: bill.createdAt,
@@ -79,6 +83,7 @@ export const sendInvoiceController = async (req: Request, res: Response) => {
     });
     return res.status(200).json({ success: true, message: 'Invoice email sent' });
   } catch (e) {
+    console.error('Send Invoice Error:', e);
     return res.status(500).json({ success: false, message: 'Failed to send invoice email' });
   }
 };

@@ -1,10 +1,10 @@
 "use client";
 
-import { Plus, Minus, ShoppingCart, X, Check, Loader2 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
-import toast from "react-hot-toast";
+import { AnimatePresence, motion } from "framer-motion";
+import { Check, Loader2, Minus, Plus, Search, ShoppingCart, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 type MenuItem = {
   id: string;
@@ -36,8 +36,32 @@ export default function TakeOrderInterface({
     Record<string, number>
   >({});
   const [customerEmail, setCustomerEmail] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredItems, setFilteredItems] = useState<MenuItem[]>(menuItems);
 
   const [discount, setDiscount] = useState<number>(0);
+
+  // Debounced search effect with LIKE matching
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      if (!searchQuery.trim()) {
+        setFilteredItems(menuItems);
+      } else {
+        const query = searchQuery.toLowerCase();
+        const filtered = menuItems.filter((item) => {
+          // LIKE matching - searches in name and description
+          return (
+            item.name.toLowerCase().includes(query) ||
+            (item.description && item.description.toLowerCase().includes(query))
+          );
+        });
+        setFilteredItems(filtered);
+      }
+    }, 300); // 300ms debounce delay
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery, menuItems]);
+
   const nextImage = (
     itemId: string,
     maxImages: number,
@@ -165,9 +189,29 @@ export default function TakeOrderInterface({
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6 bg-gray-50 min-h-screen">
       {/* Menu List */}
       <div className="lg:col-span-2 space-y-6">
-        <h2 className="text-3xl font-extrabold text-gray-800">Menu</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-3xl font-extrabold text-gray-800">Menu</h2>
+        </div>
+
+        {/* Search Filter */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+          <input
+            type="text"
+            placeholder="Search food items..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-50 transition-all"
+          />
+          {searchQuery && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+              {filteredItems.length} result{filteredItems.length !== 1 ? 's' : ''}
+            </div>
+          )}
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {menuItems.map((item) => (
+          {filteredItems.map((item) => (
             <div
               key={item.id}
               className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col justify-between"
@@ -236,6 +280,15 @@ export default function TakeOrderInterface({
             </div>
           ))}
         </div>
+
+        {/* No results message */}
+        {filteredItems.length === 0 && searchQuery.trim() && (
+          <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+            <Search size={48} className="text-gray-300 mb-4" />
+            <p className="text-lg font-medium">No food items found</p>
+            <p className="text-sm text-gray-400">Try searching with different keywords</p>
+          </div>
+        )}
       </div>
 
       {/* Cart Section */}

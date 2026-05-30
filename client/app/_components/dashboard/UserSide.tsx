@@ -1,13 +1,11 @@
-import React from "react";
-import Link from "next/link";
-import { cookies } from "next/headers";
 import {
-  MapPin,
   ChevronRight,
+  MapPin,
   Store,
-  ClipboardList,
-  Utensils,
+  Utensils
 } from "lucide-react";
+import { cookies } from "next/headers";
+import Link from "next/link";
 import UserNavbar from "./UserNavbar";
 
 type Restaurant = {
